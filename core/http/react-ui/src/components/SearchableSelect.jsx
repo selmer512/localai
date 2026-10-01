@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+const coarsePointer = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
+
 export default function SearchableSelect({
   value, onChange, options, placeholder = 'Select...',
   allOption, searchPlaceholder = 'Search...',
@@ -131,8 +133,9 @@ export default function SearchableSelect({
         <span style={{ flex: 1, textAlign: 'left' }}>{displayLabel}</span>
         <i className="fas fa-chevron-down" aria-hidden="true" style={{ fontSize: '0.5rem', color: 'var(--color-text-muted)' }} />
       </button>
+      {open && <div className="searchable-select__backdrop" onClick={() => { setOpen(false); setQuery(''); setFocusIndex(-1) }} aria-hidden="true" />}
       {open && (
-        <div style={{
+        <div className="searchable-select__panel" style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100, marginTop: 4,
           minWidth: 200, maxHeight: 'min(260px, 60vh)', background: 'var(--color-bg-secondary)',
           border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)',
@@ -141,7 +144,9 @@ export default function SearchableSelect({
         }}>
           <div style={{ padding: '6px', borderBottom: '1px solid var(--color-border-subtle)' }}>
             <input
-              autoFocus
+              // On touch devices autofocus raises the keyboard over the phone
+              // sheet before the options are even visible; let the user tap in.
+              autoFocus={!coarsePointer}
               className="input"
               type="text"
               placeholder={searchPlaceholder}
@@ -151,7 +156,7 @@ export default function SearchableSelect({
               style={{ width: '100%', padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.8125rem' }}
             />
           </div>
-          <div ref={listRef} role="listbox" style={{ overflowY: 'auto', maxHeight: 'min(200px, 50vh)' }}>
+          <div ref={listRef} role="listbox" className="searchable-select__list" style={{ overflowY: 'auto', maxHeight: 'min(200px, 50vh)' }}>
             {allOption && (
               <div
                 role="option"
@@ -162,7 +167,7 @@ export default function SearchableSelect({
               >
                 <span className="flex-1">{allOption}</span>
                 {enterTarget?.type === 'all' && (
-                  <span style={{ marginLeft: 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
+                  <span className="searchable-select__hint" style={{ marginLeft: 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
                 )}
               </div>
             )}
@@ -196,6 +201,7 @@ export default function SearchableSelect({
                 <div
                   key={o.value}
                   role="option"
+                  className="searchable-select__option"
                   aria-selected={isActive}
                   onClick={() => select(o.value)}
                   style={itemStyle(isActive, isFocused)}
@@ -221,7 +227,7 @@ export default function SearchableSelect({
                     </span>
                   )}
                   {isEnterTarget && (
-                    <span style={{ marginLeft: o.badge ? '6px' : 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
+                    <span className="searchable-select__hint" style={{ marginLeft: o.badge ? '6px' : 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
                   )}
                 </div>
               )

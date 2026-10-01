@@ -47,3 +47,30 @@ test('tab bar is phone-only', async ({ browser }) => {
   await expect(page.locator('.mobile-tabbar')).toBeHidden()
   await ctx.close()
 })
+
+test('model picker opens as a bottom sheet and selects', async ({ page }) => {
+  await page.route('**/api/models/capabilities', (route) => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ data: ['alpha-7b', 'beta-3b', 'gamma-vision'].map(id => ({ id, capabilities: ['FLAG_CHAT'] })) }),
+  }))
+  await page.goto('/app/chat')
+  const trigger = page.locator('.main-content button.input[aria-haspopup="listbox"]').first()
+  await trigger.click()
+  const panel = page.locator('.searchable-select__panel')
+  await expect(panel).toBeVisible()
+  const vp = page.viewportSize()
+  // The sheet slides in; poll until it has settled against the bottom edge.
+  await expect.poll(async () => {
+    const box = await panel.boundingBox()
+    return [Math.round(box.x), Math.round(box.width), Math.round(box.y + box.height)]
+  }).toEqual([0, vp.width, vp.height])
+  const opt = panel.getByRole('option', { name: 'beta-3b' })
+  expect((await opt.boundingBox()).height).toBeGreaterThanOrEqual(48)
+  // Tapping the dimmed area dismisses without selecting.
+  await page.locator('.searchable-select__backdrop').click({ position: { x: 10, y: 10 } })
+  await expect(panel).toHaveCount(0)
+  await trigger.click()
+  await panel.getByRole('option', { name: 'beta-3b' }).click()
+  await expect(panel).toHaveCount(0)
+  await expect(trigger).toContainText('beta-3b')
+})
