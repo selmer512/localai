@@ -1,6 +1,8 @@
 {
   "appName": "LocalAI",
   "openMenu": "打开菜单",
+  "more": "更多",
+  "mobileNavigation": "移动导航",
   "closeMenu": "关闭菜单",
   "primaryNavigation": "主导航",
   "switchToLightMode": "切换到浅色模式",

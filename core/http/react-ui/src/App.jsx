@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import Sidebar from './components/Sidebar'
 import OperationsBar from './components/OperationsBar'
+import MobileTabBar from './components/MobileTabBar'
 import { ToastContainer, useToast } from './components/Toast'
 import { systemApi } from './utils/api'
 import { useTheme } from './contexts/ThemeContext'
@@ -85,7 +86,7 @@ export default function App() {
 
   const layoutClasses = [
     'app-layout',
-    isChatRoute ? 'app-layout-chat' : '',
+    isChatRoute ? 'app-layout-chat' : 'has-tab-bar',
     sidebarCollapsed ? 'sidebar-is-collapsed' : '',
   ].filter(Boolean).join(' ')
 
@@ -180,6 +181,9 @@ export default function App() {
           </footer>
         )}
       </main>
+      {/* Hidden on chat routes: the composer owns the bottom edge there, and
+          the header's hamburger still reaches every destination. */}
+      {!isChatRoute && <MobileTabBar drawerOpen={sidebarOpen} onOpenMore={() => setSidebarOpen(true)} />}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   )

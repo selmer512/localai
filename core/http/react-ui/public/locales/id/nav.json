@@ -1,6 +1,8 @@
 {
   "appName": "LocalAI",
   "openMenu": "Buka menu",
+  "more": "Lainnya",
+  "mobileNavigation": "Navigasi seluler",
   "closeMenu": "Tutup menu",
   "primaryNavigation": "Navigasi utama",
   "switchToLightMode": "Ganti ke mode terang",

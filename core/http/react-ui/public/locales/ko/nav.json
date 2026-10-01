@@ -1,6 +1,8 @@
 {
   "appName": "LocalAI",
   "openMenu": "메뉴 열기",
+  "more": "더보기",
+  "mobileNavigation": "모바일 내비게이션",
   "closeMenu": "메뉴 닫기",
   "primaryNavigation": "기본 탐색",
   "switchToLightMode": "라이트 모드로 전환",

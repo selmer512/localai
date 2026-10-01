@@ -1,6 +1,8 @@
 {
   "appName": "LocalAI",
   "openMenu": "Abrir menú",
+  "more": "Más",
+  "mobileNavigation": "Navegación móvil",
   "closeMenu": "Cerrar menú",
   "primaryNavigation": "Navegación principal",
   "switchToLightMode": "Cambiar a tema claro",
