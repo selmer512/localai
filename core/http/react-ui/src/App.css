@@ -13961,7 +13961,8 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
   .input-mono,
   .textarea,
   .chat-input {
-    font-size: max(16px, 1rem);
+    /* !important: dozens of component classes set their own small font-size. */
+    font-size: max(16px, 1rem) !important;
   }
   .btn, .filter-btn, .nav-item, .chat-send-btn, button.btn-icon, .btn-icon {
     min-height: 44px;
@@ -13974,4 +13975,18 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
 @media (max-height: 480px) and (orientation: landscape) {
   .mobile-header { min-height: 44px; }
   .page { padding-top: var(--spacing-sm); padding-bottom: var(--spacing-sm); }
+}
+
+/* Phones: a text-like control beside its label leaves the label a ~100px
+   column. Stack them; toggles and other compact controls stay inline. */
+@media (max-width: 639px) {
+  .form-row:has(.form-row__control :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea)) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+  }
+  .form-row:has(.form-row__control :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea)) .form-row__control {
+    flex-shrink: 1;
+    width: 100%;
+  }
 }
