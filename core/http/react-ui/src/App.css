@@ -14131,3 +14131,62 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
 @media (prefers-reduced-motion: reduce) {
   .searchable-select__panel { animation: none !important; }
 }
+
+/* ===========================================================================
+   Chat header on phones. Five controls in one 390px row crushed the model
+   picker, so the chat name takes its own quiet line and the controls get a
+   full row beneath it.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .chat-header {
+    flex-wrap: wrap;
+    row-gap: 0;
+    padding-left: max(var(--spacing-md), env(safe-area-inset-left));
+    padding-right: max(var(--spacing-md), env(safe-area-inset-right));
+  }
+  .chat-header-title {
+    order: -1;
+    flex: 1 0 100%;
+    max-width: 100%;
+    padding-top: 2px;
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+  }
+  /* Icon-only Chats button; the label stays for assistive tech. */
+  .chats-menu-trigger-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .chats-menu-trigger-kbd { display: none !important; }
+}
+
+/* Models filters on phones: search and backend each take a full row at their
+   natural height. In a column, the desktop `flex: 1 1 100%` basis meant 100% of
+   the *height*, which blew the rows apart and pushed the backend select off the
+   right edge. */
+@media (max-width: 639px) {
+  .models-filters__query {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+  .models-filters__query > .filter-bar-group__search,
+  .models-filters__query > .models-filters__backend {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+  }
+  /* SearchableSelect styles its trigger with a token that is not defined, so
+     it renders borderless; match the neighbouring use-case trigger. */
+  .models-filters__backend button.input {
+    border: 1px solid var(--color-border-default) !important;
+    min-height: 44px;
+  }
+}
