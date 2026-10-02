@@ -110,6 +110,10 @@ type ApplicationConfig struct {
 	// file is mode 0600.
 	MITMCADir string
 
+	// UIDir, when set, serves the web UI from a built React dist folder on
+	// disk instead of the copy embedded in the binary.
+	UIDir string
+
 	DisableWebUI                       bool
 	OllamaAPIRootEndpoint              bool
 	EnforcePredownloadScans            bool
@@ -719,6 +723,12 @@ func WithJSONStringPreload(configFile string) AppOption {
 func WithConfigFile(configFile string) AppOption {
 	return func(o *ApplicationConfig) {
 		o.ConfigFile = configFile
+	}
+}
+
+func WithUIDir(dir string) AppOption {
+	return func(o *ApplicationConfig) {
+		o.UIDir = dir
 	}
 }
 

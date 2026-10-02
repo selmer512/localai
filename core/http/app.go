@@ -48,6 +48,22 @@ var embedDirStatic embed.FS
 //go:embed react-ui/dist/*
 var reactUI embed.FS
 
+// reactUIFS is the filesystem the web UI is served from: the build embedded
+// in the binary, or dir when it holds a build (index.html at its root). The
+// on-disk form lets a UI change ship by replacing a folder instead of
+// rebuilding LocalAI; index.html is read per request, so it takes effect on
+// the next page load without a restart.
+func reactUIFS(dir string) (fs.FS, error) {
+	if dir != "" {
+		if _, err := os.Stat(filepath.Join(dir, "index.html")); err == nil {
+			xlog.Info("Serving web UI from disk", "dir", dir)
+			return os.DirFS(dir), nil
+		}
+		xlog.Warn("UI directory has no index.html, serving the built-in UI", "dir", dir)
+	}
+	return fs.Sub(reactUI, "react-ui/dist")
+}
+
 var quietPaths = []string{"/api/operations", "/api/resources", "/healthz", "/readyz"}
 
 // immutableAssetCacheControl is the Cache-Control served for content-hashed
@@ -593,12 +609,12 @@ func API(application *application.Application) (*echo.Echo, error) {
 		routes.RegisterUIRoutes(e, application.ModelConfigLoader(), application.ApplicationConfig(), application.GalleryService(), adminMiddleware)
 
 		// Serve React SPA from / with SPA fallback via 404 handler
-		reactFS, fsErr := fs.Sub(reactUI, "react-ui/dist")
+		reactFS, fsErr := reactUIFS(application.ApplicationConfig().UIDir)
 		if fsErr != nil {
 			xlog.Warn("React UI not available (build with 'make core/http/react-ui/dist')", "error", fsErr)
 		} else {
 			serveIndex := func(c echo.Context) error {
-				indexHTML, err := reactUI.ReadFile("react-ui/dist/index.html")
+				indexHTML, err := fs.ReadFile(reactFS, "index.html")
 				if err != nil {
 					return c.String(http.StatusNotFound, "React UI not built")
 				}

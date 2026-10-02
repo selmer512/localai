@@ -104,6 +104,7 @@ For more information on VRAM management, see [VRAM and Memory Management]({{%rel
 | `--upload-limit` | `15` | Default upload-limit in MB | `$LOCALAI_UPLOAD_LIMIT`, `$UPLOAD_LIMIT` |
 | `--api-keys` | | List of API Keys to enable API authentication. When this is set, all requests must be authenticated with one of these API keys | `$LOCALAI_API_KEY`, `$API_KEY` |
 | `--disable-webui` | `false` | Disables the web user interface. When set to true, the server will only expose API endpoints without serving the web interface | `$LOCALAI_DISABLE_WEBUI`, `$DISABLE_WEBUI` |
+| `--ui-dir` | | Serve the web UI from this folder (a built react-ui `dist`, containing `index.html`) instead of the copy built into the binary. Lets a UI change be deployed by replacing the folder, without rebuilding LocalAI | `$LOCALAI_UI_DIR` |
 | `--disable-runtime-settings` | `false` | Disables the runtime settings feature. When set to true, the server will not load runtime settings from the `runtime_settings.json` file and the settings web interface will be disabled | `$LOCALAI_DISABLE_RUNTIME_SETTINGS`, `$DISABLE_RUNTIME_SETTINGS` |
 | `--disable-gallery-endpoint` | `false` | Disable the gallery endpoints | `$LOCALAI_DISABLE_GALLERY_ENDPOINT`, `$DISABLE_GALLERY_ENDPOINT` |
 | `--disable-metrics-endpoint` | `false` | Disable the `/metrics` endpoint | `$LOCALAI_DISABLE_METRICS_ENDPOINT`, `$DISABLE_METRICS_ENDPOINT` |

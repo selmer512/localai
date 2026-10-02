@@ -77,6 +77,7 @@ type RunCMD struct {
 	UploadLimit                        int      `env:"LOCALAI_UPLOAD_LIMIT,UPLOAD_LIMIT" default:"15" help:"Default upload-limit in MB" group:"api"`
 	APIKeys                            []string `env:"LOCALAI_API_KEY,API_KEY" help:"List of API Keys to enable API authentication. When this is set, all the requests must be authenticated with one of these API keys" group:"api"`
 	DisableWebUI                       bool     `env:"LOCALAI_DISABLE_WEBUI,DISABLE_WEBUI" default:"false" help:"Disables the web user interface. When set to true, the server will only expose API endpoints without serving the web interface" group:"api"`
+	UIDir                              string   `env:"LOCALAI_UI_DIR" help:"Serve the web UI from this folder (a built react-ui dist, containing index.html) instead of the copy built into the binary. Lets a UI change be deployed by replacing the folder, without rebuilding LocalAI" group:"api"`
 	OllamaAPIRootEndpoint              bool     `env:"LOCALAI_OLLAMA_API_ROOT_ENDPOINT" default:"false" help:"Register Ollama-compatible health check on / (replaces web UI on root path). The /api/* Ollama endpoints are always available regardless of this flag" group:"api"`
 	DisableRuntimeSettings             bool     `env:"LOCALAI_DISABLE_RUNTIME_SETTINGS,DISABLE_RUNTIME_SETTINGS" default:"false" help:"Disables the runtime settings. When set to true, the server will not load the runtime settings from the runtime_settings.json file" group:"api"`
 	DisablePredownloadScan             bool     `env:"LOCALAI_DISABLE_PREDOWNLOAD_SCAN" help:"If true, disables the best-effort security scanner before downloading any files." group:"hardening" default:"false"`
@@ -321,6 +322,7 @@ func (r *RunCMD) Run(ctx *cliContext.Context) error {
 		config.WithHTTPCompressionMinLength(r.HTTPCompressionMinLength),
 		config.WithThreads(r.Threads),
 		config.WithUploadLimitMB(r.UploadLimit),
+		config.WithUIDir(r.UIDir),
 		config.WithApiKeys(r.APIKeys),
 		config.WithModelsURL(append(r.Models, r.ModelArgs...)...),
 		config.WithExternalBackends(r.ExternalBackends...),
