@@ -52,7 +52,7 @@ test.describe('Nodes fleet dashboard', () => {
     await expect(rail.locator('a[href$="/swagger/index.html"]')).toHaveAttribute('target', '_blank')
   })
 
-  test('uses the standard collapsible Operate rail on mobile', async ({ page }) => {
+  test('shows the Operate pages as one strip on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await mockFullOperateNavigation(page)
     await mockNodes(page, [baseNodes[0]])
@@ -62,12 +62,14 @@ test.describe('Nodes fleet dashboard', () => {
     await expect(page.locator('.sidebar-nav a.nav-item', { hasText: 'Operate' })).toBeVisible()
     await page.getByRole('button', { name: 'Close menu' }).click()
 
+    // Phones get every Operate page in one swipeable strip rather than a
+    // menu that has to be expanded first.
     const rail = page.locator('.console-layout > .console-rail')
     await expect(rail).toBeVisible()
-    await expect(rail.locator('.console-rail-groups')).toBeHidden()
-    await rail.getByRole('button', { name: 'Expand Operate navigation' }).click()
     await expect(rail.locator('.console-rail-groups')).toBeVisible()
+    await expect(rail.getByRole('button', { name: 'Expand Operate navigation' })).toBeHidden()
     await expect(rail.locator('a.nav-item')).toHaveCount(14)
+    await expect(rail.locator('a[href="/app/nodes"]')).toHaveClass(/active/)
   })
 
   test('shows aggregate health, capacity, attention filtering, search, sorting, and grouping', async ({ page }) => {

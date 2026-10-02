@@ -358,3 +358,52 @@ test('a landscape phone keeps the rail language control inside the rail', async 
   expect(box.x + box.width).toBeLessThanOrEqual(rail.x + rail.width + 1)
   await ctx.close()
 })
+
+test.describe('console navigation and detail panes on a phone', () => {
+  test('the section menu is one strip with the current page in view', async ({ page }) => {
+    await page.goto('/app/traces')
+    const strip = page.locator('.console-rail-groups')
+    const active = strip.locator('.nav-item.active')
+    await expect(active).toBeVisible()
+    // One row, no expand/collapse buttons to discover first.
+    const tops = await strip.locator('.nav-item').evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
+    expect(tops).toHaveLength(1)
+    await expect(page.locator('.console-rail-toggle')).toBeHidden()
+    await expect(page.locator('.console-rail-collapse')).toBeHidden()
+    // Traces sits far along the strip; it must have been scrolled into view.
+    // Poll: the item list re-renders once /api/features answers.
+    const vw = page.viewportSize().width
+    await expect.poll(async () => {
+      const box = await active.boundingBox()
+      return box.x >= 0 && box.x + box.width <= vw
+    }).toBe(true)
+  })
+
+  test('a tapped tab does not stay highlighted after navigating away', async ({ page }) => {
+    // iOS keeps :hover on the last tapped element; the global a:hover colour
+    // left the previous tab looking selected.
+    await page.goto('/app')
+    const chat = page.locator('.mobile-tabbar__item', { hasText: 'Chat' })
+    const home = page.locator('.mobile-tabbar__item', { hasText: 'Home' })
+    await chat.hover()
+    const [hovered, idle] = await Promise.all([
+      chat.evaluate(el => getComputedStyle(el).color),
+      page.locator('.mobile-tabbar__item', { hasText: 'Models' }).evaluate(el => getComputedStyle(el).color),
+    ])
+    expect(hovered).toBe(idle)
+    expect(await home.evaluate(el => getComputedStyle(el).color)).not.toBe(idle)
+  })
+
+  test('a capped description ends on a word and can be expanded', async ({ page }) => {
+    const desc = 'Qwen3-TTS C++ backend using GGML (qwentts.cpp). Native C++ text-to-speech with streaming output, named speakers, voice design, and zero-shot voice cloning. 24kHz mono, 11 languages with Mandarin dialects. 0.6B and 1.7B models with quantized variants for CPU and GPU.'
+    await page.route('**/api/backends*', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ backends: [{ name: 'qwen3-tts-cpp', description: desc, installed: false }] }) }))
+    await page.goto('/app/backends?backend=qwen3-tts-cpp')
+    const lede = page.locator('.detail-pane__lede')
+    await expect(lede).toHaveText(/…$/)
+    expect(desc.startsWith((await lede.textContent()).replace(/…$/, ''))).toBe(true)
+    await page.getByRole('button', { name: 'Show more' }).click()
+    await expect(lede).toHaveText(desc)
+    await page.getByRole('button', { name: 'Show less' }).click()
+    await expect(lede).toHaveText(/…$/)
+  })
+})

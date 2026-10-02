@@ -43,7 +43,9 @@
     "help": "帮助",
     "yes": "是",
     "no": "否",
-    "loading": "加载中..."
+    "loading": "加载中...",
+    "showMore": "显示更多",
+    "showLess": "收起"
   },
   "status": {
     "loading": "加载中...",

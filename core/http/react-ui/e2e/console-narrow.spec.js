@@ -1,42 +1,43 @@
 import { test, expect } from './coverage-fixtures.js'
 
 test.describe('Operate console on a narrow screen', () => {
+  // Phones get the console's pages as one swipeable strip of pills: nothing to
+  // expand first, and it costs a single line above the page.
   test('ignores the desktop collapsed preference', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.addInitScript(() => localStorage.setItem('localai_console_rail_collapsed', 'true'))
     await page.goto('/app/operate')
 
     const rail = page.locator('.console-rail')
-    await expect(rail).toHaveCSS('width', '374px')
-    await expect(rail.getByText('Operate', { exact: true })).toBeVisible()
-    await expect(rail.getByRole('button', { name: 'Expand Operate navigation' })).toBeVisible()
+    await expect(rail).toHaveCSS('width', '390px')
+    // Labels stay visible: the icon-only desktop rail does not leak through.
+    await expect(rail.locator('a.nav-item', { hasText: 'Overview' }).locator('.nav-label')).toBeVisible()
     await expect(rail.locator('.console-rail-collapse')).toBeHidden()
   })
 
-  test('expanding the rail leaves the overview on screen', async ({ page }) => {
+  test('the navigation leaves the overview on screen', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.goto('/app/operate')
 
-    const toggle = page.locator('.console-rail-toggle')
-    await expect(toggle).toBeVisible()
-    await toggle.click()
     await expect(page.locator('.console-rail-groups')).toBeVisible()
-
     const heading = page.getByRole('heading', { name: 'Overview', exact: true })
     const box = await heading.boundingBox()
     expect(box).not.toBeNull()
     expect(box.y).toBeLessThan(800)
   })
 
-  test('the rail scrolls internally rather than growing without bound', async ({ page }) => {
+  test('the navigation is one line that scrolls sideways', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.goto('/app/operate')
-    await page.locator('.console-rail-toggle').click()
 
     const groups = page.locator('.console-rail-groups')
     await expect(groups).toBeVisible()
-    const height = await groups.evaluate(el => el.getBoundingClientRect().height)
-    expect(height).toBeLessThan(800)
+    const { height, scrolls } = await groups.evaluate(el => ({
+      height: el.getBoundingClientRect().height,
+      scrolls: el.scrollWidth > el.clientWidth && getComputedStyle(el).overflowX === 'auto',
+    }))
+    expect(height).toBeLessThan(80)
+    expect(scrolls).toBe(true)
   })
 })
 

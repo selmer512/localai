@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { NavLink, Outlet, useOutletContext, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
@@ -87,6 +87,18 @@ function ConsoleLayoutInner({ config }) {
 
   const auth = { isAdmin, authEnabled, hasFeature, features }
 
+  // On phones the groups are one sideways-scrolling strip of pills. Keep the
+  // current page's pill in view, otherwise landing on Traces shows Overview.
+  // scrollLeft rather than scrollIntoView, which would also scroll the page.
+  const groupsRef = useRef(null)
+  useEffect(() => {
+    const strip = groupsRef.current
+    if (!strip || strip.scrollWidth <= strip.clientWidth) return
+    const active = strip.querySelector('.nav-item.active')
+    if (!active) return
+    strip.scrollLeft = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2
+  }, [location.pathname, features])
+
   const toggleRailCollapsed = () => {
     const next = !railCollapsed
     try { localStorage.setItem(CONSOLE_RAIL_COLLAPSED_KEY, String(next)) } catch (_) { /* ignore */ }
@@ -122,7 +134,7 @@ function ConsoleLayoutInner({ config }) {
             <i className={`fas fa-chevron-${railCollapsed ? 'right' : 'left'}`} aria-hidden="true" />
           </button>
         </div>
-        <div id={`console-rail-groups-${config.id}`} className="console-rail-groups">
+        <div id={`console-rail-groups-${config.id}`} className="console-rail-groups" ref={groupsRef}>
           {config.groups.map((group, gi) => {
             const items = group.items.filter(item => isConsoleItemVisible(item, auth))
             if (items.length === 0) return null

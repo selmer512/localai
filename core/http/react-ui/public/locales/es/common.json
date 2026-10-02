@@ -43,7 +43,9 @@
     "help": "Ayuda",
     "yes": "Sí",
     "no": "No",
-    "loading": "Cargando..."
+    "loading": "Cargando...",
+    "showMore": "Mostrar más",
+    "showLess": "Mostrar menos"
   },
   "status": {
     "loading": "Cargando...",

@@ -43,7 +43,9 @@
     "help": "도움말",
     "yes": "예",
     "no": "아니요",
-    "loading": "불러오는 중..."
+    "loading": "불러오는 중...",
+    "showMore": "더 보기",
+    "showLess": "간략히 보기"
   },
   "status": {
     "loading": "불러오는 중...",

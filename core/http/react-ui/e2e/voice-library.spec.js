@@ -125,11 +125,12 @@ test.describe('Personality Library', () => {
   test('keeps the Operate rail compact and accessible on small screens', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/app/voice-library')
+    // One swipeable line of pills: every page reachable without expanding a
+    // menu, and the group names kept for screen readers.
     const rail = page.locator('.console-rail')
-    await expect(rail.getByRole('link', { name: 'Backends' })).toBeHidden()
-    await rail.getByRole('button', { name: 'Expand Operate navigation' }).click()
     await expect(rail.getByRole('link', { name: 'Backends' })).toBeVisible()
-    await expect(rail.getByRole('button', { name: 'Collapse Operate navigation' })).toBeVisible()
+    expect((await rail.boundingBox()).height).toBeLessThan(80)
+    await expect(rail.locator('.console-group-title', { hasText: 'Runtime' })).toHaveCount(1)
   })
 
   test('passes the stable voice URI from the library into TTS', async ({ page }) => {
