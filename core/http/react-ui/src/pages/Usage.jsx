@@ -6,6 +6,7 @@ import { apiUrl } from '../utils/basePath'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/PageHeader'
 import SourcesTab from './Usage/SourcesTab'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 const PERIODS = [
   { key: 'day', label: 'Day' },
@@ -821,34 +822,32 @@ export default function Usage() {
                 <p className="empty-state-text">Usage data will appear here as API requests are made.</p>
               </div>
             ) : (
-              <div className="table-container">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Model</th>
-                      <th className="col-w-90">Requests</th>
-                      <th className="col-w-110">Prompt</th>
-                      <th className="col-w-110">Completion</th>
-                      <th className="col-w-110">Total</th>
-                      {costEnabled && <th className="col-w-100">Est. Cost</th>}
-                      <th className="col-w-140"></th>
+              <ResponsiveTable>
+                <thead>
+                  <tr>
+                    <th>Model</th>
+                    <th className="col-w-90">Requests</th>
+                    <th className="col-w-110">Prompt</th>
+                    <th className="col-w-110">Completion</th>
+                    <th className="col-w-110">Total</th>
+                    {costEnabled && <th className="col-w-100">Est. Cost</th>}
+                    <th className="col-w-140"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {modelRows.map(row => (
+                    <tr key={row.model}>
+                      <td className="cell-mono">{row.model}</td>
+                      <td className="cell-mono">{formatNumber(row.request_count)}</td>
+                      <td className="cell-mono">{formatNumber(row.prompt_tokens)}</td>
+                      <td className="cell-mono">{formatNumber(row.completion_tokens)}</td>
+                      <td className="cell-mono fw-semibold">{formatNumber(row.total_tokens)}</td>
+                      {costEnabled && <td className="cell-mono">{formatCost(costOf(row, pricing))}</td>}
+                      <td><UsageBar value={row.total_tokens} max={maxTokens} /></td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {modelRows.map(row => (
-                      <tr key={row.model}>
-                        <td className="cell-mono">{row.model}</td>
-                        <td className="cell-mono">{formatNumber(row.request_count)}</td>
-                        <td className="cell-mono">{formatNumber(row.prompt_tokens)}</td>
-                        <td className="cell-mono">{formatNumber(row.completion_tokens)}</td>
-                        <td className="cell-mono fw-semibold">{formatNumber(row.total_tokens)}</td>
-                        {costEnabled && <td className="cell-mono">{formatCost(costOf(row, pricing))}</td>}
-                        <td><UsageBar value={row.total_tokens} max={maxTokens} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </ResponsiveTable>
             )
           )}
 
@@ -860,74 +859,72 @@ export default function Usage() {
                 <p className="empty-state-text">Per-user usage data will appear here as users make API requests.</p>
               </div>
             ) : (
-              <div className="table-container">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>User</th>
-                      <th className="col-w-90">Requests</th>
-                      <th className="col-w-110">Prompt</th>
-                      <th className="col-w-110">Completion</th>
-                      <th className="col-w-110">Total</th>
-                      {costEnabled && <th className="col-w-100">Est. Cost</th>}
-                      <th className="col-w-110">Proj. Total</th>
-                      <th className="col-w-140"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {userRows.map(row => {
-                      const up = userPredictions[row.user_id]
-                      const isExpanded = selectedUserId === row.user_id
-                      return (
-                        <Fragment key={row.user_id}>
-                          <tr
-                            onClick={() => setSelectedUserId(isExpanded ? null : row.user_id)}
-                            className="clickable"
-                          >
-                            <td className="text-center text-muted text-xs col-w-30">
-                              <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'}`} />
+              <ResponsiveTable>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>User</th>
+                    <th className="col-w-90">Requests</th>
+                    <th className="col-w-110">Prompt</th>
+                    <th className="col-w-110">Completion</th>
+                    <th className="col-w-110">Total</th>
+                    {costEnabled && <th className="col-w-100">Est. Cost</th>}
+                    <th className="col-w-110">Proj. Total</th>
+                    <th className="col-w-140"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userRows.map(row => {
+                    const up = userPredictions[row.user_id]
+                    const isExpanded = selectedUserId === row.user_id
+                    return (
+                      <Fragment key={row.user_id}>
+                        <tr
+                          onClick={() => setSelectedUserId(isExpanded ? null : row.user_id)}
+                          className="clickable"
+                        >
+                          <td className="text-center text-muted text-xs col-w-30">
+                            <i className={`fas fa-chevron-${isExpanded ? 'down' : 'right'}`} />
+                          </td>
+                          <td className="text-sm">{row.user_name}</td>
+                          <td className="cell-mono">{formatNumber(row.request_count)}</td>
+                          <td className="cell-mono">{formatNumber(row.prompt_tokens)}</td>
+                          <td className="cell-mono">{formatNumber(row.completion_tokens)}</td>
+                          <td className="cell-mono fw-semibold">{formatNumber(row.total_tokens)}</td>
+                          {costEnabled && <td className="cell-mono">{formatCost(costOf(row, pricing))}</td>}
+                          <td className="cell-mono text-muted text-italic">
+                            {up?.predictions ? `~${formatNumber(up.predictions.projectedTotals.total_tokens)}` : '-'}
+                          </td>
+                          <td><UsageBar value={row.total_tokens} max={maxUserTokens} /></td>
+                        </tr>
+                        {isExpanded && up && (
+                          <tr>
+                            <td colSpan={costEnabled ? 9 : 8} className="p-0 bg-secondary">
+                              <div className="pad-md">
+                                {up.predictions && (
+                                  <div className="usage-grid--narrow mb-sm">
+                                    <StatCard icon="fas fa-arrow-right-arrow-left" label="Proj. Requests" value={up.predictions.projectedTotals.request_count} muted />
+                                    <StatCard icon="fas fa-arrow-up" label="Proj. Prompt" value={up.predictions.projectedTotals.prompt_tokens} muted />
+                                    <StatCard icon="fas fa-arrow-down" label="Proj. Completion" value={up.predictions.projectedTotals.completion_tokens} muted />
+                                    <StatCard icon="fas fa-coins" label="Proj. Total" value={up.predictions.projectedTotals.total_tokens} muted />
+                                  </div>
+                                )}
+                                {up.timeSeries.length > 0 ? (
+                                  <UsageTimeChart data={up.timeSeries} predictedData={up.predictions?.predictedBuckets} period={period} />
+                                ) : (
+                                  <div className="text-note pad-sm">
+                                    No time series data for this user.
+                                  </div>
+                                )}
+                              </div>
                             </td>
-                            <td className="text-sm">{row.user_name}</td>
-                            <td className="cell-mono">{formatNumber(row.request_count)}</td>
-                            <td className="cell-mono">{formatNumber(row.prompt_tokens)}</td>
-                            <td className="cell-mono">{formatNumber(row.completion_tokens)}</td>
-                            <td className="cell-mono fw-semibold">{formatNumber(row.total_tokens)}</td>
-                            {costEnabled && <td className="cell-mono">{formatCost(costOf(row, pricing))}</td>}
-                            <td className="cell-mono text-muted text-italic">
-                              {up?.predictions ? `~${formatNumber(up.predictions.projectedTotals.total_tokens)}` : '-'}
-                            </td>
-                            <td><UsageBar value={row.total_tokens} max={maxUserTokens} /></td>
                           </tr>
-                          {isExpanded && up && (
-                            <tr>
-                              <td colSpan={costEnabled ? 9 : 8} className="p-0 bg-secondary">
-                                <div className="pad-md">
-                                  {up.predictions && (
-                                    <div className="usage-grid--narrow mb-sm">
-                                      <StatCard icon="fas fa-arrow-right-arrow-left" label="Proj. Requests" value={up.predictions.projectedTotals.request_count} muted />
-                                      <StatCard icon="fas fa-arrow-up" label="Proj. Prompt" value={up.predictions.projectedTotals.prompt_tokens} muted />
-                                      <StatCard icon="fas fa-arrow-down" label="Proj. Completion" value={up.predictions.projectedTotals.completion_tokens} muted />
-                                      <StatCard icon="fas fa-coins" label="Proj. Total" value={up.predictions.projectedTotals.total_tokens} muted />
-                                    </div>
-                                  )}
-                                  {up.timeSeries.length > 0 ? (
-                                    <UsageTimeChart data={up.timeSeries} predictedData={up.predictions?.predictedBuckets} period={period} />
-                                  ) : (
-                                    <div className="text-note pad-sm">
-                                      No time series data for this user.
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </Fragment>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                        )}
+                      </Fragment>
+                    )
+                  })}
+                </tbody>
+              </ResponsiveTable>
             )
           )}
 

@@ -179,7 +179,7 @@ export default function NodeBackendLogs() {
       <PageHeader
         title={
           <>
-            <i className="fas fa-terminal cell-mono" style={{ fontSize: '0.8em', marginRight: 'var(--spacing-sm)' }} />
+            <i className="fas fa-terminal" style={{ fontSize: '0.8em', marginRight: 'var(--spacing-sm)' }} />
             {baseModelName}
             {!isMerged && (
               <span

@@ -5,6 +5,7 @@ import ConfirmDialog from './ConfirmDialog'
 import useFailoverChains from '../hooks/useFailoverChains'
 import { useAuth } from '../context/AuthContext'
 import { failoverApi } from '../utils/api'
+import ResponsiveTable from './ResponsiveTable'
 
 const UNITS = [
   ['day', 86_400],
@@ -75,46 +76,44 @@ export default function FailoverChainStatus({ chain, onPin, onUnpin, canPin = fa
         )}
       </div>
 
-      <div className="table-container">
-        <table className="table failover-status__table">
-          <thead>
-            <tr>
-              <th>{t('failover.columns.target')}</th>
-              <th>{t('failover.columns.kind')}</th>
-              <th>{t('failover.columns.warm')}</th>
-              <th>{t('failover.columns.health')}</th>
-              <th>{t('failover.columns.lastProbe')}</th>
-              <th>{t('failover.columns.lastError')}</th>
-              {canPin && <th><span className="sr-only">{t('failover.columns.actions')}</span></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {(chain.targets || []).map(target => (
-              <tr key={target.model} className={target.model === chain.active ? 'failover-status__row--active' : undefined}>
-                <td><code>{target.model}</code></td>
-                <td>{t(`failover.kinds.${target.kind}`, target.kind)}</td>
-                <td>{target.warm ? t('failover.warm') : <span className="text-muted">-</span>}</td>
-                <td><StatusPill status={target.state} label={t(`failover.states.${target.state}`, target.state)} /></td>
-                <td className="text-muted">{relative(target.last_probe, i18n.language) || t('failover.never')}</td>
-                <td>
-                  {target.last_error
-                    ? <span className="failover-status__error" title={target.last_error}>{target.last_error}</span>
-                    : <span className="text-muted">-</span>}
+      <ResponsiveTable className="failover-status__table">
+        <thead>
+          <tr>
+            <th>{t('failover.columns.target')}</th>
+            <th>{t('failover.columns.kind')}</th>
+            <th>{t('failover.columns.warm')}</th>
+            <th>{t('failover.columns.health')}</th>
+            <th>{t('failover.columns.lastProbe')}</th>
+            <th>{t('failover.columns.lastError')}</th>
+            {canPin && <th><span className="sr-only">{t('failover.columns.actions')}</span></th>}
+          </tr>
+        </thead>
+        <tbody>
+          {(chain.targets || []).map(target => (
+            <tr key={target.model} className={target.model === chain.active ? 'failover-status__row--active' : undefined}>
+              <td><code>{target.model}</code></td>
+              <td>{t(`failover.kinds.${target.kind}`, target.kind)}</td>
+              <td>{target.warm ? t('failover.warm') : <span className="text-muted">-</span>}</td>
+              <td><StatusPill status={target.state} label={t(`failover.states.${target.state}`, target.state)} /></td>
+              <td className="text-muted">{relative(target.last_probe, i18n.language) || t('failover.never')}</td>
+              <td>
+                {target.last_error
+                  ? <span className="failover-status__error" title={target.last_error}>{target.last_error}</span>
+                  : <span className="text-muted">-</span>}
+              </td>
+              {canPin && (
+                <td className="failover-status__action">
+                  {chain.pinned !== target.model && (
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirm({ kind: 'pin', target: target.model })}>
+                      {t('failover.actions.pin')}
+                    </button>
+                  )}
                 </td>
-                {canPin && (
-                  <td className="failover-status__action">
-                    {chain.pinned !== target.model && (
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => setConfirm({ kind: 'pin', target: target.model })}>
-                        {t('failover.actions.pin')}
-                      </button>
-                    )}
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </ResponsiveTable>
 
       <ConfirmDialog
         open={!!confirm}

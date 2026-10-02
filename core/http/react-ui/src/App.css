@@ -14190,3 +14190,418 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
     min-height: 44px;
   }
 }
+
+/* ===========================================================================
+   Shared FilterBar on phones. The chip row scrolls sideways, so the right-hand
+   slot (toggles, Update, sort) always wraps beneath it; the desktop divider
+   and left padding then floated a stray rule in an empty half-row.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .filter-bar-group__row { gap: var(--spacing-sm); }
+  .filter-bar-group__row > .filter-bar { flex: 1 1 100%; min-width: 0; margin-bottom: 0; }
+  .filter-bar-group__right {
+    flex: 1 1 100%;
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+    justify-content: space-between;
+    gap: var(--spacing-sm) var(--spacing-md);
+  }
+  .filter-bar-group__search { min-width: 0; }
+}
+
+/* ===========================================================================
+   Home on phones. Desktop section rhythm (--space-section) left screen-height
+   gaps between blocks; the quick links wrapped into a ragged centred cluster.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .home-page {
+    justify-content: flex-start;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-lg) max(var(--spacing-md), env(safe-area-inset-left)) var(--spacing-xl);
+  }
+  .home-header { gap: var(--spacing-sm); }
+  .home-jump { margin-bottom: 0; }
+
+  .home-assistant-card { margin-bottom: 0; padding: var(--spacing-md); }
+  .home-assistant-icon { width: 36px; height: 36px; font-size: 1rem; }
+
+  .home-chat-card { padding: var(--spacing-md); border-radius: var(--radius-lg); }
+  .home-model-row { flex-wrap: wrap; }
+  .home-model-row > :first-child { flex: 1 1 160px; min-width: 0; }
+  .home-attach-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-base);
+  }
+  .home-send-btn { width: 44px; height: 44px; font-size: var(--text-base); }
+  .home-input-footer { padding-left: var(--spacing-xs); }
+
+  /* Equal-width, thumb-sized links; an odd last link takes the full row. */
+  .home-quick-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home-quick-links > * {
+    justify-content: center;
+    min-height: 44px;
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+  .home-quick-links > :last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  .home-connect { margin-top: 0; padding: var(--spacing-md); }
+}
+
+/* The closed settings drawer is parked with translateX(100%), which still
+   counts towards .chat-main's scrollable overflow. Scrolling the newest message
+   into view then scrolled this overflow:hidden column sideways, shifting the
+   whole conversation off the left edge on phones. `clip` cannot be scrolled,
+   programmatically or otherwise. The drawer is also made non-focusable while
+   closed so Tab cannot land in it. */
+.chat-layout,
+.chat-main { overflow: clip; }
+.chat-settings-drawer:not(.open) { visibility: hidden; transition: transform 250ms var(--ease-default), visibility 0s linear 250ms; }
+
+/* Activity operation cards on phones: Pause/Cancel and the percentage take
+   their own row, so the name and status are not squeezed into a sliver. */
+@media (max-width: 639px) {
+  .operation-card__main { flex-wrap: wrap; }
+  .operation-card__body { flex: 1 1 calc(100% - 40px); }
+  .operation-card__actions { flex: 1 1 100%; justify-content: flex-end; }
+}
+
+/* Import options disclosure: keep the label on one line and let the field
+   summary beside it truncate instead of wrapping the label. */
+.import-disclosure { max-width: 100%; min-width: 0; white-space: nowrap; }
+.import-disclosure .import-options__summary { flex: 1 1 auto; }
+
+/* ===========================================================================
+   Lanes on phones. The desktop grids give the label a fixed 8-10rem column,
+   which at 358px leaves descriptions wrapping one word per line (and Studio's
+   five-column modality row had no room at all). Same content, restacked.
+   =========================================================================== */
+@media (max-width: 639px) {
+  /* label / description / arrow → label over description, arrow at right */
+  :is(.lanes--jump, .lanes--sections, .lanes--usecase, .lanes--attention) .lane {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 2px;
+  }
+  :is(.lanes--jump, .lanes--sections, .lanes--usecase, .lanes--attention) .lane > :nth-child(1) { grid-column: 1; grid-row: 1; }
+  :is(.lanes--jump, .lanes--sections, .lanes--usecase, .lanes--attention) .lane > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  :is(.lanes--jump, .lanes--sections, .lanes--usecase, .lanes--attention) .lane > .lane__go { grid-column: 2; grid-row: 1 / span 2; }
+
+  /* Home resident models: id + backend stacked, status and stop at right */
+  .lanes--resident .lane { grid-template-columns: minmax(0, 1fr) auto auto; row-gap: 2px; }
+  .lanes--resident .lane > :nth-child(1) { grid-column: 1; grid-row: 1; overflow: hidden; text-overflow: ellipsis; }
+  .lanes--resident .lane > :nth-child(2) { grid-column: 1; grid-row: 2; }
+  .lanes--resident .lane > :nth-child(3) { grid-column: 2; grid-row: 1 / span 2; }
+  .lanes--resident .lane > :nth-child(4) { grid-column: 3; grid-row: 1 / span 2; }
+
+  /* Studio modality: group + state on top, name/description, then model and
+     typical cost on one line */
+  .lanes--modality .lane { grid-template-columns: minmax(0, 1fr) auto; row-gap: 4px; }
+  .lanes--modality .lane > :nth-child(1) { grid-column: 1; grid-row: 1; }
+  .lanes--modality .lane > :nth-child(5) { grid-column: 2; grid-row: 1; }
+  .lanes--modality .lane > :nth-child(2) { grid-column: 1 / -1; grid-row: 2; }
+  .lanes--modality .lane > :nth-child(3) { grid-column: 1; grid-row: 3; }
+  .lanes--modality .lane > :nth-child(4) { grid-column: 2; grid-row: 3; text-align: right; }
+}
+
+/* ===========================================================================
+   Touch targets. Every control family the mobile audit measured under 40px on
+   a coarse pointer. Icon-only controls get a 44px square; text controls and
+   chips a 44px / 40px row height. Desktop (fine pointer) density is unchanged.
+   =========================================================================== */
+@media (pointer: coarse) {
+  /* Icon-only buttons */
+  .console-rail-toggle,
+  .console-rail-collapse,
+  .toast-close,
+  .operations-strip__hide,
+  .operation-card__hide,
+  .action-menu__trigger,
+  .home-connect-dismiss,
+  .home-loaded-stop,
+  .media-history-clear-btn,
+  .media-history-item-delete,
+  .chat-message-actions button,
+  .chat-mode-chip,
+  .cfr-clear,
+  .btn-icon {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .action-menu__trigger--compact { min-width: 40px; min-height: 40px; }
+
+  /* Text buttons, tabs and links that act as buttons */
+  .btn { min-width: 44px; }
+  .tab,
+  .me-tab,
+  .set-rail__item,
+  .segmented__item,
+  .unified-mcp-tab,
+  .detail-pane__back,
+  .import-disclosure,
+  .home-connect-toggle,
+  .operations-strip__more,
+  .activity-row__action,
+  .chat-error-trace-link,
+  .chat-empty-suggestion,
+  .request-panel__copy,
+  .audio-waveform-player__download,
+  .app-footer-links a {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .detail-pane__back, .import-disclosure { display: flex; }
+
+  /* Dense chips: 40px keeps a chip row from turning into a wall of buttons */
+  .activity-chip,
+  .modality-chip,
+  .audio-transform-input__tab,
+  .entity-rail__sort-btn,
+  .fleet-table__sort,
+  .badge-link {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Text fields and select triggers */
+  .input, .textarea, select, button.input[aria-haspopup] { min-height: 44px; }
+  .chat-input { min-height: 44px; }
+}
+
+/* Toasts on phones sit under the mobile header, not over the hamburger. */
+@media (max-width: 639px) {
+  .toast-container { top: calc(64px + env(safe-area-inset-top)); }
+}
+
+/* ResponsiveTable card mode: the rows become blocks, but a <table>/<tbody>
+   left as table boxes wraps them in an anonymous shrink-to-fit cell, so every
+   card was only as wide as its content. Make the wrappers blocks too. */
+@media (max-width: 640px) {
+  .table--responsive,
+  .table--responsive > tbody { display: block; width: 100%; }
+  .table--responsive > tbody > tr { margin-inline: 0; }
+  /* Long values (ids, URLs) wrap inside the card instead of pushing it wide. */
+  .table--responsive > tbody > tr > td { min-width: 0; overflow-wrap: anywhere; }
+}
+
+/* Media pages (image, video, 3D, TTS, sound): grid items default to
+   min-width:auto, so one long unbreakable string in the controls set the
+   single column's minimum and blew the page out sideways on phones. */
+.media-layout > * { min-width: 0; }
+@media (max-width: 1023px) {
+  .media-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Recommended models on narrow screens kept only the tag, name and button and
+   hid the download size and VRAM — the numbers that decide the pick. Restack
+   instead: tag, name, then size and VRAM, with Install at the right. */
+@media (max-width: 720px) {
+  .lanes--recommended .lane {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    row-gap: 2px;
+    column-gap: var(--spacing-md);
+  }
+  .lanes--recommended .lane__num { display: block; }
+  .lanes--recommended .lane > :nth-child(1) { grid-column: 1 / 3; grid-row: 1; }
+  .lanes--recommended .lane > :nth-child(2) { grid-column: 1 / 3; grid-row: 2; overflow-wrap: anywhere; }
+  .lanes--recommended .lane > :nth-child(3) { grid-column: 1; grid-row: 3; }
+  .lanes--recommended .lane > :nth-child(4) { grid-column: 2; grid-row: 3; }
+  .lanes--recommended .lane > :nth-child(5) { grid-column: 3; grid-row: 1 / span 3; align-self: center; }
+}
+
+/* Home first-run wizard: centred buttons that cannot wrap ran off both edges
+   at 390px. */
+.home-wizard-actions { flex-wrap: wrap; }
+
+
+/* ===========================================================================
+   Phone type floor. These rules set text at 9–10px, which is fine beside a
+   mouse at desktop density and hard to read on a phone (iOS's smallest text
+   style is 11pt). Same selectors, so this wins on order; generated from every
+   sub-11px font-size in this file, minus icons, glyph buttons, avatars and
+   chart axes whose boxes are sized to the glyph.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .nav-external,
+  .operation-node-status,
+  .badge,
+  .filter-btn__count,
+  .empty-state__eyebrow,
+  .chat-list-item-time,
+  .chat-message-model,
+  .chats-menu-item-time,
+  .chat-activity-count,
+  .chat-activity-item-label,
+  .chat-activity-item-code,
+  .chat-activity-item-code code,
+  .chat-activity-param,
+  .chat-context-label,
+  .chat-slider-labels,
+  .media-history-item-time,
+  .home-starters-badge,
+  .biometrics-matches__badge,
+  .voice-row__head > span,
+  .voice-row__meta,
+  .voice-detail__eyebrow,
+  .voice-detail__metadata dt,
+  .voice-detail__model-list small,
+  .voice-detail__capability-note,
+  .voice-detail__compatible-models li small,
+  .voice-create-label-row > span,
+  .node-detail__metric-note,
+  .node-detail__mobile-meta,
+  .fleet-kicker,
+  .fleet-health__legend span,
+  .fleet-gauge__detail,
+  .fleet-gauge__coverage,
+  .fleet-attention__filter,
+  .fleet-workbench__tabs button span,
+  .fleet-table__node + span,
+  .fleet-table__subvalue,
+  .fleet-table__approve,
+  .fleet-table__resource > span:last-child,
+  .fleet-table__capacity-row > b,
+  .model-workbench__scope span,
+  .model-backend-list > span:not(.fleet-table__unknown, .text-muted),
+  .node-inspector__section h3,
+  .node-inspector__address,
+  .node-inspector__labels > span:not(.text-muted),
+  .node-inspector__resource-label strong span,
+  .node-inspector__resource-label > span,
+  .node-inspector__model-row .cell-mono,
+  .node-inspector__model-row .state-pill,
+  .node-inspector__model-row .text-muted,
+  .model-inspector__logs,
+  .model-inspector__replica-logs,
+  .model-inspector__node > p,
+  .model-inspector__node li,
+  .model-inspector__node code,
+  .operation-card__tag,
+  .badge--tiny,
+  .zero-pane__eyebrow,
+  .detail-pane__label,
+  .stat-grid__item dt,
+  .discover__chart-title,
+  .models-filters__usecase-label,
+  .models-filters__refine-label,
+  .operate-headline__cell dt,
+  .request-panel__title {
+    font-size: 0.6875rem;
+  }
+}
+
+/* Touch targets, second pass: controls the first block did not reach, and
+   chips that were tall enough but too narrow ("All", "Any"). */
+@media (pointer: coarse) {
+  .activity-chip,
+  .modality-chip,
+  .entity-rail__sort-btn,
+  .fleet-table__sort { min-width: 44px; justify-content: center; }
+
+  .studio-tab,
+  .biometrics-mediainput__tab,
+  .console-group .nav-item,
+  .scheduling-rule-actions .btn,
+  .fleet-attention__filter,
+  .ambiguity-alert__chip {
+    min-height: 44px;
+  }
+
+  .biometrics-mediainput__clear,
+  .variant-row__info,
+  .ambiguity-alert__dismiss {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Text buttons and links inside dense rows: 40px rows keep tables readable. */
+  .fleet-table__node,
+  .fleet-table__approve,
+  .fleet-bulkbar__clear,
+  .node-detail__text-action,
+  .node-detail__breadcrumb a,
+  .model-inspector__logs,
+  .model-inspector__replica-logs,
+  .studio-modality__install,
+  .table--responsive td a,
+  button.cell-mono {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Remove-× glyphs inside chips: a 32px hit area without growing the chip. */
+  .home-file-tag button,
+  .kvchips__chip-remove,
+  .chats-menu-item-actions button,
+  .login-token-toggle button {
+    min-width: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fleet-checkbox { width: 22px; height: 22px; }
+}
+
+/* Model Editor header on phones: title over actions, not a two-line title
+   squeezed beside two buttons. */
+@media (max-width: 639px) {
+  .me-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+  }
+  .me-head > .hstack { flex-wrap: wrap; }
+}
+
+/* Studio generator tabs on phones: one strip that scrolls sideways, instead of
+   seven tabs wrapped into three rows above every generator. */
+@media (max-width: 639px) {
+  .studio-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-padding-inline: var(--spacing-md);
+  }
+  .studio-tabs::-webkit-scrollbar { display: none; }
+  .studio-tab { flex: none; white-space: nowrap; }
+}
+
+/* Trace detail metrics: four fixed columns are ~80px each on a phone, which
+   broke values like "transcription" mid-word. Two columns there. */
+@media (max-width: 639px) {
+  .tr-metrics--fixed { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Home on phones: the page gap already separates blocks, so the lane heading's
+   own top margin doubled the space above "Jump back in". */
+@media (max-width: 639px) {
+  .home-page .lane-head { margin-top: 0; }
+}
+
+/* Tablet / landscape-phone icon rail: mirror the desktop collapsed sidebar's
+   language switcher, whose "EN" code spilled past the 52px rail and whose menu
+   opened upwards inside it. */
+@media (max-width: 1023px) and (min-width: 640px) {
+  .sidebar:not(.open) .language-switcher-code { display: none; }
+  .sidebar:not(.open) .language-switcher-menu { left: calc(100% + 8px); bottom: 0; }
+}

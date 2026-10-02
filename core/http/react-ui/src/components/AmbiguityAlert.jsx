@@ -52,6 +52,7 @@ export default function AmbiguityAlert({ modality, candidates = [], knownBackend
                   <button
                     key={name}
                     type="button"
+                    className="ambiguity-alert__chip"
                     data-testid={`ambiguity-chip-${name}`}
                     onClick={() => onPick && onPick(name)}
                     title={isInstalled
@@ -87,6 +88,7 @@ export default function AmbiguityAlert({ modality, candidates = [], knownBackend
         {onDismiss && (
           <button
             type="button"
+            className="ambiguity-alert__dismiss"
             data-testid="ambiguity-dismiss"
             onClick={onDismiss}
             aria-label="Dismiss"

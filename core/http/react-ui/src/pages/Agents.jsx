@@ -7,6 +7,7 @@ import { useUserMap } from '../hooks/useUserMap'
 import UserGroupSection from '../components/UserGroupSection'
 import PageHeader from '../components/PageHeader'
 import ConfirmDialog from '../components/ConfirmDialog'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 export default function Agents() {
   const { addToast } = useOutletContext()
@@ -266,82 +267,80 @@ export default function Agents() {
               <p className="empty-state-text">{t('empty.noMatchingText', { query: search })}</p>
             </div>
           ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>{t('table.name')}</th>
-                    <th>{t('table.status')}</th>
-                    <th>{t('table.events')}</th>
-                    <th className="text-right">{t('table.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(agent => {
-                    const name = agent.name || agent.id
-                    const isActive = agent.status === 'active'
-                    return (
-                      <tr key={name}>
-                        <td>
-                          <a className="agents-name" onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/chat`)}>
-                            {name}
-                          </a>
-                        </td>
-                        <td>{statusBadge(agent.status)}</td>
-                        <td>
-                          <a
-                            className="agents-name"
-                            onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/status`)}
-                            title={t('table.eventsTooltip', { count: agent.eventsCount })}
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>{t('table.name')}</th>
+                  <th>{t('table.status')}</th>
+                  <th>{t('table.events')}</th>
+                  <th className="text-right">{t('table.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map(agent => {
+                  const name = agent.name || agent.id
+                  const isActive = agent.status === 'active'
+                  return (
+                    <tr key={name}>
+                      <td>
+                        <a className="agents-name" onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/chat`)}>
+                          {name}
+                        </a>
+                      </td>
+                      <td>{statusBadge(agent.status)}</td>
+                      <td>
+                        <a
+                          className="agents-name"
+                          onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/status`)}
+                          title={t('table.eventsTooltip', { count: agent.eventsCount })}
+                        >
+                          {agent.eventsCount}
+                        </a>
+                      </td>
+                      <td>
+                        <div className="agents-action-group">
+                          <button
+                            className={`btn btn-sm ${isActive ? 'btn-warning' : 'btn-success'}`}
+                            onClick={() => handlePauseResume(agent)}
+                            title={isActive ? t('actions.pause') : t('actions.resume')}
                           >
-                            {agent.eventsCount}
-                          </a>
-                        </td>
-                        <td>
-                          <div className="agents-action-group">
-                            <button
-                              className={`btn btn-sm ${isActive ? 'btn-warning' : 'btn-success'}`}
-                              onClick={() => handlePauseResume(agent)}
-                              title={isActive ? t('actions.pause') : t('actions.resume')}
-                            >
-                              <i className={`fas ${isActive ? 'fa-pause' : 'fa-play'}`} />
-                            </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/edit`)}
-                              title={t('actions.edit')}
-                            >
-                              <i className="fas fa-edit" />
-                            </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/chat`)}
-                              title={t('actions.chat')}
-                            >
-                              <i className="fas fa-comment" />
-                            </button>
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleExport(name)}
-                              title={t('actions.export')}
-                            >
-                              <i className="fas fa-download" />
-                            </button>
-                            <button
-                              className="btn btn-danger btn-sm"
-                              onClick={() => handleDelete(name)}
-                              title={t('actions.delete')}
-                            >
-                              <i className="fas fa-trash" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+                            <i className={`fas ${isActive ? 'fa-pause' : 'fa-play'}`} />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/edit`)}
+                            title={t('actions.edit')}
+                          >
+                            <i className="fas fa-edit" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => navigate(`/app/agents/${encodeURIComponent(name)}/chat`)}
+                            title={t('actions.chat')}
+                          >
+                            <i className="fas fa-comment" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleExport(name)}
+                            title={t('actions.export')}
+                          >
+                            <i className="fas fa-download" />
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDelete(name)}
+                            title={t('actions.delete')}
+                          >
+                            <i className="fas fa-trash" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </ResponsiveTable>
           )}
 
         </>

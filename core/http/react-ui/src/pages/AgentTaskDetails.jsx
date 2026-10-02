@@ -6,6 +6,7 @@ import ModelSelector from '../components/ModelSelector'
 import PageHeader from '../components/PageHeader'
 import { CAP_CHAT } from '../utils/capabilities'
 import LoadingSpinner from '../components/LoadingSpinner'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 export default function AgentTaskDetails() {
   const { id } = useParams()
@@ -276,29 +277,27 @@ export default function AgentTaskDetails() {
               <i className="fas fa-clock-rotate-left text-warning icon-before" />
               Recent Jobs ({jobHistory.length})
             </h3>
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr><th>Job ID</th><th>Status</th><th>Created</th><th>Actions</th></tr>
-                </thead>
-                <tbody>
-                  {jobHistory.map(job => (
-                    <tr key={job.id}>
-                      <td className="text-mono text-sm">
-                        {job.id?.slice(0, 12)}...
-                      </td>
-                      <td>{statusBadge(job.status)}</td>
-                      <td className="text-sub">{formatDate(job.created_at)}</td>
-                      <td>
-                        <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)}>
-                          <i className="fas fa-eye" /> View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <ResponsiveTable>
+              <thead>
+                <tr><th>Job ID</th><th>Status</th><th>Created</th><th>Actions</th></tr>
+              </thead>
+              <tbody>
+                {jobHistory.map(job => (
+                  <tr key={job.id}>
+                    <td className="text-mono text-sm">
+                      {job.id?.slice(0, 12)}...
+                    </td>
+                    <td>{statusBadge(job.status)}</td>
+                    <td className="text-sub">{formatDate(job.created_at)}</td>
+                    <td>
+                      <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)}>
+                        <i className="fas fa-eye" /> View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </ResponsiveTable>
           </div>
         )}
       </div>

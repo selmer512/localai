@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import ResponsiveTable from '../../components/ResponsiveTable'
 
 const SORT_FNS = {
   tokens: (a, b) => (b.tokens || 0) - (a.tokens || 0),
@@ -174,71 +175,69 @@ export default function SourcesTable({
         </label>
       </div>
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>{t('usage.sources.sortName')}</th>
-              {showUserColumn && <th style={{ width: 180 }}>{t('usage.sources.sortUser')}</th>}
-              <th className="col-w-110">Prefix</th>
-              <th style={{ width: 100, textAlign: 'right' }}>{t('usage.sources.sortRequests')}</th>
-              <th style={{ width: 100, textAlign: 'right' }}>{t('usage.sources.sortTokens')}</th>
-              <th style={{ width: 120, textAlign: 'right' }}>{t('usage.sources.sortLastUsed')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r) => {
-              const isSel = selectedKey === r.id
-              return (
-                <tr
-                  key={r.id}
-                  onClick={() => onSelectKey?.(isSel ? null : r.id)}
-                  style={{
-                    cursor: 'pointer',
-                    background: isSel ? 'var(--color-bg-secondary)' : undefined,
-                    opacity: r.revoked ? 0.5 : 1,
-                  }}
-                >
-                  <td>
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                      <i
-                        className={`${iconFor(r.kind)} text-note`}
-                      />
-                      <span>{r.name}</span>
-                      {r.revoked && (
-                        <span
-                          style={{
-                            fontSize: '0.6875rem',
-                            textTransform: 'uppercase',
-                            color: 'var(--color-text-muted)',
-                          }}
-                        >
-                          ({t('usage.sources.revoked')})
-                        </span>
-                      )}
-                    </span>
+      <ResponsiveTable>
+        <thead>
+          <tr>
+            <th>{t('usage.sources.sortName')}</th>
+            {showUserColumn && <th style={{ width: 180 }}>{t('usage.sources.sortUser')}</th>}
+            <th className="col-w-110">Prefix</th>
+            <th style={{ width: 100, textAlign: 'right' }}>{t('usage.sources.sortRequests')}</th>
+            <th style={{ width: 100, textAlign: 'right' }}>{t('usage.sources.sortTokens')}</th>
+            <th style={{ width: 120, textAlign: 'right' }}>{t('usage.sources.sortLastUsed')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((r) => {
+            const isSel = selectedKey === r.id
+            return (
+              <tr
+                key={r.id}
+                onClick={() => onSelectKey?.(isSel ? null : r.id)}
+                style={{
+                  cursor: 'pointer',
+                  background: isSel ? 'var(--color-bg-secondary)' : undefined,
+                  opacity: r.revoked ? 0.5 : 1,
+                }}
+              >
+                <td>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <i
+                      className={`${iconFor(r.kind)} text-note`}
+                    />
+                    <span>{r.name}</span>
+                    {r.revoked && (
+                      <span
+                        style={{
+                          fontSize: '0.6875rem',
+                          textTransform: 'uppercase',
+                          color: 'var(--color-text-muted)',
+                        }}
+                      >
+                        ({t('usage.sources.revoked')})
+                      </span>
+                    )}
+                  </span>
+                </td>
+                {showUserColumn && (
+                  <td className="text-sub">
+                    {r.userName || r.userID || '-'}
                   </td>
-                  {showUserColumn && (
-                    <td className="text-sub">
-                      {r.userName || r.userID || '-'}
-                    </td>
-                  )}
-                  <td className="text-meta">{r.prefix || '-'}</td>
-                  <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {Number(r.requests || 0).toLocaleString()}
-                  </td>
-                  <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
-                    {formatTokens(r.tokens || 0)}
-                  </td>
-                  <td style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                    {formatRelative(r.last_used)}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+                )}
+                <td className="text-meta">{r.prefix || '-'}</td>
+                <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                  {Number(r.requests || 0).toLocaleString()}
+                </td>
+                <td style={{ textAlign: 'right', fontFamily: 'var(--font-mono)' }}>
+                  {formatTokens(r.tokens || 0)}
+                </td>
+                <td style={{ textAlign: 'right', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  {formatRelative(r.last_used)}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </ResponsiveTable>
     </div>
   )
 }

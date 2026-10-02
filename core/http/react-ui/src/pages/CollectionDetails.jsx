@@ -3,6 +3,7 @@ import { useParams, useOutletContext, useSearchParams } from 'react-router-dom'
 import { agentCollectionsApi } from '../utils/api'
 import ConfirmDialog from '../components/ConfirmDialog'
 import PageHeader from '../components/PageHeader'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 export default function CollectionDetails() {
   const { name } = useParams()
@@ -331,37 +332,35 @@ export default function CollectionDetails() {
               <p>No entries in this collection. Upload a file to get started.</p>
             </div>
           ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Entry</th>
-                    <th className="text-right">Actions</th>
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>Entry</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((entry, index) => (
+                  <tr key={index}>
+                    <td>
+                      <div className="collection-detail-entry-content">
+                        {typeof entry === 'string' ? entry : JSON.stringify(entry)}
+                      </div>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-xs)' }}>
+                        <button className="btn btn-secondary btn-sm" onClick={() => handleViewContent(entry)} title="View Content">
+                          <i className="fas fa-eye" />
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteEntry(entry)} title="Delete">
+                          <i className="fas fa-trash" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {entries.map((entry, index) => (
-                    <tr key={index}>
-                      <td>
-                        <div className="collection-detail-entry-content">
-                          {typeof entry === 'string' ? entry : JSON.stringify(entry)}
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-xs)' }}>
-                          <button className="btn btn-secondary btn-sm" onClick={() => handleViewContent(entry)} title="View Content">
-                            <i className="fas fa-eye" />
-                          </button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteEntry(entry)} title="Delete">
-                            <i className="fas fa-trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </ResponsiveTable>
           )}
         </>
       ) : activeTab === 'search' ? (
@@ -451,40 +450,38 @@ export default function CollectionDetails() {
               <p>No external sources configured. Add a URL to start ingesting data.</p>
             </div>
           ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>URL</th>
-                    <th>Interval</th>
-                    <th className="text-right">Actions</th>
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Interval</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sources.map((source, index) => (
+                  <tr key={index}>
+                    <td style={{ fontSize: '0.8125rem', wordBreak: 'break-all' }}>
+                      {typeof source === 'string' ? source : (source.url || JSON.stringify(source))}
+                    </td>
+                    <td className="text-sub">
+                      {(typeof source === 'object' && source.update_interval) ? source.update_interval : '-'}
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <button
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleRemoveSource(typeof source === 'string' ? source : source.url)}
+                          title="Remove"
+                        >
+                          <i className="fas fa-trash" />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {sources.map((source, index) => (
-                    <tr key={index}>
-                      <td style={{ fontSize: '0.8125rem', wordBreak: 'break-all' }}>
-                        {typeof source === 'string' ? source : (source.url || JSON.stringify(source))}
-                      </td>
-                      <td className="text-sub">
-                        {(typeof source === 'object' && source.update_interval) ? source.update_interval : '-'}
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          <button
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleRemoveSource(typeof source === 'string' ? source : source.url)}
-                            title="Remove"
-                          >
-                            <i className="fas fa-trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </ResponsiveTable>
           )}
         </>
       )}

@@ -111,7 +111,22 @@ export default function SearchableSelect({
   })
 
   return (
-    <div ref={ref} className={className} style={{ position: 'relative', minWidth: 160, ...style }}>
+    <div
+      ref={ref}
+      className={className}
+      style={{ position: 'relative', minWidth: 160, ...style }}
+      // Escape must close the panel wherever focus is. On touch the search
+      // field is not autofocused, so its own handler alone would leave a
+      // hardware-keyboard user (iPad) stuck behind the sheet's backdrop.
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' && open) {
+          setOpen(false)
+          setQuery('')
+          setFocusIndex(-1)
+          buttonRef.current?.focus()
+        }
+      }}
+    >
       <button
         ref={buttonRef}
         type="button"

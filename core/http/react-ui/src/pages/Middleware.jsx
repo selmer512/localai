@@ -6,6 +6,7 @@ import { settingsApi, modelsApi } from '../utils/api'
 import LoadingSpinner from '../components/LoadingSpinner'
 import Toggle from '../components/Toggle'
 import PageHeader from '../components/PageHeader'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 // Middleware admin page. Three tabs:
 //   - Filtering: per-model resolved PII state + per-model detector list
@@ -206,70 +207,68 @@ function FilteringTab({ status, addToast, onChanged }) {
             Toggle PII inline; edit a row for detectors and policy.
           </span>
         </div>
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th className="col-w-120">Backend</th>
-                <th className="col-w-120">PII</th>
-                <th className="col-w-110">Source</th>
-                <th>Detectors</th>
-                <th className="col-w-80">Edit</th>
+        <ResponsiveTable>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th className="col-w-120">Backend</th>
+              <th className="col-w-120">PII</th>
+              <th className="col-w-110">Source</th>
+              <th>Detectors</th>
+              <th className="col-w-80">Edit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(pii.models || []).map(m => (
+              <tr key={m.name}>
+                <td className="text-mono text-sm">{m.name}</td>
+                <td className="text-mono text-meta">{m.backend || '—'}</td>
+                <td>
+                  <span className="hstack hstack--xs">
+                    <Toggle
+                      checked={!!m.enabled}
+                      disabled={piiBusy.has(m.name)}
+                      onChange={(v) => togglePII(m.name, v)}
+                    />
+                    {m.enabled && (!m.detectors || m.detectors.length === 0) && (
+                      <span
+                        title="Enabled but no detector resolved — nothing is scanned. Toggle a detector's Default on above, or add pii.detectors to the model."
+                        className="mw-noop"
+                      >
+                        <i className="fas fa-triangle-exclamation icon-before" />no-op
+                      </span>
+                    )}
+                  </span>
+                </td>
+                <td className="text-meta">
+                  {m.explicit ? 'YAML' : (m.default_for_backend ? 'backend default' : 'default off')}
+                </td>
+                <td className="cell-mono text-xs">
+                  {m.detectors && m.detectors.length > 0
+                    ? <>{m.detectors.join(', ')}{m.detectors_from_default && <span className="text-muted"> (default)</span>}</>
+                    : <span className="text-muted">—</span>}
+                </td>
+                <td>
+                  <Link
+                    to={`/app/model-editor/${encodeURIComponent(m.name)}`}
+                    state={fromState(location, 'Middleware')}
+                    className="btn btn-secondary btn-sm pill-xs"
+                    title={`Edit ${m.name}.yaml`}
+                  >
+                    <i className="fas fa-pen-to-square" /> Edit
+                  </Link>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {(pii.models || []).map(m => (
-                <tr key={m.name}>
-                  <td className="text-mono text-sm">{m.name}</td>
-                  <td className="text-mono text-meta">{m.backend || '—'}</td>
-                  <td>
-                    <span className="hstack hstack--xs">
-                      <Toggle
-                        checked={!!m.enabled}
-                        disabled={piiBusy.has(m.name)}
-                        onChange={(v) => togglePII(m.name, v)}
-                      />
-                      {m.enabled && (!m.detectors || m.detectors.length === 0) && (
-                        <span
-                          title="Enabled but no detector resolved — nothing is scanned. Toggle a detector's Default on above, or add pii.detectors to the model."
-                          className="mw-noop"
-                        >
-                          <i className="fas fa-triangle-exclamation icon-before" />no-op
-                        </span>
-                      )}
-                    </span>
-                  </td>
-                  <td className="text-meta">
-                    {m.explicit ? 'YAML' : (m.default_for_backend ? 'backend default' : 'default off')}
-                  </td>
-                  <td className="cell-mono text-xs">
-                    {m.detectors && m.detectors.length > 0
-                      ? <>{m.detectors.join(', ')}{m.detectors_from_default && <span className="text-muted"> (default)</span>}</>
-                      : <span className="text-muted">—</span>}
-                  </td>
-                  <td>
-                    <Link
-                      to={`/app/model-editor/${encodeURIComponent(m.name)}`}
-                      state={fromState(location, 'Middleware')}
-                      className="btn btn-secondary btn-sm pill-xs"
-                      title={`Edit ${m.name}.yaml`}
-                    >
-                      <i className="fas fa-pen-to-square" /> Edit
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-              {(!pii.models || pii.models.length === 0) && (
-                <tr>
-                  <td colSpan={6} className="inline-empty">
-                    No models loaded.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+            ))}
+            {(!pii.models || pii.models.length === 0) && (
+              <tr>
+                <td colSpan={6} className="inline-empty">
+                  No models loaded.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </ResponsiveTable>
       </div>
     </>
   )
@@ -346,61 +345,59 @@ function DetectorModels({ pii, addToast, onChanged }) {
         flags and what action it takes.
       </div>
 
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Detector model</th>
-              <th className="col-w-110">Type</th>
-              <th className="col-w-120">Backend</th>
-              <th className="col-w-110">Default</th>
-              <th className="col-w-80">Edit</th>
+      <ResponsiveTable>
+        <thead>
+          <tr>
+            <th>Detector model</th>
+            <th className="col-w-110">Type</th>
+            <th className="col-w-120">Backend</th>
+            <th className="col-w-110">Default</th>
+            <th className="col-w-80">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(d => (
+            <tr key={d.name}>
+              <td className="text-mono text-sm fw-semibold">
+                {d.missing
+                  ? <span title="This default detector names a model that is not loaded.">{d.name}</span>
+                  : <Link to={`/app/model-editor/${encodeURIComponent(d.name)}`} state={fromState(location, 'Middleware')} title={`Edit ${d.name}.yaml`}>{d.name}</Link>}
+              </td>
+              <td>{detectorTypeBadge(d.type)}</td>
+              <td className="text-mono text-meta">{d.backend || '—'}</td>
+              <td>
+                <Toggle
+                  checked={!!d.default}
+                  disabled={busy.has(d.name)}
+                  onChange={(v) => toggleDefault(d.name, v)}
+                />
+              </td>
+              <td>
+                {d.missing ? (
+                  <span className="text-meta">—</span>
+                ) : (
+                  <Link
+                    to={`/app/model-editor/${encodeURIComponent(d.name)}`}
+                    state={fromState(location, 'Middleware')}
+                    className="btn btn-secondary btn-sm pill-xs"
+                    title={`Edit ${d.name}.yaml`}
+                  >
+                    <i className="fas fa-pen-to-square" /> Edit
+                  </Link>
+                )}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {rows.map(d => (
-              <tr key={d.name}>
-                <td className="text-mono text-sm fw-semibold">
-                  {d.missing
-                    ? <span title="This default detector names a model that is not loaded.">{d.name}</span>
-                    : <Link to={`/app/model-editor/${encodeURIComponent(d.name)}`} state={fromState(location, 'Middleware')} title={`Edit ${d.name}.yaml`}>{d.name}</Link>}
-                </td>
-                <td>{detectorTypeBadge(d.type)}</td>
-                <td className="text-mono text-meta">{d.backend || '—'}</td>
-                <td>
-                  <Toggle
-                    checked={!!d.default}
-                    disabled={busy.has(d.name)}
-                    onChange={(v) => toggleDefault(d.name, v)}
-                  />
-                </td>
-                <td>
-                  {d.missing ? (
-                    <span className="text-meta">—</span>
-                  ) : (
-                    <Link
-                      to={`/app/model-editor/${encodeURIComponent(d.name)}`}
-                      state={fromState(location, 'Middleware')}
-                      className="btn btn-secondary btn-sm pill-xs"
-                      title={`Edit ${d.name}.yaml`}
-                    >
-                      <i className="fas fa-pen-to-square" /> Edit
-                    </Link>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={5} className="inline-empty">
-                  No detector models loaded. Add one with the button above (a token_classify NER model
-                  or a built-in secret pattern model).
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          ))}
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={5} className="inline-empty">
+                No detector models loaded. Add one with the button above (a token_classify NER model
+                or a built-in secret pattern model).
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </ResponsiveTable>
     </div>
   )
 }
@@ -554,44 +551,42 @@ function RoutingTab({ status, decisions }) {
             </button>
           </div>
         </div>
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th className="w-160">Model</th>
-                <th className="col-w-110">Classifier</th>
-                <th>Candidates</th>
-                <th className="col-w-200">Cache / corpus</th>
-                <th className="col-w-140">Fallback</th>
+        <ResponsiveTable>
+          <thead>
+            <tr>
+              <th className="w-160">Model</th>
+              <th className="col-w-110">Classifier</th>
+              <th>Candidates</th>
+              <th className="col-w-200">Cache / corpus</th>
+              <th className="col-w-140">Fallback</th>
+            </tr>
+          </thead>
+          <tbody>
+            {router.models.map(m => (
+              <tr key={m.name}>
+                <td className="text-mono text-sm fw-semibold">
+                  <Link to={`/app/model-editor/${encodeURIComponent(m.name)}`} state={fromState(location, 'Middleware')} title="Edit this router model's config">{m.name}</Link>
+                </td>
+                <td className="text-mono text-xs">{m.classifier}</td>
+                <td className="text-xs">
+                  {(m.candidates || []).map((c, i) => (
+                    <div key={i} className="hstack hstack--xs text-mono">
+                      <span className="min-w-100 text-primary">{(c.labels || []).join(', ') || '—'}</span>
+                      <span className="text-muted">→</span>
+                      <span>{c.model}</span>
+                    </div>
+                  ))}
+                </td>
+                <td className="text-xs">
+                  {m.knn ? <RouterKNNCell knn={m.knn} /> : <RouterCacheCell cache={m.embedding_cache} />}
+                </td>
+                <td className="text-mono text-meta">
+                  {m.fallback || '—'}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {router.models.map(m => (
-                <tr key={m.name}>
-                  <td className="text-mono text-sm fw-semibold">
-                    <Link to={`/app/model-editor/${encodeURIComponent(m.name)}`} state={fromState(location, 'Middleware')} title="Edit this router model's config">{m.name}</Link>
-                  </td>
-                  <td className="text-mono text-xs">{m.classifier}</td>
-                  <td className="text-xs">
-                    {(m.candidates || []).map((c, i) => (
-                      <div key={i} className="hstack hstack--xs text-mono">
-                        <span className="min-w-100 text-primary">{(c.labels || []).join(', ') || '—'}</span>
-                        <span className="text-muted">→</span>
-                        <span>{c.model}</span>
-                      </div>
-                    ))}
-                  </td>
-                  <td className="text-xs">
-                    {m.knn ? <RouterKNNCell knn={m.knn} /> : <RouterCacheCell cache={m.embedding_cache} />}
-                  </td>
-                  <td className="text-mono text-meta">
-                    {m.fallback || '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </ResponsiveTable>
       </div>
 
       {/* Recent decisions */}

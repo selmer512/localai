@@ -11,6 +11,7 @@ import { fileToBase64 } from '../utils/api'
 import Modal from '../components/Modal'
 import UserGroupSection from '../components/UserGroupSection'
 import ConfirmDialog from '../components/ConfirmDialog'
+import ResponsiveTable from '../components/ResponsiveTable'
 
 export default function AgentJobs() {
   const { addToast } = useOutletContext()
@@ -308,70 +309,68 @@ export default function AgentJobs() {
             {tasks.length === 0 ? (
               <p style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-md)' }}>You have no tasks yet.</p>
             ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Model</th>
-                    <th>Cron</th>
-                    <th>Status</th>
-                    <th className="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tasks.map(task => (
-                    <tr key={task.id || task.name}>
-                      <td>
-                        <a onClick={() => navigate(`/app/agent-jobs/tasks/${task.id || task.name}`)} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontWeight: 500 }}>
-                          {task.name || task.id}
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Model</th>
+                  <th>Cron</th>
+                  <th>Status</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map(task => (
+                  <tr key={task.id || task.name}>
+                    <td>
+                      <a onClick={() => navigate(`/app/agent-jobs/tasks/${task.id || task.name}`)} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontWeight: 500 }}>
+                        {task.name || task.id}
+                      </a>
+                    </td>
+                    <td>
+                      <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
+                        {task.description || '-'}
+                      </span>
+                    </td>
+                    <td>
+                      {task.model ? (
+                        <a onClick={() => navigate(`/app/model-editor/${encodeURIComponent(task.model)}`, { state: fromState(location, 'Agent Jobs') })} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontSize: '0.8125rem' }}>
+                          {task.model}
                         </a>
-                      </td>
-                      <td>
-                        <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'inline-block' }}>
-                          {task.description || '-'}
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {task.cron ? (
+                        <span className="badge badge-info text-mono text-xs">
+                          {task.cron}
                         </span>
-                      </td>
-                      <td>
-                        {task.model ? (
-                          <a onClick={() => navigate(`/app/model-editor/${encodeURIComponent(task.model)}`, { state: fromState(location, 'Agent Jobs') })} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontSize: '0.8125rem' }}>
-                            {task.model}
-                          </a>
-                        ) : '-'}
-                      </td>
-                      <td>
-                        {task.cron ? (
-                          <span className="badge badge-info text-mono text-xs">
-                            {task.cron}
-                          </span>
-                        ) : '-'}
-                      </td>
-                      <td>
-                        {task.enabled === false ? (
-                          <span className="badge chip-neutral">Disabled</span>
-                        ) : (
-                          <span className="badge badge-success">Enabled</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="hstack hstack--xs hstack--end">
-                          <button className="btn btn-primary btn-sm" onClick={() => openExecuteModal(task)} title="Execute">
-                            <i className="fas fa-play" />
-                          </button>
-                          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/tasks/${task.id || task.name}/edit`)} title="Edit">
-                            <i className="fas fa-edit" />
-                          </button>
-                          <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task.id || task.name)} title="Delete">
-                            <i className="fas fa-trash" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      ) : '-'}
+                    </td>
+                    <td>
+                      {task.enabled === false ? (
+                        <span className="badge chip-neutral">Disabled</span>
+                      ) : (
+                        <span className="badge badge-success">Enabled</span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="hstack hstack--xs hstack--end">
+                        <button className="btn btn-primary btn-sm" onClick={() => openExecuteModal(task)} title="Execute">
+                          <i className="fas fa-play" />
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/tasks/${task.id || task.name}/edit`)} title="Edit">
+                          <i className="fas fa-edit" />
+                        </button>
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDeleteTask(task.id || task.name)} title="Delete">
+                          <i className="fas fa-trash" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </ResponsiveTable>
             )}
 
           </>
@@ -408,47 +407,45 @@ export default function AgentJobs() {
               <p className="empty-state-text">Execute a task to create a job.</p>
             </div>
           ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Job ID</th>
-                    <th>Task</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th className="text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredJobs.map(job => (
-                    <tr key={job.id}>
-                      <td>
-                        <a onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem' }}>
-                          {job.id?.slice(0, 12)}...
-                        </a>
-                      </td>
-                      <td>{job.task_id || '-'}</td>
-                      <td>{statusBadge(job.status)}</td>
-                      <td className="text-sub">
-                        {formatDate(job.created_at)}
-                      </td>
-                      <td>
-                        <div className="hstack hstack--xs hstack--end">
-                          <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)} title="View">
-                            <i className="fas fa-eye" />
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Task</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredJobs.map(job => (
+                  <tr key={job.id}>
+                    <td>
+                      <a onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)} style={{ cursor: 'pointer', color: 'var(--color-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.8125rem' }}>
+                        {job.id?.slice(0, 12)}...
+                      </a>
+                    </td>
+                    <td>{job.task_id || '-'}</td>
+                    <td>{statusBadge(job.status)}</td>
+                    <td className="text-sub">
+                      {formatDate(job.created_at)}
+                    </td>
+                    <td>
+                      <div className="hstack hstack--xs hstack--end">
+                        <button className="btn btn-secondary btn-sm" onClick={() => navigate(`/app/agent-jobs/jobs/${job.id}`)} title="View">
+                          <i className="fas fa-eye" />
+                        </button>
+                        {(job.status === 'running' || job.status === 'pending') && (
+                          <button className="btn btn-danger btn-sm" onClick={() => handleCancelJob(job.id)} title="Cancel">
+                            <i className="fas fa-stop" />
                           </button>
-                          {(job.status === 'running' || job.status === 'pending') && (
-                            <button className="btn btn-danger btn-sm" onClick={() => handleCancelJob(job.id)} title="Cancel">
-                              <i className="fas fa-stop" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </ResponsiveTable>
           )}
 
         </>
