@@ -1,0 +1,33 @@
+# Rebuild only the local-ai binary (which embeds the React UI) and layer it
+# onto an existing LocalAI image. Backends, CUDA libraries and drivers come
+# from BASE_IMAGE unchanged, so this takes minutes instead of a full build.
+#
+#   docker build -f Dockerfile.ui-update \
+#     --build-arg BASE_IMAGE=docker.io/localai/localai:latest-gpu-nvidia-cuda-13 \
+#     -t localai-mobile:cuda13 .
+ARG BASE_IMAGE=docker.io/localai/localai:latest-gpu-nvidia-cuda-13
+
+FROM node:26-slim AS ui
+WORKDIR /app
+COPY core/http/react-ui/package*.json ./
+RUN npm install
+COPY core/http/react-ui/ ./
+RUN npm run build
+
+# Same OS as the LocalAI images: the binary links sqlite through cgo, so it
+# must be built against a glibc no newer than the one it will run on.
+FROM ubuntu:24.04 AS builder
+ARG GO_VERSION=1.26.0
+ARG TARGETARCH=amd64
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential ca-certificates curl git unzip && \
+    rm -rf /var/lib/apt/lists/*
+RUN curl -L -s https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz | tar -C /usr/local -xz
+ENV PATH=$PATH:/root/go/bin:/usr/local/go/bin
+WORKDIR /build
+COPY . .
+COPY --from=ui /app/dist ./core/http/react-ui/dist
+RUN make build
+
+FROM ${BASE_IMAGE}
+COPY --from=builder /build/local-ai /local-ai
