@@ -3363,7 +3363,12 @@ button.collapsible-header:focus-visible {
 
 /* Page route transitions */
 .page-transition {
-  animation: pageReveal var(--duration-reveal) var(--ease-reveal) both;
+  /* backwards, not both: holding the final keyframe kept an identity
+     transform on every page wrapper forever, which makes it the containing
+     block for position:fixed descendants. Bottom sheets and overlays opened
+     from a scrolled page then landed inside the page, off screen, instead of
+     on the viewport. */
+  animation: pageReveal var(--duration-reveal) var(--ease-reveal) backwards;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -14713,4 +14718,61 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
 }
 @media (pointer: coarse) {
   .detail-pane__more { min-height: 40px; display: inline-flex; align-items: center; }
+}
+
+/* ===========================================================================
+   iPhone status bar. With viewport-fit=cover the page runs under the clock
+   and notch; the mobile header scrolled away and left page text showing
+   through the status bar. Pin the header (its background covers the safe
+   area), which also keeps the menu one tap away.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+  }
+  /* One sticky bar is enough; the section strip scrolls with the page. */
+  .console-rail,
+  .console-rail--collapsed { position: static; }
+}
+
+/* ===========================================================================
+   MCP menu on phones. It opened left-aligned under a button at the right
+   edge and ran off the screen. Same treatment as the model picker: a bottom
+   sheet with the page dimmed behind it. Tapping outside still closes it.
+   =========================================================================== */
+@media (max-width: 639px) {
+  .chat-mcp-dropdown-menu,
+  .chat-input-modes .chat-mcp-dropdown-menu {
+    position: fixed;
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1100;
+    width: 100%;
+    min-width: 0 !important;
+    max-height: min(75vh, 560px);
+    max-height: min(75dvh, 560px);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior: contain;
+    box-shadow: 0 0 0 100vmax var(--color-modal-backdrop);
+    animation: sheetIn var(--duration-normal) var(--ease-spring);
+  }
+  .chat-mcp-dropdown-menu::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 5px;
+    margin: 8px auto 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-border-strong);
+  }
+  .chat-mcp-server-item { min-height: 48px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-mcp-dropdown-menu { animation: none; }
 }

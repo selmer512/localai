@@ -407,3 +407,42 @@ test.describe('console navigation and detail panes on a phone', () => {
     await expect(lede).toHaveText(/…$/)
   })
 })
+
+test.describe('overlays and chrome on a scrolled phone page', () => {
+  test.beforeEach(async ({ page }) => {
+    await json(page, '**/api/models/capabilities', { data: [{ id: 'Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf', capabilities: ['FLAG_CHAT'] }] })
+    await page.goto('/app')
+    await expect(page.locator('.home-model-row button.input')).toBeVisible()
+    await page.evaluate(() => window.scrollTo(0, 250))
+  })
+
+  test('the page wrapper keeps no transform, so sheets anchor to the screen', async ({ page }) => {
+    // An identity transform left by the page reveal animation made the
+    // wrapper the containing block for position:fixed, so sheets opened from
+    // a scrolled page landed inside the page, off screen.
+    await expect.poll(() => page.locator('.page-transition').evaluate(el => getComputedStyle(el).transform)).toBe('none')
+    await page.locator('.home-model-row button.input').click()
+    const vh = page.viewportSize().height
+    await expect.poll(async () => {
+      const box = await page.locator('.searchable-select__panel').boundingBox()
+      return Math.round(box.y + box.height)
+    }).toBe(vh)
+  })
+
+  test('the MCP menu opens as a sheet that fits the screen', async ({ page }) => {
+    await page.locator('.home-model-row .chat-mcp-dropdown > button').click()
+    const menu = page.locator('.chat-mcp-dropdown-menu')
+    await expect(menu).toBeVisible()
+    const { width, height } = page.viewportSize()
+    await expect.poll(async () => {
+      const box = await menu.boundingBox()
+      return [Math.round(box.x), Math.round(box.width), Math.round(box.y + box.height)]
+    }).toEqual([0, width, height])
+  })
+
+  test('the header stays pinned over the status bar while scrolling', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo(0, 600))
+    const box = await page.locator('.mobile-header').boundingBox()
+    expect(Math.round(box.y)).toBe(0)
+  })
+})
