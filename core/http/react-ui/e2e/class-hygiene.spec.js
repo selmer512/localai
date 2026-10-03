@@ -108,4 +108,26 @@ test.describe('class hygiene', () => {
 
     expect(offenders, 'merged class strings leave one element over-styled and its siblings bare').toEqual([])
   })
+
+  test('template-literal class strings carry no merged button and icon classes', () => {
+    // The literal-only checks above missed merges written as template
+    // literals: the Fine-tuning "Experimental" badge rendered as a button with
+    // a plus glyph over the title, and the other-users agents table lost every
+    // class while its wrapper referenced a loop variable out of scope.
+    const offenders = []
+    for (const file of jsxFiles(SRC)) {
+      readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+        for (const m of line.matchAll(/className=\{`([^`]*)`\}/g)) {
+          const classes = m[1].replace(/\$\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean)
+          const tag = (line.slice(0, m.index).match(/<([A-Za-z][\w.]*)(?![\s\S]*<)/) || [])[1] || ''
+          const icon = classes.filter(isIconFont).length
+          const btn = classes.filter(c => c === 'btn').length
+          const where = `${relative(join(HERE, '..'), file)}:${i + 1}`
+          if (icon > 1 || btn > 1 || (icon && btn)) offenders.push(`${where} merged classes: ${m[1].slice(0, 80)}`)
+          else if (icon && tag && tag !== 'i' && tag !== 'span') offenders.push(`${where} icon font on <${tag}>`)
+        }
+      })
+    }
+    expect(offenders, 'merged class strings leave one element over-styled and its siblings bare').toEqual([])
+  })
 })

@@ -1883,6 +1883,20 @@
   filter: brightness(1.04);
   transform: translateY(-1px);
 }
+/* Agents' pause/resume toggle used these with no rule behind them, so the
+   button fell back to the browser's default grey face. Tinted like danger. */
+.btn-warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning);
+  border-color: var(--color-warning-border);
+}
+.btn-success {
+  background: var(--color-success-light);
+  color: var(--color-success);
+  border-color: var(--color-success-border);
+}
+.btn-warning:hover:not(:disabled),
+.btn-success:hover:not(:disabled) { filter: brightness(1.1); }
 
 .btn-sm {
   padding: 0.35rem var(--spacing-sm);
@@ -14775,4 +14789,113 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
 }
 @media (prefers-reduced-motion: reduce) {
   .chat-mcp-dropdown-menu { animation: none; }
+}
+
+/* ===========================================================================
+   Lists on phones: a table squeezed into "Label: value" cards reads like the
+   desktop table it came from. Shape each row as a list card instead: the
+   first column is the title, the rest are compact details, and a column of
+   buttons becomes the card's action row. Cards align with the page margins.
+   =========================================================================== */
+@media (max-width: 640px) {
+  .table-container:has(> .table--responsive) {
+    margin-inline: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .table--responsive > tbody {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  .table--responsive > tbody > tr {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-lg);
+  }
+  .table--responsive > tbody > tr > td {
+    min-height: 32px;
+    font-size: var(--text-sm);
+  }
+  .table--responsive > tbody > tr > td[data-label]::before {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  /* Title */
+  .table--responsive > tbody > tr > td:first-child {
+    justify-content: flex-start;
+    text-align: left;
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-semibold);
+    padding-bottom: var(--spacing-xs);
+  }
+  .table--responsive > tbody > tr > td:first-child::before { display: none; }
+  /* Action row */
+  .table--responsive > tbody > tr > td:last-child:not(:first-child):has(button, .btn) {
+    justify-content: flex-end;
+    margin-top: var(--spacing-xs);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--color-border-divider);
+  }
+  .table--responsive > tbody > tr > td:last-child:not(:first-child):has(button, .btn)::before { display: none; }
+  .table--responsive > tbody > tr > td:last-child:has(button, .btn) > div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Console strip: lay every pill out as a direct child of one flex row, so
+   no group can sit at a different height (Safari offset the later groups).
+   The divider between groups moves onto each group's first pill. */
+@media (max-width: 639px) {
+  .console-rail .console-group,
+  .console-rail .console-group + .console-group { display: contents; }
+  .console-rail .console-rail-groups { gap: 4px; }
+  .console-rail .console-group + .console-group > .nav-item:first-of-type {
+    position: relative;
+    margin-left: 13px;
+  }
+  .console-rail .console-group + .console-group > .nav-item:first-of-type::before {
+    content: '';
+    position: absolute;
+    left: -9px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--color-border-divider);
+  }
+}
+
+/* Personality Library on phones: one scroller (the page), and no second empty
+   pane under the list asking to "select a personality" that the list's own
+   empty state already explains. */
+@media (max-width: 640px) {
+  .voice-library-shell { min-height: 0; overflow: visible; }
+  .voice-library-list { max-height: none; overflow: visible; }
+  .voice-library-detail:has(> .empty-state) { display: none; }
+}
+
+/* Models / Backends browse lists on phones: the list is the page, so it
+   scrolls with the page instead of inside a 320px box within it. */
+@media (max-width: 639px) {
+  .entity-rail__list,
+  .page--app .entity-rail__list,
+  .models-filters__usecases { max-height: none; overflow: visible; }
+}
+
+/* Keyboard hints are desktop furniture: "Enter to send", "Shift+Enter for a
+   newline" and ⌘K badges describe keys a phone does not have. */
+@media (hover: none) and (pointer: coarse) {
+  .home-input-hint,
+  .chat-recent-strip-kbd,
+  .chats-menu-trigger-kbd,
+  .action-menu__shortcut,
+  .chat-empty-hints > span:nth-child(-n + 2) { display: none !important; }
 }

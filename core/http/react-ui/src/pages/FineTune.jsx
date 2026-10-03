@@ -1042,14 +1042,14 @@ export default function FineTune() {
     <div className="page page--wide">
       <UnsavedChangesGuard when={dirty && showForm && !loading} />
       <PageHeader
-        title={<>Fine-tuning <span className={`badge badge-warning ft-actions btn fas fa-upload btn btn-primary fas fa-${showForm ? 'times' : 'plus'}`}>Experimental</span></>}
+        title={<>Fine-tuning <span className="badge badge-warning">Experimental</span></>}
         supporting="Create and manage fine-tuning jobs"
         actions={
-          <div>
+          <div className="ft-actions">
             <button className="btn btn-secondary" onClick={handleImportConfig}>
               <i className="fas fa-file-import" aria-hidden="true" /> Import config
             </button>
-            <button className="btn btn-secondary" onClick={() => setShowForm(!showForm)}>
+            <button className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'}`} onClick={() => setShowForm(!showForm)}>
               <i className={`fas ${showForm ? 'fa-xmark' : 'fa-plus'}`} aria-hidden="true" />
               {showForm ? 'Cancel' : 'New job'}
             </button>

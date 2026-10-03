@@ -354,66 +354,69 @@ export default function Agents() {
           currentUserId={user?.id}
           itemKey="agents"
           renderGroup={(items, userId) => (
-            <div className={`table-container table text-right agents-name agents-action-group btn btn-sm ${isActive ? 'btn-warning' : 'btn-success'} fas ${isActive ? 'fa-pause' : 'fa-play'} btn btn-secondary btn-sm fas fa-edit btn btn-secondary btn-sm fas fa-comment btn btn-secondary btn-sm fas fa-download btn btn-danger btn-sm fas fa-trash`}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>{t('table.name')}</th>
-                    <th>{t('table.status')}</th>
-                    <th>{t('table.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(items || []).map(a => {
-                    const isActive = a.active === true
-                    return (
-                      <tr key={a.name}>
-                        <td>
-                          <a onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/chat?user_id=${encodeURIComponent(userId)}`)}>
-                            {a.name}
-                          </a>
-                        </td>
-                        <td>{statusBadge(isActive ? 'active' : 'paused')}</td>
-                        <td>
-                          <div>
-                            <button
-                              onClick={() => handlePauseResume(a, userId)}
-                              title={isActive ? t('actions.pause') : t('actions.resume')}
-                            >
-                              <i className={`fas ${isActive ? 'fa-pause' : 'fa-play'}`} aria-hidden="true" />
-                            </button>
-                            <button
-                              onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/edit?user_id=${encodeURIComponent(userId)}`)}
-                              title={t('actions.edit')}
-                            >
-                              <i className="fas fa-pen" aria-hidden="true" />
-                            </button>
-                            <button
-                              onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/chat?user_id=${encodeURIComponent(userId)}`)}
-                              title={t('actions.chat')}
-                            >
-                              <i className="fas fa-comments" aria-hidden="true" />
-                            </button>
-                            <button
-                              onClick={() => handleExport(a.name, userId)}
-                              title={t('actions.export')}
-                            >
-                              <i className="fas fa-file-export" aria-hidden="true" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(a.name, userId)}
-                              title={t('actions.delete')}
-                            >
-                              <i className="fas fa-trash" aria-hidden="true" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <ResponsiveTable>
+              <thead>
+                <tr>
+                  <th>{t('table.name')}</th>
+                  <th>{t('table.status')}</th>
+                  <th className="text-right">{t('table.actions')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(items || []).map(a => {
+                  const isActive = a.active === true
+                  return (
+                    <tr key={a.name}>
+                      <td>
+                        <a className="agents-name" onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/chat?user_id=${encodeURIComponent(userId)}`)}>
+                          {a.name}
+                        </a>
+                      </td>
+                      <td>{statusBadge(isActive ? 'active' : 'paused')}</td>
+                      <td>
+                        <div className="agents-action-group">
+                          <button
+                            className={`btn btn-sm ${isActive ? 'btn-warning' : 'btn-success'}`}
+                            onClick={() => handlePauseResume(a, userId)}
+                            title={isActive ? t('actions.pause') : t('actions.resume')}
+                          >
+                            <i className={`fas ${isActive ? 'fa-pause' : 'fa-play'}`} aria-hidden="true" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/edit?user_id=${encodeURIComponent(userId)}`)}
+                            title={t('actions.edit')}
+                          >
+                            <i className="fas fa-pen" aria-hidden="true" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => navigate(`/app/agents/${encodeURIComponent(a.name)}/chat?user_id=${encodeURIComponent(userId)}`)}
+                            title={t('actions.chat')}
+                          >
+                            <i className="fas fa-comments" aria-hidden="true" />
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => handleExport(a.name, userId)}
+                            title={t('actions.export')}
+                          >
+                            <i className="fas fa-file-export" aria-hidden="true" />
+                          </button>
+                          <button
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDelete(a.name, userId)}
+                            title={t('actions.delete')}
+                          >
+                            <i className="fas fa-trash" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </ResponsiveTable>
           )}
         />
       )}

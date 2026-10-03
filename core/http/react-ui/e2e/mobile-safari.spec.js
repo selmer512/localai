@@ -446,3 +446,72 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
     expect(Math.round(box.y)).toBe(0)
   })
 })
+
+test.describe('mobile polish from device testing', () => {
+  const agents = async (page) => {
+    await page.route('**/api/agents', r => r.fulfill({ json: { agents: ['Filipe', 'OpenCodeAgent'], statuses: { Filipe: true, OpenCodeAgent: false } } }))
+    await page.route('**/api/agents/*/observables', r => r.fulfill({ json: { History: [] } }))
+    await page.goto('/app/agents')
+    await expect(page.locator('.table--responsive > tbody > tr').first()).toBeVisible()
+  }
+
+  test('list rows are cards: title first, actions in their own row, inside the page margins', async ({ page }) => {
+    await agents(page)
+    const card = page.locator('.table--responsive > tbody > tr').first()
+    const title = card.locator('td').first()
+    // The title carries no "Name" label.
+    expect(await title.evaluate(el => getComputedStyle(el, '::before').display)).toBe('none')
+    const actions = card.locator('td').last()
+    expect(await actions.evaluate(el => getComputedStyle(el, '::before').display)).toBe('none')
+    const [t, a] = await Promise.all([title.boundingBox(), actions.boundingBox()])
+    expect(a.y).toBeGreaterThan(t.y + t.height)
+    const [cb, header] = await Promise.all([card.boundingBox(), page.locator('.page-header').boundingBox()])
+    expect(Math.round(cb.x)).toBe(Math.round(header.x))
+  })
+
+  test('pause and resume are styled buttons, not the browser default', async ({ page }) => {
+    await agents(page)
+    const bg = await page.locator('.agents-action-group .btn-warning').first().evaluate(el => getComputedStyle(el).backgroundColor)
+    expect(bg).not.toMatch(/rgb\(2[34]\d, 2[34]\d, 2[34]\d\)/)
+  })
+
+  test('the Fine-tuning badge sits beside the title and the header buttons do not touch', async ({ page }) => {
+    await page.goto('/app/fine-tune')
+    const badge = page.locator('.page-title .badge')
+    await expect(badge).toHaveText(/Experimental/i)
+    const [b, h] = await Promise.all([badge.boundingBox(), page.locator('.page-title').boundingBox()])
+    expect(b.height).toBeLessThan(40)
+    expect(b.y + b.height).toBeLessThanOrEqual(h.y + h.height + 1)
+    const buttons = page.locator('.page-header__meta .btn')
+    const [one, two] = await Promise.all([buttons.nth(0).boundingBox(), buttons.nth(1).boundingBox()])
+    expect(two.x - (one.x + one.width)).toBeGreaterThanOrEqual(6)
+  })
+
+  test('section strip pills share one row across groups', async ({ page }) => {
+    await page.goto('/app/fine-tune')
+    await expect(page.locator('.console-rail .nav-item.active')).toBeVisible()
+    const tops = await page.locator('.console-rail .nav-item').evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
+    expect(tops).toHaveLength(1)
+    expect(await page.locator('.console-rail .console-group').first().evaluate(el => getComputedStyle(el).display)).toBe('contents')
+  })
+
+  test('the personality library has one scroller and no empty detail pane', async ({ page }) => {
+    await page.goto('/app/voice-library')
+    await expect(page.locator('.voice-library-list')).toBeAttached()
+    expect(await page.locator('.voice-library-list').evaluate(el => getComputedStyle(el).overflowY)).toBe('visible')
+    await expect(page.locator('.voice-library-detail')).toBeHidden()
+  })
+
+  test('browse lists scroll with the page, not inside it', async ({ page }) => {
+    await page.goto('/app/models?view=installed')
+    const list = page.locator('.entity-rail__list').first()
+    await expect(list).toBeAttached()
+    expect(await list.evaluate(el => [getComputedStyle(el).overflowY, getComputedStyle(el).maxHeight])).toEqual(['visible', 'none'])
+  })
+
+  test('keyboard hints are not shown on a phone', async ({ page }) => {
+    await page.goto('/app')
+    await expect(page.locator('.home-textarea')).toBeVisible()
+    await expect(page.locator('.home-input-hint')).toBeHidden()
+  })
+})
