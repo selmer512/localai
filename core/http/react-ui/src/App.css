@@ -11877,6 +11877,8 @@ button.collapsible-header:focus-visible {
   color: var(--color-text);
 }
 .talk-check--locked { cursor: not-allowed; color: var(--color-text-secondary); }
+.talk-check__hint { color: var(--color-text-secondary); font-size: var(--text-xs); }
+.talk-check__hint::before { content: '— '; }
 .talk-chip {
   background: var(--color-bg-secondary);
   border-radius: var(--radius-sm);
@@ -14906,4 +14908,23 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
   .chats-menu-trigger-kbd,
   .action-menu__shortcut,
   .chat-empty-hints > span:nth-child(-n + 2) { display: none !important; }
+}
+
+/* Talk on phones: a toggle row is checkbox + label on one line with its
+   explanation underneath, like a settings row, instead of three squeezed
+   columns. The pipeline chip wraps rather than truncating mid-name. */
+@media (max-width: 639px) {
+  .talk-check {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    column-gap: var(--spacing-sm);
+    row-gap: 2px;
+    align-items: center;
+  }
+  .talk-check__label { font-weight: 500; }
+  .talk-check__hint { grid-column: 3; line-height: 1.35; }
+  .talk-check__hint::before { content: none; }
+  .talk-chip { flex-wrap: wrap; }
+  .talk-chip .cell-clip { min-width: 0; flex: 1 1 auto; max-width: none; white-space: normal; overflow-wrap: anywhere; }
+  .talk-chip .ml-auto { margin-left: 0; flex-basis: 100%; }
 }

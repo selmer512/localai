@@ -763,9 +763,9 @@ export default function Talk() {
                   onChange={(e) => setManageMode(e.target.checked)}
                 />
                 <i className="fas fa-user-shield text-primary" />
-                Manage Mode
-                <span className="text-secondary text-xs">
-                  — let the model query LocalAI (models, backends, system info)
+                <span className="talk-check__label">Manage Mode</span>
+                <span className="talk-check__hint">
+                  let the model query LocalAI (models, backends, system info)
                 </span>
               </label>
             )}
@@ -815,9 +815,9 @@ export default function Talk() {
               onChange={(e) => changeAllowInterrupt(e.target.checked)}
             />
             <i className="fas fa-headphones text-primary" />
-            Interrupt while it speaks
-            <span className="text-secondary text-xs">
-              — keeps the mic on during replies; use headphones, or the assistant may hear itself
+            <span className="talk-check__label">Interrupt while it speaks</span>
+            <span className="talk-check__hint">
+              keeps the mic on during replies; use headphones, or the assistant may hear itself
             </span>
           </label>
 

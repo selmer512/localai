@@ -108,3 +108,22 @@ test('desktop keeps barge-in on by default', async ({ page }) => {
   await serverEvent(page, { type: 'response.created', response: { id: 'r1' } })
   expect(await micEnabled(page)).toBe(true)
 })
+
+test.describe('Talk toggles on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
+
+  test('label stays on one line beside the checkbox with the explanation underneath', async ({ page }) => {
+    await fakeWebRTC(page)
+    await page.goto('/app/talk')
+    const row = page.locator('label.talk-check', { hasText: 'Interrupt while it speaks' })
+    const box = await row.locator('input').boundingBox()
+    const label = await row.locator('.talk-check__label').boundingBox()
+    const hint = await row.locator('.talk-check__hint').boundingBox()
+    // One line of label text, vertically aligned with the checkbox.
+    expect(label.height).toBeLessThan(30)
+    expect(Math.abs((label.y + label.height / 2) - (box.y + box.height / 2))).toBeLessThan(8)
+    // Explanation sits below the label and starts where the label starts.
+    expect(hint.y).toBeGreaterThanOrEqual(label.y + label.height - 1)
+    expect(Math.abs(hint.x - label.x)).toBeLessThan(2)
+  })
+})
