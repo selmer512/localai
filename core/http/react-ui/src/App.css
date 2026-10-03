@@ -11851,6 +11851,14 @@ button.collapsible-header:focus-visible {
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-md);
 }
+.talk-mic-paused {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
 .talk-hint {
   background: var(--color-primary-light);
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);

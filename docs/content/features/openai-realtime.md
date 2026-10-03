@@ -459,6 +459,26 @@ Allow the selected UDP port through the host and network firewalls. If LocalAI
 cannot bind it, WebRTC signaling requests return an HTTP 500 error describing
 the bind failure.
 
+#### Echo on phones (Talk page)
+
+On a phone the reply plays through a loudspeaker next to the microphone, and
+mobile browsers (iOS Safari in particular) do not always cancel it. The server
+then hears the assistant's own reply as a new turn and the assistant answers
+itself in a loop. To prevent this, the web UI's **Talk** page pauses the
+microphone while the assistant is replying, plus a short tail for the end of
+the reply to finish playing. The status bar shows **Mic paused** while this is
+active.
+
+The trade-off is that you cannot interrupt the assistant mid-reply. Enable
+**Interrupt while it speaks** on the Talk page to keep the microphone live
+during replies (barge-in). Use headphones when you do. The setting is
+remembered per browser. It is off by default on touch devices and on by default
+on desktops, where browser echo cancellation is reliable.
+
+Clients of your own can do the same: disable the microphone track between
+`response.created` and `response.done`. The server sends `response.done` only
+after the last audio frame.
+
 ## Protocol
 
 The API follows the OpenAI Realtime API protocol for handling sessions, audio buffers, and conversation items.

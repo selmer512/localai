@@ -44,6 +44,25 @@ function upsertAssistant(prev, itemId, text, mode) {
   return upsertEntry(prev, itemId, 'assistant', text, mode)
 }
 
+// How long the mic stays paused after the server finishes sending a reply.
+// The server paces audio in real time and sends response.done after the last
+// frame, so this only has to cover the browser's jitter buffer and output
+// latency (largest on iOS) before the tail of the reply leaves the speaker.
+const ECHO_GUARD_TAIL_MS = 800
+const INTERRUPT_STORAGE_KEY = 'localai-talk-allow-interrupt'
+
+// Phones play the reply through a loudspeaker inches from the mic, and iOS
+// Safari's echo cancellation does not reliably remove it, so the assistant
+// hears itself and answers its own reply. Pausing the mic while it speaks is
+// the safe default there; desktops (and headphones) keep barge-in.
+function defaultAllowInterrupt() {
+  try {
+    const saved = localStorage.getItem(INTERRUPT_STORAGE_KEY)
+    if (saved !== null) return saved === 'true'
+  } catch { /* storage unavailable */ }
+  return !window.matchMedia?.('(pointer: coarse)').matches
+}
+
 export default function Talk() {
   const { addToast } = useOutletContext()
   const navigate = useNavigate()
@@ -96,6 +115,13 @@ export default function Talk() {
   const { isAdmin } = useAuth()
   const [manageMode, setManageMode] = useState(false)
 
+  // Echo guard: when interruptions are off, the mic is paused while the
+  // assistant is replying (see defaultAllowInterrupt).
+  const [allowInterrupt, setAllowInterrupt] = useState(defaultAllowInterrupt)
+  const allowInterruptRef = useRef(allowInterrupt)
+  const [micPaused, setMicPaused] = useState(false)
+  const echoTailTimerRef = useRef(null)
+
   // Diagnostics
   const [diagVisible, setDiagVisible] = useState(false)
 
@@ -120,6 +146,22 @@ export default function Talk() {
     peakFreq: '--', thd: '--', rms: '--', sampleRate: '--',
     packetsRecv: '--', packetsLost: '--', jitter: '--', concealed: '--', raw: '',
   })
+
+  // A disabled track keeps the WebRTC stream alive but sends silence, so the
+  // server's VAD never sees the assistant's own voice as a new turn.
+  const pauseMic = useCallback((paused) => {
+    clearTimeout(echoTailTimerRef.current)
+    echoTailTimerRef.current = null
+    localStreamRef.current?.getAudioTracks().forEach(t => { t.enabled = !paused })
+    setMicPaused(paused)
+  }, [])
+
+  const changeAllowInterrupt = useCallback((allow) => {
+    setAllowInterrupt(allow)
+    allowInterruptRef.current = allow
+    try { localStorage.setItem(INTERRUPT_STORAGE_KEY, String(allow)) } catch { /* storage unavailable */ }
+    if (allow) pauseMic(false)
+  }, [pauseMic])
 
   // Fetch pipeline models on mount
   useEffect(() => {
@@ -253,6 +295,9 @@ export default function Talk() {
         break
       case 'session.updated':
         break
+      case 'response.created':
+        if (!allowInterruptRef.current) pauseMic(true)
+        break
       case 'input_audio_buffer.speech_started':
         updateStatus('listening', 'Hearing you speak...')
         break
@@ -339,14 +384,19 @@ export default function Talk() {
           setTranscript(prev => prev.filter(e => e.id !== id))
         }
         updateStatus('listening', 'Listening...')
+        if (!allowInterruptRef.current) {
+          clearTimeout(echoTailTimerRef.current)
+          echoTailTimerRef.current = setTimeout(() => pauseMic(false), ECHO_GUARD_TAIL_MS)
+        }
         break
       }
       case 'error':
+        pauseMic(false)
         hasErrorRef.current = true
         updateStatus('error', 'Error: ' + (event.error?.message || 'Unknown error'))
         break
     }
-  }, [sendSessionUpdate, updateStatus, handleFunctionCall])
+  }, [sendSessionUpdate, updateStatus, handleFunctionCall, pauseMic])
 
   // ── Connect ──
   const connect = useCallback(async () => {
@@ -363,7 +413,11 @@ export default function Talk() {
     setIsConnected(true)
 
     try {
-      const localStream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      // Ask for the browser's voice processing explicitly: some browsers only
+      // apply echo cancellation when it is requested.
+      const localStream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      })
       localStreamRef.current = localStream
 
       const pc = new RTCPeerConnection({})
@@ -426,6 +480,9 @@ export default function Talk() {
   // ── Disconnect ──
   const disconnect = useCallback(() => {
     stopDiagnostics()
+    clearTimeout(echoTailTimerRef.current)
+    echoTailTimerRef.current = null
+    setMicPaused(false)
     if (dcRef.current) { dcRef.current.close(); dcRef.current = null }
     if (pcRef.current) { pcRef.current.close(); pcRef.current = null }
     if (localStreamRef.current) {
@@ -443,6 +500,7 @@ export default function Talk() {
   useEffect(() => {
     return () => {
       stopDiagnostics()
+      clearTimeout(echoTailTimerRef.current)
       if (dcRef.current) dcRef.current.close()
       if (pcRef.current) pcRef.current.close()
       if (localStreamRef.current) localStreamRef.current.getTracks().forEach(t => t.stop())
@@ -640,6 +698,11 @@ export default function Talk() {
           >
             <i className={statusStyle.icon} style={{ color: statusStyle.color }} />
             <span className="fw-medium" style={{ color: statusStyle.color }}>{statusText}</span>
+            {micPaused && status !== 'error' && (
+              <span className="talk-mic-paused ml-auto" data-testid="talk-mic-paused">
+                <i className="fas fa-microphone-slash" /> Mic paused
+              </span>
+            )}
             {status === 'error' && (
               <a href="/app/traces?tab=backend" className="chat-error-trace-link ml-auto">
                 <i className="fas fa-wave-square" /> View traces
@@ -744,6 +807,19 @@ export default function Talk() {
               </button>
             </div>
           )}
+
+          <label className="talk-check mb-xs">
+            <input
+              type="checkbox"
+              checked={allowInterrupt}
+              onChange={(e) => changeAllowInterrupt(e.target.checked)}
+            />
+            <i className="fas fa-headphones text-primary" />
+            Interrupt while it speaks
+            <span className="text-secondary text-xs">
+              — keeps the mic on during replies; use headphones, or the assistant may hear itself
+            </span>
+          </label>
 
           {/* Session settings */}
           <details className="talk-details mb-md">
