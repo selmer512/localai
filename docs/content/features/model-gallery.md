@@ -155,6 +155,16 @@ When browsing the gallery or importing a model by URI, LocalAI can show **estima
 - **Hardware fit indicator**: When your system reports GPU or RAM capacity, the gallery shows whether the estimated VRAM fits (green) or may not fit (red) using a 95% headroom rule.
 - Estimates are best-effort and may be missing if the server does not support HEAD/Range or the request times out.
 
+## Searching Hugging Face from the web UI
+
+The gallery is curated, so it does not list every model on the Hugging Face Hub. To look beyond it, open **Models → Explore** and switch the source from **LocalAI gallery** to **Hugging Face**.
+
+- **Filters**: free-text search, a task (chat, vision, speech to text, text to speech, image, embeddings), a format (GGUF by default, or Safetensors, ONNX, or any) and a sort order (most downloaded, trending, most liked, newest). Each filter maps directly to the Hub's own search, so results and ranking match huggingface.co.
+- **Importing**: **Import** opens [Import Model](#how-to-install-a-model-not-part-of-a-gallery) with `huggingface://owner/repo` filled in. The importer detects the backend and picks the files, and asks you to choose when a repository offers several builds. A repository with no format LocalAI supports cannot be imported. Gated repositories (marked **Gated**) also need you to have accepted their terms on huggingface.co and an `HF_TOKEN` set on the server.
+- **Where the search runs**: your browser queries `huggingface.co` directly, not through LocalAI. The device you browse from needs internet access, and your search terms are sent to Hugging Face. The LocalAI server only contacts Hugging Face when you import.
+
+You can also link straight to a search: `/app/models?source=hf&q=parakeet`. The Import Model page accepts `?uri=` to start with a repository already filled in.
+
 ## Useful Links and resources
 
 - [Open LLM Leaderboard](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard) - here you can find a list of the most performing models on the Open LLM benchmark. Keep in mind models compatible with LocalAI must be quantized in the `gguf` format.

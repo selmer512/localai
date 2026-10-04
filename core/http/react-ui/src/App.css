@@ -14928,3 +14928,92 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
   .talk-chip .cell-clip { min-width: 0; flex: 1 1 auto; max-width: none; white-space: normal; overflow-wrap: anywhere; }
   .talk-chip .ml-auto { margin-left: 0; flex-basis: 100%; }
 }
+
+/* Models → Explore source switch and the Hugging Face Hub search. */
+.models-source { margin-bottom: var(--spacing-md); }
+.hf-search__sort { flex: 0 0 auto; }
+.hf-search__sort select { min-width: 10rem; }
+.hf-search__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
+}
+.hf-search__note {
+  margin: var(--spacing-sm) 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.hf-search__loading {
+  padding: var(--spacing-xl) 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+.hf-results {
+  list-style: none;
+  margin: var(--spacing-md) 0 0;
+  padding: 0;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.hf-results[aria-busy="true"] { opacity: 0.6; }
+.hf-result {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+.hf-result + .hf-result { border-top: 1px solid var(--color-border-subtle); }
+.hf-result__main { flex: 1; min-width: 0; }
+.hf-result__name { display: flex; align-items: baseline; gap: var(--spacing-sm); min-width: 0; }
+.hf-result__repo {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  overflow-wrap: anywhere;
+}
+.hf-result__owner {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hf-result__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-xs) var(--spacing-md);
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.hf-result__actions { display: flex; gap: var(--spacing-xs); flex: 0 0 auto; }
+.hf-result__task { color: var(--color-text-primary); }
+.hf-result__task::first-letter { text-transform: uppercase; }
+.hf-search__more { display: flex; justify-content: center; margin-top: var(--spacing-md); }
+
+@media (max-width: 639px) {
+  /* The switch spans the width like a native segmented control. */
+  .models-source { display: flex; }
+  .models-source .segmented__item { flex: 1; justify-content: center; }
+  .hf-search__sort select { min-width: 0; width: 100%; }
+  /* Chip groups become single rows you swipe sideways, so the filters take
+     two short rows instead of the whole first screen. They bleed to the
+     screen edge to show there is more to swipe to. */
+  .hf-search__chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--spacing-md));
+    padding-inline: var(--spacing-md);
+  }
+  .hf-search__chips::-webkit-scrollbar { display: none; }
+  .hf-search__chips .filter-btn { flex: 0 0 auto; }
+  /* Repo name on its own line with the owner under it; the actions get a
+     row of their own so Import is a full-width, thumb-sized target. */
+  .hf-result { flex-direction: column; align-items: stretch; gap: var(--spacing-sm); padding: var(--spacing-md); }
+  .hf-result__name { flex-direction: column; gap: 2px; }
+  .hf-result__actions .btn-primary { flex: 1; justify-content: center; }
+}

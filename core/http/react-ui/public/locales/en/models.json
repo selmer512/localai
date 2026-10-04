@@ -304,5 +304,48 @@
         "cta": "Create a failover chain"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "Where to look",
+    "sourceGallery": "LocalAI gallery",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "Search Hugging Face models…",
+    "sortLabel": "Sort by",
+    "taskLabel": "Task",
+    "formatLabel": "Format",
+    "note": "Searches huggingface.co directly from this device. Import works out the backend and files; repos without a supported format can't be imported.",
+    "loading": "Searching Hugging Face…",
+    "errorTitle": "Couldn't reach Hugging Face",
+    "errorText": "This device needs internet access to search the Hub. Check the connection and try again.",
+    "retry": "Try again",
+    "emptyTitle": "No models found",
+    "emptyText": "Try a different search, or set Task or Format to Any.",
+    "gated": "Gated",
+    "downloads": "Downloads",
+    "likes": "Likes",
+    "viewOnHub": "Open {{name}} on Hugging Face",
+    "importAction": "Import",
+    "loadMore": "Load more",
+    "formats": {
+      "any": "Any format",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "All tasks",
+      "chat": "Chat",
+      "vision": "Vision",
+      "speechToText": "Speech to text",
+      "textToSpeech": "Text to speech",
+      "image": "Image",
+      "embeddings": "Embeddings"
+    },
+    "sort": {
+      "downloads": "Most downloaded",
+      "trending": "Trending",
+      "likes": "Most liked",
+      "newest": "Newest"
+    }
   }
 }

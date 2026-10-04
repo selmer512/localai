@@ -300,5 +300,48 @@
         "cta": "Buat rantai failover"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "Tempat mencari",
+    "sourceGallery": "Galeri LocalAI",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "Cari model Hugging Face…",
+    "sortLabel": "Urutkan",
+    "taskLabel": "Tugas",
+    "formatLabel": "Format",
+    "note": "Mencari di huggingface.co langsung dari perangkat ini. Impor akan menentukan backend dan file; repositori tanpa format yang didukung tidak dapat diimpor.",
+    "loading": "Mencari di Hugging Face…",
+    "errorTitle": "Tidak dapat terhubung ke Hugging Face",
+    "errorText": "Perangkat ini memerlukan akses internet untuk mencari di Hub. Periksa koneksi lalu coba lagi.",
+    "retry": "Coba lagi",
+    "emptyTitle": "Model tidak ditemukan",
+    "emptyText": "Coba pencarian lain, atau atur Tugas atau Format ke Semua.",
+    "gated": "Akses terbatas",
+    "downloads": "Unduhan",
+    "likes": "Suka",
+    "viewOnHub": "Buka {{name}} di Hugging Face",
+    "importAction": "Impor",
+    "loadMore": "Muat lebih banyak",
+    "formats": {
+      "any": "Semua format",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "Semua tugas",
+      "chat": "Obrolan",
+      "vision": "Visi",
+      "speechToText": "Suara ke teks",
+      "textToSpeech": "Teks ke suara",
+      "image": "Gambar",
+      "embeddings": "Embedding"
+    },
+    "sort": {
+      "downloads": "Paling banyak diunduh",
+      "trending": "Sedang tren",
+      "likes": "Paling disukai",
+      "newest": "Terbaru"
+    }
   }
 }

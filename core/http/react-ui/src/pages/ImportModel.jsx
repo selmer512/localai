@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { modelsApi, backendsApi } from '../utils/api'
 import { formatBytes } from '../utils/format'
@@ -123,14 +123,19 @@ export default function ImportModel() {
   // document to write. These are genuinely different inputs, unlike the
   // Simple/Power modes they replace, which were the same form at two
   // different lengths.
+  // ?uri= arrives from the Hugging Face search on the Models page: the user
+  // already picked the repo, so open on the source form with it filled in.
+  const [searchParams] = useSearchParams()
+  const presetUri = searchParams.get('uri') || ''
   const [tab, setTab] = useState(() => {
+    if (presetUri) return 'source'
     try { return localStorage.getItem('import-form-tab') === 'yaml' ? 'yaml' : 'source' } catch { return 'source' }
   })
   const [showOptions, setShowOptions] = useState(() => {
     try { return localStorage.getItem('import-form-options') === 'open' } catch { return false }
   })
 
-  const [importUri, setImportUri] = useState('')
+  const [importUri, setImportUri] = useState(presetUri)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [yamlContent, setYamlContent] = useState(DEFAULT_YAML)
   const [estimate, setEstimate] = useState(null)

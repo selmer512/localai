@@ -93,10 +93,27 @@ function ConsoleLayoutInner({ config }) {
   const groupsRef = useRef(null)
   useEffect(() => {
     const strip = groupsRef.current
-    if (!strip || strip.scrollWidth <= strip.clientWidth) return
-    const active = strip.querySelector('.nav-item.active')
-    if (!active) return
-    strip.scrollLeft = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2
+    if (!strip) return
+    const center = () => {
+      if (strip.scrollWidth <= strip.clientWidth) return
+      const active = strip.querySelector('.nav-item.active')
+      if (!active) return
+      strip.scrollLeft = active.offsetLeft - (strip.clientWidth - active.offsetWidth) / 2
+    }
+    center()
+    // Pill widths settle after first paint (icon font, labels arriving), which
+    // moves the active pill; follow it until the user takes over the strip.
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(center)
+    for (const el of strip.children) observer.observe(el)
+    const stop = () => observer.disconnect()
+    strip.addEventListener('pointerdown', stop, { once: true })
+    strip.addEventListener('wheel', stop, { once: true, passive: true })
+    return () => {
+      observer.disconnect()
+      strip.removeEventListener('pointerdown', stop)
+      strip.removeEventListener('wheel', stop)
+    }
   }, [location.pathname, features])
 
   const toggleRailCollapsed = () => {

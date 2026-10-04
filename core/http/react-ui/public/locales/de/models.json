@@ -287,5 +287,48 @@
         "cta": "Failover-Kette erstellen"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "Wo suchen",
+    "sourceGallery": "LocalAI-Galerie",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "Hugging-Face-Modelle durchsuchen…",
+    "sortLabel": "Sortieren nach",
+    "taskLabel": "Aufgabe",
+    "formatLabel": "Format",
+    "note": "Durchsucht huggingface.co direkt von diesem Gerät aus. Der Import ermittelt Backend und Dateien; Repositories ohne unterstütztes Format können nicht importiert werden.",
+    "loading": "Hugging Face wird durchsucht…",
+    "errorTitle": "Hugging Face nicht erreichbar",
+    "errorText": "Dieses Gerät braucht Internetzugang, um den Hub zu durchsuchen. Prüfe die Verbindung und versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "emptyTitle": "Keine Modelle gefunden",
+    "emptyText": "Versuche eine andere Suche oder stelle Aufgabe oder Format auf Alle.",
+    "gated": "Zugriffsbeschränkt",
+    "downloads": "Downloads",
+    "likes": "Likes",
+    "viewOnHub": "{{name}} auf Hugging Face öffnen",
+    "importAction": "Importieren",
+    "loadMore": "Mehr laden",
+    "formats": {
+      "any": "Alle Formate",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "Alle Aufgaben",
+      "chat": "Chat",
+      "vision": "Bildverständnis",
+      "speechToText": "Sprache zu Text",
+      "textToSpeech": "Text zu Sprache",
+      "image": "Bild",
+      "embeddings": "Embeddings"
+    },
+    "sort": {
+      "downloads": "Meiste Downloads",
+      "trending": "Im Trend",
+      "likes": "Meiste Likes",
+      "newest": "Neueste"
+    }
   }
 }

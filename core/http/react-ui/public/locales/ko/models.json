@@ -271,5 +271,48 @@
         "cta": "페일오버 체인 만들기"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "검색 위치",
+    "sourceGallery": "LocalAI 갤러리",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "Hugging Face 모델 검색…",
+    "sortLabel": "정렬 기준",
+    "taskLabel": "작업",
+    "formatLabel": "형식",
+    "note": "이 기기에서 huggingface.co를 직접 검색합니다. 가져오기 시 백엔드와 파일을 자동으로 결정하며, 지원되는 형식이 없는 저장소는 가져올 수 없습니다.",
+    "loading": "Hugging Face 검색 중…",
+    "errorTitle": "Hugging Face에 연결할 수 없습니다",
+    "errorText": "Hub를 검색하려면 이 기기가 인터넷에 연결되어 있어야 합니다. 연결을 확인한 뒤 다시 시도하세요.",
+    "retry": "다시 시도",
+    "emptyTitle": "모델을 찾을 수 없습니다",
+    "emptyText": "다른 검색어를 사용하거나 작업 또는 형식을 전체로 설정하세요.",
+    "gated": "접근 제한",
+    "downloads": "다운로드",
+    "likes": "좋아요",
+    "viewOnHub": "Hugging Face에서 {{name}} 열기",
+    "importAction": "가져오기",
+    "loadMore": "더 보기",
+    "formats": {
+      "any": "모든 형식",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "모든 작업",
+      "chat": "채팅",
+      "vision": "비전",
+      "speechToText": "음성→텍스트",
+      "textToSpeech": "텍스트→음성",
+      "image": "이미지",
+      "embeddings": "임베딩"
+    },
+    "sort": {
+      "downloads": "다운로드순",
+      "trending": "인기 급상승",
+      "likes": "좋아요순",
+      "newest": "최신순"
+    }
   }
 }

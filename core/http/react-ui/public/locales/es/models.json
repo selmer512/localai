@@ -287,5 +287,48 @@
         "cta": "Crear una cadena de failover"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "Dónde buscar",
+    "sourceGallery": "Galería de LocalAI",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "Buscar modelos en Hugging Face…",
+    "sortLabel": "Ordenar por",
+    "taskLabel": "Tarea",
+    "formatLabel": "Formato",
+    "note": "Busca en huggingface.co directamente desde este dispositivo. La importación determina el backend y los archivos; los repositorios sin un formato compatible no se pueden importar.",
+    "loading": "Buscando en Hugging Face…",
+    "errorTitle": "No se pudo conectar con Hugging Face",
+    "errorText": "Este dispositivo necesita acceso a internet para buscar en el Hub. Revisa la conexión e inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "emptyTitle": "No se encontraron modelos",
+    "emptyText": "Prueba otra búsqueda o pon Tarea o Formato en Cualquiera.",
+    "gated": "Acceso restringido",
+    "downloads": "Descargas",
+    "likes": "Me gusta",
+    "viewOnHub": "Abrir {{name}} en Hugging Face",
+    "importAction": "Importar",
+    "loadMore": "Cargar más",
+    "formats": {
+      "any": "Cualquier formato",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "Todas las tareas",
+      "chat": "Chat",
+      "vision": "Visión",
+      "speechToText": "Voz a texto",
+      "textToSpeech": "Texto a voz",
+      "image": "Imagen",
+      "embeddings": "Embeddings"
+    },
+    "sort": {
+      "downloads": "Más descargados",
+      "trending": "Tendencia",
+      "likes": "Más valorados",
+      "newest": "Más recientes"
+    }
   }
 }

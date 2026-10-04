@@ -287,5 +287,48 @@
         "cta": "创建故障转移链"
       }
     }
+  },
+  "hf": {
+    "sourceLabel": "搜索来源",
+    "sourceGallery": "LocalAI 模型库",
+    "sourceHub": "Hugging Face",
+    "searchPlaceholder": "搜索 Hugging Face 模型…",
+    "sortLabel": "排序方式",
+    "taskLabel": "任务",
+    "formatLabel": "格式",
+    "note": "直接从此设备搜索 huggingface.co。导入时会自动确定后端和文件；没有受支持格式的仓库无法导入。",
+    "loading": "正在搜索 Hugging Face…",
+    "errorTitle": "无法连接 Hugging Face",
+    "errorText": "此设备需要联网才能搜索 Hub。请检查网络连接后重试。",
+    "retry": "重试",
+    "emptyTitle": "未找到模型",
+    "emptyText": "请尝试其他搜索词，或将任务或格式设为“全部”。",
+    "gated": "需申请访问",
+    "downloads": "下载量",
+    "likes": "点赞数",
+    "viewOnHub": "在 Hugging Face 上打开 {{name}}",
+    "importAction": "导入",
+    "loadMore": "加载更多",
+    "formats": {
+      "any": "全部格式",
+      "gguf": "GGUF",
+      "safetensors": "Safetensors",
+      "onnx": "ONNX"
+    },
+    "tasks": {
+      "any": "全部任务",
+      "chat": "对话",
+      "vision": "视觉",
+      "speechToText": "语音转文字",
+      "textToSpeech": "文字转语音",
+      "image": "图像",
+      "embeddings": "向量嵌入"
+    },
+    "sort": {
+      "downloads": "下载最多",
+      "trending": "热门",
+      "likes": "点赞最多",
+      "newest": "最新"
+    }
   }
 }

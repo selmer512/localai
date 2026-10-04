@@ -13,6 +13,7 @@ import PageHeader from '../components/PageHeader'
 import GalleryLoader from '../components/GalleryLoader'
 import Toggle from '../components/Toggle'
 import RecommendedModels from '../components/RecommendedModels'
+import HuggingFaceSearch from '../components/HuggingFaceSearch'
 import SplitView from '../components/split/SplitView'
 import EntityRail from '../components/split/EntityRail'
 import InstalledModels, { ModelLifecycleDetailShell, modelUseCases } from './InstalledModels'
@@ -147,6 +148,9 @@ export default function Models() {
   const { resources } = useResources()
   const [searchParams, setSearchParams] = useSearchParams()
   const activeView = searchParams.get('view') === 'installed' ? 'installed' : 'explore'
+  // Where Explore looks: the curated gallery, or the Hugging Face Hub as a
+  // whole. Kept in the URL so returning from the importer lands back here.
+  const source = searchParams.get('source') === 'hf' ? 'hf' : 'gallery'
   const installedState = ['running', 'idle', 'disabled', 'pinned', 'distributed'].includes(searchParams.get('state'))
     ? searchParams.get('state')
     : 'all'
@@ -630,7 +634,9 @@ export default function Models() {
           was just repeating them from a distance. */}
       <div className="view-bar">
         <h1 className="view-bar__title">{t('lifecycle.title')}</h1>
-        <span className="view-bar__count">{t('rail.showingCount', { shown: visibleModels.length, total: stats.total })}</span>
+        {source === 'gallery' && (
+          <span className="view-bar__count">{t('rail.showingCount', { shown: visibleModels.length, total: stats.total })}</span>
+        )}
         <div className="view-bar__actions">
           <button className="btn btn-secondary btn-sm" onClick={() => navigate('/app/model-editor', { state: fromState(location, t('models')) })}>
             <i className="fas fa-plus" /> {t('actions.addModel')}
@@ -643,6 +649,33 @@ export default function Models() {
 
       <ModelsLifecycleNav activeView={activeView} searchParams={searchParams} t={t} />
 
+      <div role="radiogroup" aria-label={t('hf.sourceLabel')} className="segmented models-source">
+        {[
+          { key: 'gallery', icon: 'fa-layer-group', label: t('hf.sourceGallery') },
+          { key: 'hf', icon: 'fa-face-smile', label: t('hf.sourceHub') },
+        ].map(o => (
+          <button
+            key={o.key}
+            type="button"
+            role="radio"
+            aria-checked={source === o.key}
+            className={`segmented__item${source === o.key ? ' is-active' : ''}`}
+            onClick={() => setSearchParams(previous => {
+              const next = new URLSearchParams(previous)
+              if (o.key === 'hf') next.set('source', 'hf')
+              else next.delete('source')
+              next.delete('model')
+              return next
+            })}
+          >
+            <i className={`fas ${o.icon}`} aria-hidden="true" /> {o.label}
+          </button>
+        ))}
+      </div>
+
+      {source === 'hf' ? (
+        <HuggingFaceSearch query={search} onQueryChange={handleSearch} />
+      ) : <>
       {/* Filters, in three deliberate bands.
           1. Query scope: free-text search plus the backend select. The backend
              select leads the taxonomy row rather than trailing it because
@@ -951,6 +984,7 @@ export default function Models() {
           }
         />
       )}
+      </>}
 
     </div>
   )
