@@ -66,13 +66,73 @@ test.describe('phone app shell', () => {
   test('the light theme carries through the shell', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('localai-theme', 'light'))
     await page.goto('/app/more')
-    const [cell, ground] = await Promise.all([
-      page.locator('.more-page section > div').first().evaluate(el => getComputedStyle(el).backgroundColor),
-      page.evaluate(() => getComputedStyle(document.body).backgroundColor),
-    ])
     // Light cells are white on a pale ground, not the dark theme's navy.
-    expect(cell).toBe('rgb(255, 255, 255)')
-    expect(ground).not.toBe('rgb(13, 17, 23)')
+    // Polled: the page background eases between themes.
+    await expect.poll(() => page.locator('.more-page section > div').first().evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(255, 255, 255)')
+    await expect.poll(() => page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(247, 249, 252)')
+  })
+})
+
+test.describe('phone pages read and flow like an app', () => {
+  test.use(phone)
+
+  // Tab labels (11px, iOS uses 10) and badges (12px) are the only text
+  // allowed under the 13px iOS caption size.
+  for (const path of ['/app', '/app/models', '/app/backends', '/app/operate', '/app/nodes', '/app/talk', '/app/fine-tune', '/app/image', '/app/activity', '/app/more']) {
+    test(`no body text under 13px on ${path}`, async ({ page }) => {
+      await page.goto(path)
+      await page.waitForTimeout(800)
+      const small = await page.evaluate(() => {
+        const out = []
+        const walker = document.createTreeWalker(document.querySelector('.main-content-inner'), NodeFilter.SHOW_TEXT)
+        let n
+        while ((n = walker.nextNode())) {
+          const el = n.parentElement
+          if (!n.textContent.trim() || !el || !el.offsetParent) continue
+          if (el.closest('.badge, .sr-only, .tw\\:sr-only, code, pre, kbd, [aria-hidden="true"], .toast-container')) continue
+          const r = el.getBoundingClientRect()
+          if (r.width < 2 || r.height < 2) continue
+          const fs = parseFloat(getComputedStyle(el).fontSize)
+          if (fs < 13) out.push(`${el.className || el.tagName} ${fs}px "${n.textContent.trim().slice(0, 20)}"`)
+        }
+        return out
+      })
+      expect(small).toEqual([])
+    })
+  }
+
+  test('page actions sit in one row with the primary action first', async ({ page }) => {
+    await page.goto('/app/fine-tune')
+    await expect(page.locator('.page-header__meta .btn').first()).toBeVisible()
+    const tops = await page.locator('.page-header__meta .btn').evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
+    expect(tops).toHaveLength(1)
+  })
+
+  test('an empty state does not repeat the header\'s secondary actions', async ({ page }) => {
+    await page.goto('/app/fine-tune')
+    const empty = page.locator('.empty-state')
+    await expect(empty).toBeVisible()
+    await expect(empty.locator('.btn-secondary:visible')).toHaveCount(0)
+    await expect(empty).toHaveCSS('text-align', 'center')
+  })
+
+  test('Talk options are switches and Connect stays docked above the tab bar', async ({ page }) => {
+    await page.goto('/app/talk')
+    const sw = page.getByRole('checkbox', { name: /Interrupt while it speaks/ })
+    await expect(sw).toHaveCSS('width', '51px')
+    await expect(sw).toHaveCSS('appearance', 'none')
+    await expect(page.locator('.talk-col .hstack--between')).toHaveCSS('position', 'sticky')
+  })
+
+  test('chat bubbles carry the speaker, so there is no "You" label', async ({ page }) => {
+    await page.goto('/app/chat')
+    await page.evaluate(() => {
+      const user = document.createElement('div')
+      user.className = 'chat-message chat-message-user'
+      user.innerHTML = '<div class="chat-message-bubble"><span class="chat-message-model">You</span><div class="chat-message-content">Hi</div></div>'
+      document.body.appendChild(user)
+    })
+    await expect(page.locator('.chat-message-user .chat-message-model')).toBeHidden()
   })
 })
 

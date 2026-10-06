@@ -485,9 +485,13 @@ test.describe('mobile polish from device testing', () => {
     const [b, h] = await Promise.all([badge.boundingBox(), page.locator('.page-title').boundingBox()])
     expect(b.height).toBeLessThan(40)
     expect(b.y + b.height).toBeLessThanOrEqual(h.y + h.height + 1)
-    const buttons = page.locator('.page-header__meta .btn')
-    const [one, two] = await Promise.all([buttons.nth(0).boundingBox(), buttons.nth(1).boundingBox()])
-    expect(two.x - (one.x + one.width)).toBeGreaterThanOrEqual(6)
+    // Measured in visual order: on a phone the primary action is drawn first.
+    const boxes = (await page.locator('.page-header__meta .btn').evaluateAll(els => els.map(el => {
+      const r = el.getBoundingClientRect(); return { x: r.x, w: r.width }
+    }))).sort((a, b) => a.x - b.x)
+    expect(boxes[1].x - (boxes[0].x + boxes[0].w)).toBeGreaterThanOrEqual(6)
+    // The primary action leads.
+    await expect(page.locator('.page-header__meta .btn-primary')).toHaveCSS('order', '-1')
   })
 
   test('the navigation bar shows the title once the large title scrolls under it', async ({ page }) => {

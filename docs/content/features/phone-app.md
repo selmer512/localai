@@ -25,6 +25,14 @@ Pages you open from More, such as Traces or Settings, show their content straigh
 - **Models** uses a segmented control for Explore and Installed, and for the gallery or a [Hugging Face search]({{%relref "features/model-gallery#searching-hugging-face-from-the-web-ui" %}}). A model opens as a details page with its size and fit summarised under the name.
 - **Pickers** (model, backend and other searchable lists) open as a sheet from the bottom of the screen.
 
+## Controls and text
+
+- **Page actions** (for example New job, Import, Create agent) sit in one row of rounded buttons under the title, with the main action first and filled.
+- **On/off options** appear as iOS switches, filters such as Fits in GPU as rows in a settings group, and short tab rows as segmented controls.
+- **Lists** (agents, usage, jobs and similar) appear as a grouped list with one row per item.
+- **Text** follows the iOS sizes: 17px body, 15px secondary text and 13px captions. Only tab bar labels and status badges are smaller.
+- **Talk** keeps its Connect button docked above the tab bar, so it stays in reach while you scroll through the options.
+
 ## Themes
 
 The phone layout follows the light or dark theme you choose, from **More → Dark mode** or the theme button on the desktop.

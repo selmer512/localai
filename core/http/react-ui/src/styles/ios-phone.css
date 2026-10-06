@@ -497,3 +497,408 @@
   .mobile-tabbar__item:hover { color: var(--color-text-tertiary); }
   .mobile-tabbar__item.active:hover { color: var(--color-primary); }
 }
+
+/* ===========================================================================
+   iOS type scale on phones. LocalAI's tokens are desktop-sized (11 / 13 / 14
+   px); iOS reads at caption 13, subhead 15, body 17. Moving the tokens moves
+   every component built on them.
+   =========================================================================== */
+@media (max-width: 639px) {
+  :root, [data-theme="dark"], [data-theme="light"] {
+    --text-xs: 0.8125rem;   /* 13 — caption / footnote */
+    --text-sm: 0.9375rem;   /* 15 — subhead */
+    --text-base: 1.0625rem; /* 17 — body */
+    --text-lg: 1.1875rem;   /* 19 */
+    --text-xl: 1.375rem;    /* 22 — title 2 */
+  }
+  body { font-size: 17px; }
+
+  /* Chat focus mode fades the header on desktop; on a phone the bar is the
+     screen's title and stays fully legible. */
+  .chat--focus .chat-header-title, .chat--focus .chat-header-shield { opacity: 1 !important; }
+  .chat-header-model, .chat-header-model * { opacity: 1 !important; filter: none !important; text-shadow: none !important; }
+}
+
+/* ===========================================================================
+   Pass 2 (device feedback): page actions, forms, lists and type on phones.
+   =========================================================================== */
+@media (max-width: 639px) {
+  /* More replaces the sidebar drawer on phones. */
+  .sidebar, .sidebar-overlay { display: none !important; }
+  .mobile-tabbar__label { font-size: 11px; }
+
+  /* --- Page header actions: one row of iOS capsules ----------------------
+     Every page names this container differently; they all get one look:
+     primary filled and first, the rest tinted, scrolling sideways if long. */
+  :is(.header-actions, .skills-header-actions, .ft-actions, .view-bar__actions, .page-header__meta, .me-head > .hstack) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 4px 0 0 !important;
+    padding: 0 !important;
+    justify-content: flex-start !important;
+  }
+  :is(.header-actions, .skills-header-actions, .ft-actions, .view-bar__actions, .page-header__meta, .me-head > .hstack)::-webkit-scrollbar { display: none; }
+  :is(.header-actions, .skills-header-actions, .ft-actions, .view-bar__actions, .page-header__meta, .me-head > .hstack) > .btn {
+    flex: none;
+    min-height: 36px !important;
+    padding: 0 16px !important;
+    border-radius: 18px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border: 0 !important;
+  }
+  :is(.header-actions, .skills-header-actions, .ft-actions, .view-bar__actions, .page-header__meta, .me-head > .hstack) > .btn-primary { order: -1; }
+  :is(.header-actions, .skills-header-actions, .ft-actions, .view-bar__actions, .page-header__meta, .me-head > .hstack) > :is(.btn-secondary, .btn-ghost) {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary) !important;
+  }
+  /* The headers that wrapped title and actions side by side now stack. */
+  .page-header--editorial, .view-bar, .me-head { flex-direction: column; align-items: stretch !important; }
+  .view-bar__title { margin: 0; }
+  /* A badge beside a large title (Experimental) sits on its baseline. */
+  [data-ios-large-title] + .badge, [data-ios-large-title] .badge { vertical-align: middle; font-size: 12px !important; }
+
+  /* --- Empty states: iOS "content unavailable" ---------------------------
+     Centred, and without repeating the header's secondary actions. */
+  .empty-state {
+    align-items: center !important;
+    text-align: center !important;
+    padding: 40px 16px !important;
+    background: transparent !important;
+  }
+  .empty-state-title { font-size: 22px !important; }
+  .empty-state-text { font-size: 15px !important; color: var(--color-text-muted); }
+  .empty-state-icon { font-size: 40px; }
+  :is(.empty-state, .empty-state__actions) { gap: 12px; }
+  .empty-state:has(.btn-primary) .btn-secondary { display: none !important; }
+  .empty-state .btn { min-height: 44px; border-radius: 22px; padding: 0 22px; font-size: 17px; }
+
+  /* --- Checkboxes become iOS switches ------------------------------------ */
+  input[type="checkbox"]:not(.toggle input):not([role="switch"]):not(table input) {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: none;
+    position: relative;
+    width: 51px;
+    height: 31px;
+    margin: 0;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-toggle-off, var(--color-border-default));
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  input[type="checkbox"]:not(.toggle input):not([role="switch"]):not(table input)::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25), 0 1px 1px rgba(0, 0, 0, 0.16);
+    transition: transform 0.2s;
+  }
+  input[type="checkbox"]:not(.toggle input):not([role="switch"]):not(table input):checked { background: var(--color-success); }
+  input[type="checkbox"]:not(.toggle input):not([role="switch"]):not(table input):checked::after { transform: translateX(20px); }
+  input[type="checkbox"]:not(.toggle input):not([role="switch"]):not(table input):disabled { opacity: 0.4; }
+
+  /* --- Disclosure sections as iOS rows ----------------------------------- */
+  details > summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    font-size: 17px;
+    list-style: none;
+    cursor: pointer;
+  }
+  details > summary::-webkit-details-marker { display: none; }
+  details > summary::after {
+    content: '\f054';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    font-size: 13px;
+    margin-left: auto;
+    color: var(--color-text-tertiary);
+    transition: transform 0.2s;
+  }
+  details[open] > summary::after { transform: rotate(90deg); }
+
+  /* --- Filter toggles (Models, Backends…) as an iOS settings group -------- */
+  .filter-bar-group__toggle {
+    display: flex !important;
+    align-items: center;
+    gap: 12px !important;
+    min-height: 52px;
+    padding: 0 16px !important;
+    background: var(--color-bg-secondary);
+    border-bottom: 0.5px solid var(--color-border-subtle);
+    font-size: 17px !important;
+    color: var(--color-text-primary) !important;
+  }
+  .filter-bar-group__toggle > i { order: -1; width: 22px; text-align: center; color: var(--color-primary); font-size: 17px; }
+  .filter-bar-group__toggle > .toggle { order: 1; margin-left: auto; }
+  .models-filters__refine { display: flex !important; flex-direction: column; gap: 0 !important; border: 0 !important; padding: 0 !important; }
+  .models-filters__refine-label {
+    font-family: var(--font-sans) !important;
+    font-size: 13px !important;
+    letter-spacing: 0.02em !important;
+    color: var(--color-text-tertiary);
+    padding: 0 16px 7px;
+  }
+  .models-filters__refine > :is(.filter-bar-group__toggle, .models-filters__context):nth-child(2),
+  .models-filters__refine > .models-filters__refine-label + * { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+  .models-filters__refine > :last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-bottom: 0; }
+  .models-filters__context {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px !important;
+    padding: 12px 16px !important;
+    background: var(--color-bg-secondary);
+    font-size: 17px !important;
+  }
+  .models-filters__context label { font-size: 17px !important; color: var(--color-text-primary); display: inline-flex; align-items: center; gap: 12px; }
+  .models-filters__context label i { color: var(--color-primary); width: 22px; text-align: center; }
+  .models-filters__context input[type="range"] { flex: 1 1 100%; order: 3; }
+  .models-filters__context-value { margin-left: auto; font-size: 17px !important; color: var(--color-text-tertiary); }
+  /* Backends draws a rule beside its refine group; not on a phone. */
+  :has(> .filter-bar-group__toggle) { border-left: 0 !important; padding-left: 0 !important; }
+
+  /* --- Forms ------------------------------------------------------------- */
+  .form-label {
+    font-family: var(--font-sans) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.02em !important;
+    color: var(--color-text-tertiary) !important;
+    margin-bottom: 6px;
+  }
+  .form-label > i { display: none; }
+  .form-hint, .form-help, .field-hint { font-size: 13px !important; }
+
+  /* --- Small text the audit found below 13px ----------------------------- */
+  .badge { font-size: 12px !important; padding: 2px 8px; }
+  :is(.fleet-kicker, .lane__tag, .zero-pane__eyebrow, .entity-rail__group-label, .entity-rail__group-count,
+      .resource-gpu-vendor, .resource-summary-row__value, .fleet-gauge__detail, .fleet-gauge__value-text,
+      .stat-grid__item dt, .operate-headline dt, .activity-chip, .entity-rail__sort-btn, .chat-header-title) {
+    font-size: 13px !important;
+    font-family: var(--font-sans) !important;
+  }
+  .entity-rail__sort-btn { min-height: 32px; padding: 0 10px !important; }
+  .chat-empty-hints, .chat-empty-hints span, .chat-empty-attach, .chat-recent-strip { font-size: 15px !important; }
+  .filter-bar-group label, .filter-bar label { font-size: 15px; }
+
+  /* --- Chat transcript --------------------------------------------------- */
+  /* Bubbles carry the speaker; the header names the model. */
+  .chat-message-user .chat-message-model { display: none; }
+  .chat-message-model {
+    font-family: var(--font-sans) !important;
+    font-size: 13px !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: var(--color-text-tertiary) !important;
+    padding: 0 14px 3px !important;
+  }
+  .chat-context-bar { height: 22px; background: var(--color-bg-primary); }
+  .chat-context-label { font-size: 13px !important; line-height: 22px; }
+  .chat-mode-chip-label { font-size: 15px; }
+}
+
+/* --- Talk as an iOS settings screen ---------------------------------------- */
+@media (max-width: 639px) {
+  .talk-hint { background: transparent !important; padding: 0 4px !important; color: var(--color-text-muted); }
+  .talk-hint i { display: none; }
+  /* Section labels read as grouped-list headers. */
+  .talk-col .form-label { padding: 0 16px; text-transform: uppercase; margin-top: 8px; }
+  /* Secondary actions under a field are plain iOS text buttons. */
+  .talk-col .btn-secondary.btn-sm {
+    background: transparent !important;
+    padding: 0 4px !important;
+    min-height: 44px;
+    font-size: 17px !important;
+    font-weight: 400 !important;
+    color: var(--color-primary) !important;
+  }
+  .talk-col .chat-mcp-dropdown > .btn {
+    background: var(--color-bg-secondary) !important;
+    width: 100%;
+    justify-content: flex-start;
+    min-height: 44px;
+    border-radius: 12px !important;
+    padding: 0 16px !important;
+    font-size: 17px !important;
+    color: var(--color-text-primary) !important;
+  }
+  /* Pipeline stages as one inset group. */
+  .talk-slots { gap: 0 !important; border-radius: 12px; overflow: hidden; font-size: 15px !important; }
+  .talk-slot { background: var(--color-bg-secondary) !important; min-height: 44px; padding: 0 16px !important; border-bottom: 0.5px solid var(--color-border-subtle); border-radius: 0 !important; }
+  .talk-slot:last-child { border-bottom: 0; }
+  .talk-slot__value { font-size: 15px; }
+  .talk-chip { border: 0 !important; border-radius: 12px !important; padding: 12px 16px !important; font-size: 15px !important; }
+  /* Option rows: label on the left, switch on the right, one cell each. */
+  .talk-check {
+    display: grid !important;
+    grid-template-columns: 26px minmax(0, 1fr) auto;
+    grid-template-areas: "icon label switch" ". hint hint";
+    align-items: center;
+    column-gap: 12px !important;
+    row-gap: 2px !important;
+    padding: 10px 16px !important;
+    margin: 8px 0 0 !important;
+    border-radius: 12px;
+    background: var(--color-bg-secondary);
+  }
+  .talk-check > input { grid-area: switch; }
+  .talk-check > i { grid-area: icon; text-align: center; font-size: 17px; }
+  .talk-check__label { grid-area: label; font-size: 17px; font-weight: 400 !important; }
+  .talk-check__hint { grid-area: hint; font-size: 13px !important; line-height: 18px !important; }
+  .talk-details > summary { padding: 0 16px; }
+  .talk-details__body { padding: 0 16px 16px; }
+  .talk-transcript { border-radius: 12px; border: 0 !important; font-size: 17px; }
+  /* Connect stays docked above the tab bar, where the thumb is. */
+  .talk-col .hstack--between {
+    position: sticky;
+    bottom: calc(49px + env(safe-area-inset-bottom) + 8px);
+    z-index: 5;
+    padding: 8px 0;
+    background: linear-gradient(to top, var(--color-bg-primary) 70%, transparent);
+  }
+}
+
+@media (max-width: 639px) {
+  /* Backends' refine toggles: the same iOS settings rows as Models. */
+  .bk-toggles { display: flex !important; flex-direction: column; gap: 0 !important; border: 0 !important; padding: 0 !important; width: 100%; border-radius: 12px; overflow: hidden; }
+  .bk-toggles > label {
+    display: flex !important;
+    align-items: center;
+    gap: 12px !important;
+    min-height: 52px;
+    padding: 0 16px !important;
+    background: var(--color-bg-secondary);
+    border-bottom: 0.5px solid var(--color-border-subtle);
+    font-size: 17px !important;
+    color: var(--color-text-primary) !important;
+  }
+  .bk-toggles > label:last-child { border-bottom: 0; }
+  .bk-toggles > label > i { order: -1; width: 22px; text-align: center; color: var(--color-primary); font-size: 17px !important; }
+  .bk-toggles > label > .toggle { order: 1; margin-left: auto; }
+  /* Skills keeps its search in the header: give it the full width beneath
+     the action capsules. */
+  .skills-header-actions { flex-wrap: wrap !important; overflow: visible; }
+  .skills-header-actions > .input { order: 2; flex: 1 1 100%; min-height: 36px; }
+}
+
+@media (max-width: 639px) {
+  :is(.resource-gpu-stats, .resource-summary-row, .fleet-health__headline, .model-workbench__scope, .chat-slider-labels, .fleet-kicker + span) span,
+  .chat-input-modes .btn, .page-header__supporting span { font-size: 13px !important; }
+  .page-header__supporting, .page-subtitle { font-size: 15px !important; line-height: 20px; }
+}
+
+/* --- Data lists (ResponsiveTable): one inset group, a row per record ------- */
+@media (max-width: 639px) {
+  .table--responsive > tbody {
+    gap: 0 !important;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+  }
+  .table--responsive > tbody > tr {
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: 0.5px solid var(--color-border-subtle) !important;
+    background: var(--color-bg-secondary) !important;
+    padding: 10px 16px !important;
+  }
+  .table--responsive > tbody > tr:last-child { border-bottom: 0 !important; }
+  .table--responsive > tbody > tr > td { font-size: 15px !important; min-height: 28px !important; }
+  .table--responsive > tbody > tr > td:first-child { font-size: 17px !important; }
+  .table--responsive > tbody > tr > td[data-label]::before {
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: var(--color-text-tertiary) !important;
+  }
+  .table--responsive > tbody > tr > td:last-child:not(:first-child):has(button, .btn) { border-top: 0 !important; justify-content: flex-start !important; }
+  .table--responsive > tbody > tr > td:last-child:has(button, .btn) > div { justify-content: flex-start !important; }
+  .table--responsive .btn { min-height: 34px !important; border-radius: 17px !important; padding: 0 14px !important; font-size: 15px !important; border: 0 !important; }
+  .table--responsive .btn-secondary { background: var(--color-primary-light) !important; color: var(--color-primary) !important; }
+}
+
+@media (max-width: 639px) {
+  /* iOS lists read in the system face; monospace stays for code. */
+  .table--responsive td, .table--responsive td::before, .table--responsive td :not(code):not(pre):not(kbd),
+  .entity-rail__name, .entity-rail__meta, .lane__name, .lane__num, .cell-mono:not(code) {
+    font-family: var(--font-sans) !important;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Generator pages: the page is the form, no inner frame or rules. */
+  .media-layout { padding: 0 !important; }
+  .media-controls { border-top: 0 !important; padding-top: 0 !important; }
+  .media-layout .page-header { border-bottom: 0 !important; padding-bottom: 0 !important; }
+
+  /* In-page "← Back to …" buttons repeat the navigation bar's Back. */
+  .btn:has(> i.fa-arrow-left):not(.detail-pane__back) { display: none !important; }
+
+  /* Short filter and tab rows (Activity, Face / Voice) as segmented controls. */
+  :is(.activity-filters, .biometrics-tabs) {
+    display: flex !important;
+    gap: 2px !important;
+    padding: 2px !important;
+    border: 0 !important;
+    border-radius: 9px;
+    background: var(--color-bg-tertiary);
+    overflow: visible;
+  }
+  :is(.activity-filters, .biometrics-tabs) > button {
+    flex: 1;
+    min-width: 0;
+    min-height: 32px !important;
+    padding: 0 6px !important;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    color: var(--color-text-secondary) !important;
+    font-size: 13px !important;
+    font-weight: 500;
+    white-space: nowrap;
+    justify-content: center;
+    box-shadow: none !important;
+  }
+  :is(.activity-filters, .biometrics-tabs) > button:is(.active, [aria-pressed="true"], [aria-selected="true"]) {
+    background: var(--color-surface-elevated) !important;
+    color: var(--color-text-primary) !important;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Collapsible sections (generator history…) as iOS rows; their chevron
+     used to hang into the frame padding that phones no longer have. */
+  .collapsible-header { min-height: 44px; padding-left: 0 !important; font-size: 17px; gap: 10px; }
+  .collapsible-header > i:first-child { margin-left: 0 !important; width: 16px; text-align: center; }
+}
+
+@media (max-width: 639px) {
+  /* Generator pages are not inside .page, so the layout keeps the gutter. */
+  .media-layout { padding: 0 16px 16px !important; }
+  /* Backends' refine group spans the row like any grouped list. */
+  .bk-toggles { align-self: stretch !important; }
+  .bk-toggles > label { width: 100%; box-sizing: border-box; }
+}
+
+@media (max-width: 639px) {
+  /* Backends' filter rows are columns on a phone: size children by
+     content at full width (a 100% flex basis there means 100% height). */
+  .bk-filters:has(.bk-toggles) > * { flex: none !important; width: 100%; min-width: 0; }
+}
