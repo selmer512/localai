@@ -136,6 +136,39 @@ test.describe('phone pages read and flow like an app', () => {
   })
 })
 
+test.describe('the empty conversation on a phone', () => {
+  test.use(phone)
+
+  test('recent chats are one grouped list and the title is plain text', async ({ page }) => {
+    await page.addInitScript(() => {
+      const now = Date.now()
+      const mk = (id, name, history) => ({ id, name, model: 'alpha-7b', history, createdAt: now, updatedAt: now })
+      localStorage.setItem('localai_chats_data', JSON.stringify({ activeChatId: 'a', chats: [
+        mk('a', 'New Chat', []),
+        mk('b', 'Earlier', [{ role: 'user', content: 'Hi' }, { role: 'assistant', content: 'Hello' }]),
+        mk('c', 'Older', [{ role: 'user', content: 'Yo' }, { role: 'assistant', content: 'Hey' }]),
+      ] }))
+    })
+    await page.route('**/api/models/capabilities', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: [{ id: 'alpha-7b', capabilities: ['FLAG_CHAT'] }] }),
+    }))
+    await page.goto('/app/chat')
+    const items = page.locator('.chat-recent-strip-item')
+    await expect(items).toHaveCount(2)
+    // Rows touch, split by a hairline, instead of floating bordered cards.
+    const [a, b] = await items.evaluateAll(els => els.map(el => el.getBoundingClientRect()))
+    expect(Math.round(b.top)).toBe(Math.round(a.bottom))
+    await expect(items.first()).toHaveCSS('border-top-width', '0px')
+    // The composer's paperclip already offers attachments.
+    await expect(page.locator('.chat-empty-hints')).toBeHidden()
+    // A focus ring on the title button rendered as a soft halo in Safari.
+    const title = page.locator('.chat-header-model > button.input')
+    await title.focus()
+    await expect(title).toHaveCSS('box-shadow', 'none')
+  })
+})
+
 test.describe('desktop is unchanged', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 

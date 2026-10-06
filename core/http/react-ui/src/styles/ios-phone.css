@@ -902,3 +902,50 @@
      content at full width (a 100% flex basis there means 100% height). */
   .bk-filters:has(.bk-toggles) > * { flex: none !important; width: 100%; min-width: 0; }
 }
+
+/* --- Pass 3 (device feedback) ---------------------------------------------- */
+@media (max-width: 639px) {
+  /* The chat title is a picker button styled from .input; drop everything
+     the field look carries (focus ring, tap highlight, transitions) so Safari
+     draws it as plain text in the bar, not with a soft halo. */
+  .chat-header-model > button.input,
+  .chat-header-model > button.input:focus,
+  .chat-header-model > button.input:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+    transition: none !important;
+    transform: none !important;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    background: transparent !important;
+  }
+
+  /* Recent chats on the empty conversation: one inset group, a row each. */
+  .chat-recent-strip { width: 100%; }
+  .chat-recent-strip-label { font-size: 13px; letter-spacing: 0.02em; color: var(--color-text-tertiary); padding: 0 16px 7px; }
+  .chat-recent-strip-list { display: flex !important; flex-direction: column; gap: 0 !important; border-radius: 12px; overflow: hidden; background: var(--color-bg-secondary); }
+  .chat-recent-strip-item {
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-bottom: 0.5px solid var(--color-border-subtle) !important;
+    background: var(--color-bg-secondary) !important;
+    padding: 10px 16px !important;
+    text-align: left;
+    min-height: 60px;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .chat-recent-strip-item:last-child { border-bottom: 0 !important; }
+  .chat-recent-strip-item-name { font-size: 17px !important; font-weight: 400 !important; }
+  .chat-recent-strip-item-preview, .chat-recent-strip-item-time { font-size: 15px !important; color: var(--color-text-muted); }
+  .chat-recent-strip-item-time { font-size: 13px !important; color: var(--color-text-tertiary); }
+  /* Suggestions: full-width rows rather than floating pills. */
+  .chat-empty-suggestions { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+  .chat-empty-suggestion { width: 100%; text-align: left; justify-content: flex-start; padding: 0 16px !important; }
+}
+@media (max-width: 639px) {
+  /* Use the screen's 16px gutters like every other grouped list, and drop
+     the "Attach files" hint: the composer's paperclip already says it. */
+  .chat-empty-state { max-width: none !important; width: 100%; padding-left: 16px !important; padding-right: 16px !important; }
+  .chat-empty-hints { display: none !important; }
+}
