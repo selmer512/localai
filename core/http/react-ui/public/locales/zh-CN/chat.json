@@ -7,6 +7,7 @@
     "thinking": "思考中..."
   },
   "header": {
+    "back": "返回",
     "manageModeTooltip": "此聊天可以通过与 LocalAI 对话来安装模型、编辑配置和管理后端。",
     "modelInfo": "模型信息",
     "chatSettings": "聊天设置",

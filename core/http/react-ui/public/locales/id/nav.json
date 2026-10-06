@@ -75,5 +75,11 @@
   "console": {
     "automation": "Automasi",
     "training": "Pelatihan"
+  },
+  "more_page": {
+    "preferences": "Preferensi",
+    "darkMode": "Mode gelap",
+    "about": "Tentang",
+    "version": "Versi"
   }
 }

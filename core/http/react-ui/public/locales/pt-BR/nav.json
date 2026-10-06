@@ -77,5 +77,11 @@
     "training": "Treinamento",
     "expandNavigation": "Expandir navegação de {{section}}",
     "collapseNavigation": "Recolher navegação de {{section}}"
+  },
+  "more_page": {
+    "preferences": "Preferências",
+    "darkMode": "Modo escuro",
+    "about": "Sobre",
+    "version": "Versão"
   }
 }

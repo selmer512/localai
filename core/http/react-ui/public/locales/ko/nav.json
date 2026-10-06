@@ -74,5 +74,11 @@
   "console": {
     "automation": "자동화",
     "training": "학습"
+  },
+  "more_page": {
+    "preferences": "환경설정",
+    "darkMode": "다크 모드",
+    "about": "정보",
+    "version": "버전"
   }
 }

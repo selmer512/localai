@@ -100,6 +100,28 @@ suite. Converting a style to a class on an element that already has a
 `className` is the usual way to introduce one; merge them into a single
 attribute instead.
 
+### Phone layout (<640px)
+
+Phones get an iOS-style app shell; tablets and desktops keep the sidebar layout.
+The pieces:
+
+- `src/components/mobile/` (NavBar, PhoneHome) and `src/pages/More.jsx` render
+  phone-only structure, chosen with `useIsPhone()` (`src/hooks/useIsPhone.js`).
+- `src/components/ui/` holds shadcn-style primitives (Button, Sheet, Switch,
+  Segmented, InsetGroup/ListRow) on Radix, drawn with Tailwind v4 utilities
+  behind a **`tw:` prefix** and **without preflight** (`src/styles/app.css`),
+  so they never collide with or reset App.css. The theme maps shadcn names
+  (`bg-cell`, `text-muted`, `bg-action`…) to LocalAI tokens, so both themes
+  follow `[data-theme]`.
+- `src/styles/ios-phone.css` restyles the existing pages for phones (large
+  titles, inset grouped cards, segmented tabs, iOS buttons, fields, switches).
+  Put phone overrides there rather than in App.css.
+- The More page is generated from `console/consoleConfig.js`, so a new console
+  page appears on phones automatically, under the same gates.
+- Never give a phone header or composer `backdrop-filter`: it makes the element
+  the containing block for `position: fixed` descendants, and any sheet inside
+  it (model picker, MCP menu) opens off screen.
+
 When converting a page, prefer naming the shapes it actually has
 (`.p2p-diagram`, `.usage-tile`) over adding more utilities, and check whether an
 existing block already covers it: the Nodes page reuses the P2P setup shapes,

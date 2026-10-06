@@ -100,5 +100,24 @@
     "createSummary": "Open a chat, image or voice session",
     "operate": "Operate",
     "operateSummary": "{{models}} models configured · nodes, activity and traces"
+  },
+  "phone": {
+    "chat": "新对话",
+    "chatHint": "选择模型开始对话",
+    "talk": "语音",
+    "talkHint": "实时语音对话",
+    "stop": "停止",
+    "create": {
+      "image": "图像",
+      "imageHint": "生成图片",
+      "speech": "语音合成",
+      "speechHint": "文字转语音",
+      "sound": "声音",
+      "soundHint": "音乐和音效",
+      "video": "视频",
+      "videoHint": "短视频"
+    },
+    "status_one": "已加载 {{count}} 个模型",
+    "status_other": "已加载 {{count}} 个模型"
   }
 }

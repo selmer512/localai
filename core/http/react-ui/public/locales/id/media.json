@@ -9,6 +9,7 @@
       "overview": "Ikhtisar"
     },
     "overview": {
+      "get": "Dapatkan",
       "eyebrow": "{{ready}} dari {{total}} modalitas siap",
       "title": "Studio",
       "subtitle": "Hasilkan gambar, video, 3D dan suara dengan model pada mesin ini.",

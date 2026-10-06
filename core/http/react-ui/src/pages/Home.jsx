@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import PhoneHome from '../components/mobile/PhoneHome'
+import { useIsPhone } from '../hooks/useIsPhone'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { apiUrl } from '../utils/basePath'
@@ -28,6 +30,7 @@ export default function Home() {
   const { t } = useTranslation('home')
   const { isAdmin } = useAuth()
   const branding = useBranding()
+  const isPhone = useIsPhone()
   const { resources } = useResources()
   const [configuredModels, setConfiguredModels] = useState(null)
   const configuredModelsRef = useRef(configuredModels)
@@ -290,9 +293,28 @@ export default function Home() {
   const resType = resources?.type
   const usagePct = resources?.aggregate?.usage_percent ?? resources?.ram?.usage_percent ?? 0
 
+  const phoneStatus = [
+    t('phone.status', { count: loadedCount }),
+    distributedMode && clusterData ? `${clusterData.healthyCount}/${clusterData.totalCount} ${t('statusLine.nodesLabel')}` : null,
+    !distributedMode && resources ? `${usagePct.toFixed(0)}% ${resType === 'gpu' ? t('resourceGpu') : t('resourceRam')}` : null,
+  ].filter(Boolean).join(' · ')
+
   return (
     <div className="home-page">
-      {hasModels ? (
+      {hasModels && isPhone ? (
+        <PhoneHome
+          title={branding.instanceName}
+          statusText={phoneStatus}
+          live={loadedCount > 0}
+          isAdmin={isAdmin}
+          assistantAvailable={assistantAvailable}
+          onOpenAssistant={openAssistantChat}
+          loadedModels={loadedModels}
+          onStop={handleStopModel}
+          onStopAll={handleStopAll}
+          loading={modelsLoading}
+        />
+      ) : hasModels ? (
         <>
           {/* Editorial header */}
           <header className="home-header reveal-stagger">

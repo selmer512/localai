@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { ChevronLeft } from 'lucide-react'
 import { useParams, useOutletContext, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fromState } from '../utils/editorNav'
@@ -996,6 +997,16 @@ export default function Chat() {
       <div className="chat-main">
         {/* Header */}
         <div className="chat-header">
+          {/* Phones only (hidden by CSS elsewhere): the conversation is a
+              pushed screen with the tab bar hidden, so it needs a way out. */}
+          <button
+            type="button"
+            className="chat-header-back"
+            onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/app'))}
+            aria-label={t('header.back')}
+          >
+            <ChevronLeft aria-hidden="true" strokeWidth={2.4} />
+          </button>
           <ChatsMenu
             ref={chatsMenuRef}
             chats={chats}
@@ -1023,6 +1034,7 @@ export default function Chat() {
             value={activeChat.model}
             onChange={(model) => updateChatSettings(activeChat.id, { model })}
             capability={CAP_CHAT}
+            className="chat-header-model"
             style={{ flex: '1 1 0', minWidth: 120 }}
           />
           <div className="chat-header-actions">

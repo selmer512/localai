@@ -9,6 +9,7 @@
       "overview": "Overview"
     },
     "overview": {
+      "get": "Ottieni",
       "eyebrow": "{{ready}} of {{total}} modalities ready",
       "title": "Studio",
       "subtitle": "Generate images, video, 3D, speech and sound with the models on this machine.",

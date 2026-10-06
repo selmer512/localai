@@ -10,6 +10,7 @@
       "overview": "Visão geral"
     },
     "overview": {
+      "get": "Obter",
       "eyebrow": "{{ready}} de {{total}} modalidades prontas",
       "title": "Studio",
       "subtitle": "Gere imagens, vídeos, 3D, fala e som com os modelos desta máquina.",

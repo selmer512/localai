@@ -90,15 +90,20 @@ test('viewport covers the safe area and every text field avoids iOS zoom', async
 })
 
 test.describe('navigation', () => {
-  test('tab bar navigates, opens the drawer via More, and hides on chat', async ({ page }) => {
+  test('tab bar navigates, More opens the More page, and hides on chat', async ({ page }) => {
     await page.goto('/app')
     const bar = page.getByRole('navigation', { name: 'Mobile navigation' })
     await expect(bar).toBeVisible()
     await bar.getByRole('link', { name: 'Studio' }).click()
     await expect(page).toHaveURL(/\/app\/studio/)
-    await bar.getByRole('button', { name: 'More' }).click()
-    await expect(page.locator('.sidebar.open')).toHaveCount(1)
-    await page.keyboard.press('Escape')
+    await bar.getByRole('link', { name: 'More' }).click()
+    await expect(page).toHaveURL(/\/app\/more$/)
+    // Every console destination is listed, and opening one keeps More as
+    // the selected tab, as on iOS.
+    await page.locator('.more-page').getByRole('link', { name: 'Traces' }).click()
+    await expect(page).toHaveURL(/\/app\/traces/)
+    await expect(bar.getByRole('link', { name: 'More' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.locator('.ios-navbar__back')).toContainText('More')
     await bar.getByRole('link', { name: 'Chat' }).click()
     await expect(page).toHaveURL(/\/app\/chat/)
     await expect(page.locator('.mobile-tabbar')).toHaveCount(0)
@@ -116,7 +121,7 @@ test.describe('navigation', () => {
     await page.goto('/app/operate')
     await settle(page)
     const heights = await page.evaluate(() => [
-      '.hamburger-btn', '.mobile-header-btn', '.mobile-tabbar__item', '.console-rail-toggle', '.app-footer-links a',
+      '.ios-navbar__back', '.mobile-tabbar__item', '.console-rail-toggle', '.app-footer-links a',
     ].flatMap(sel => [...document.querySelectorAll(sel)].filter(el => el.offsetParent)
       .map(el => ({ sel, h: Math.round(el.getBoundingClientRect().height) }))))
     expect(heights.length).toBeGreaterThan(5)
@@ -262,13 +267,16 @@ test.describe('lists and tables restack instead of squeezing', () => {
 })
 
 test.describe('page chrome stays compact', () => {
-  test('studio generator tabs are one sideways-scrolling row', async ({ page }) => {
+  test('studio lists generators as rows and opens each as its own screen', async ({ page }) => {
     await page.goto('/app/studio')
-    const tabs = page.locator('.studio-tab')
-    await expect(tabs.first()).toBeVisible()
-    const tops = await tabs.evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
-    expect(tops).toHaveLength(1)
-    expect(await page.locator('.studio-tabs').evaluate(el => getComputedStyle(el).overflowX)).toBe('auto')
+    // No web tab strip: each generator is a pushed screen with a way back.
+    await expect(page.locator('.studio-tabs')).toBeHidden()
+    const rows = page.getByTestId('studio-modality')
+    await expect(rows.first()).toBeVisible()
+    const ready = page.locator('[data-testid="studio-modality"][data-modality="sound"]')
+    await ready.click()
+    await expect(page).toHaveURL(/\/app\/studio\/sound/)
+    await expect(page.locator('.ios-navbar__back')).toContainText('Studio')
   })
 
   test('model editor header puts actions under the title', async ({ page }) => {
@@ -315,17 +323,17 @@ test.describe('content that used to widen pages', () => {
 })
 
 test.describe('home', () => {
-  test('quick links are an even grid, not a ragged cluster', async ({ page }) => {
+  test('is the iOS layout: status, places to go, and an even grid of create tiles', async ({ page }) => {
     await page.goto('/app')
-    const links = page.locator('.home-quick-links > *')
-    await expect(links.first()).toBeVisible()
-    expect(await page.locator('.home-quick-links').evaluate(el => getComputedStyle(el).display)).toBe('grid')
-    const count = await links.count()
-    if (count >= 2) {
-      const [a, b] = await Promise.all([links.nth(0).boundingBox(), links.nth(1).boundingBox()])
-      expect(Math.abs(a.width - b.width)).toBeLessThan(2)
-      expect(a.height).toBeGreaterThanOrEqual(44)
-    }
+    await expect(page.getByTestId('phone-home-status')).toContainText(/models? loaded/)
+    await expect(page.locator('.phone-home').getByRole('link', { name: /New chat/ })).toBeVisible()
+    const tiles = page.getByTestId('phone-home-create').locator('button')
+    await expect(tiles).toHaveCount(4)
+    const [a, b, c] = await Promise.all([tiles.nth(0).boundingBox(), tiles.nth(1).boundingBox(), tiles.nth(2).boundingBox()])
+    expect(Math.abs(a.width - b.width)).toBeLessThan(2)
+    expect(Math.abs(a.y - b.y)).toBeLessThan(2)
+    expect(c.y).toBeGreaterThan(a.y + a.height - 1)
+    expect(a.height).toBeGreaterThanOrEqual(44)
   })
 })
 
@@ -360,23 +368,16 @@ test('a landscape phone keeps the rail language control inside the rail', async 
 })
 
 test.describe('console navigation and detail panes on a phone', () => {
-  test('the section menu is one strip with the current page in view', async ({ page }) => {
-    await page.goto('/app/traces')
-    const strip = page.locator('.console-rail-groups')
-    const active = strip.locator('.nav-item.active')
-    await expect(active).toBeVisible()
-    // One row, no expand/collapse buttons to discover first.
-    const tops = await strip.locator('.nav-item').evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
-    expect(tops).toHaveLength(1)
-    await expect(page.locator('.console-rail-toggle')).toBeHidden()
-    await expect(page.locator('.console-rail-collapse')).toBeHidden()
-    // Traces sits far along the strip; it must have been scrolled into view.
-    // Poll: the item list re-renders once /api/features answers.
-    const vw = page.viewportSize().width
-    await expect.poll(async () => {
-      const box = await active.boundingBox()
-      return box.x >= 0 && box.x + box.width <= vw
-    }).toBe(true)
+  test('console pages open from More with the large title first, and Back returns there', async ({ page }) => {
+    await page.goto('/app/more')
+    await page.locator('.more-page').getByRole('link', { name: 'Traces' }).click()
+    // The section strip would repeat More above the title, so phones hide it.
+    await expect(page.locator('.console-layout > .console-rail')).toBeHidden()
+    const title = page.locator('[data-ios-large-title]')
+    await expect(title).toHaveText('Traces')
+    expect((await title.boundingBox()).y).toBeLessThan(140)
+    await page.locator('.ios-navbar__back').click()
+    await expect(page).toHaveURL(/\/app\/more$/)
   })
 
   test('a tapped tab does not stay highlighted after navigating away', async ({ page }) => {
@@ -410,9 +411,9 @@ test.describe('console navigation and detail panes on a phone', () => {
 
 test.describe('overlays and chrome on a scrolled phone page', () => {
   test.beforeEach(async ({ page }) => {
-    await json(page, '**/api/models/capabilities', { data: [{ id: 'Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf', capabilities: ['FLAG_CHAT'] }] })
-    await page.goto('/app')
-    await expect(page.locator('.home-model-row button.input')).toBeVisible()
+    await json(page, '**/api/models/capabilities', { data: [{ id: 'Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf', capabilities: ['FLAG_CHAT', 'FLAG_IMAGE'] }] })
+    await page.goto('/app/image')
+    await expect(page.locator('.main-content button.input[aria-haspopup="listbox"]').first()).toBeVisible()
     await page.evaluate(() => window.scrollTo(0, 250))
   })
 
@@ -421,7 +422,7 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
     // wrapper the containing block for position:fixed, so sheets opened from
     // a scrolled page landed inside the page, off screen.
     await expect.poll(() => page.locator('.page-transition').evaluate(el => getComputedStyle(el).transform)).toBe('none')
-    await page.locator('.home-model-row button.input').click()
+    await page.locator('.main-content button.input[aria-haspopup="listbox"]').first().click()
     const vh = page.viewportSize().height
     await expect.poll(async () => {
       const box = await page.locator('.searchable-select__panel').boundingBox()
@@ -430,7 +431,8 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
   })
 
   test('the MCP menu opens as a sheet that fits the screen', async ({ page }) => {
-    await page.locator('.home-model-row .chat-mcp-dropdown > button').click()
+    await page.goto('/app/chat')
+    await page.locator('.chat-input-area .chat-mcp-dropdown > button').click()
     const menu = page.locator('.chat-mcp-dropdown-menu')
     await expect(menu).toBeVisible()
     const { width, height } = page.viewportSize()
@@ -441,8 +443,9 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
   })
 
   test('the header stays pinned over the status bar while scrolling', async ({ page }) => {
+    await page.goto('/app/more')
     await page.evaluate(() => window.scrollTo(0, 600))
-    const box = await page.locator('.mobile-header').boundingBox()
+    const box = await page.locator('.ios-navbar').boundingBox()
     expect(Math.round(box.y)).toBe(0)
   })
 })
@@ -487,12 +490,13 @@ test.describe('mobile polish from device testing', () => {
     expect(two.x - (one.x + one.width)).toBeGreaterThanOrEqual(6)
   })
 
-  test('section strip pills share one row across groups', async ({ page }) => {
-    await page.goto('/app/fine-tune')
-    await expect(page.locator('.console-rail .nav-item.active')).toBeVisible()
-    const tops = await page.locator('.console-rail .nav-item').evaluateAll(els => [...new Set(els.map(el => Math.round(el.getBoundingClientRect().top)))])
-    expect(tops).toHaveLength(1)
-    expect(await page.locator('.console-rail .console-group').first().evaluate(el => getComputedStyle(el).display)).toBe('contents')
+  test('the navigation bar shows the title once the large title scrolls under it', async ({ page }) => {
+    await page.goto('/app/more')
+    const small = page.locator('.ios-navbar__title')
+    await expect(small).toHaveText('More')
+    await expect(small).toHaveCSS('opacity', '0')
+    await page.evaluate(() => window.scrollTo(0, 400))
+    await expect(small).toHaveCSS('opacity', '1')
   })
 
   test('the personality library has one scroller and no empty detail pane', async ({ page }) => {
@@ -510,8 +514,9 @@ test.describe('mobile polish from device testing', () => {
   })
 
   test('keyboard hints are not shown on a phone', async ({ page }) => {
-    await page.goto('/app')
-    await expect(page.locator('.home-textarea')).toBeVisible()
-    await expect(page.locator('.home-input-hint')).toBeHidden()
+    await page.goto('/app/chat')
+    await expect(page.locator('.chat-input')).toBeVisible()
+    await expect(page.getByText('Enter to send')).toBeHidden()
+    await expect(page.locator('.chats-menu-trigger-kbd')).toBeHidden()
   })
 })

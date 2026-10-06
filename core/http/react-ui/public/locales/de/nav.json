@@ -74,5 +74,11 @@
   "console": {
     "automation": "Automatisierung",
     "training": "Training"
+  },
+  "more_page": {
+    "preferences": "Einstellungen",
+    "darkMode": "Dunkelmodus",
+    "about": "Über",
+    "version": "Version"
   }
 }

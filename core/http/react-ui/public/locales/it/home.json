@@ -100,5 +100,24 @@
     "createSummary": "Open a chat, image or voice session",
     "operate": "Operate",
     "operateSummary": "{{models}} models configured · nodes, activity and traces"
+  },
+  "phone": {
+    "chat": "Nuova chat",
+    "chatHint": "Scegli un modello e inizia",
+    "talk": "Parla",
+    "talkHint": "Conversazione vocale in tempo reale",
+    "stop": "Ferma",
+    "create": {
+      "image": "Immagini",
+      "imageHint": "Genera immagini",
+      "speech": "Voce",
+      "speechHint": "Da testo a voce",
+      "sound": "Suoni",
+      "soundHint": "Musica ed effetti",
+      "video": "Video",
+      "videoHint": "Brevi clip"
+    },
+    "status_one": "{{count}} modello caricato",
+    "status_other": "{{count}} modelli caricati"
   }
 }

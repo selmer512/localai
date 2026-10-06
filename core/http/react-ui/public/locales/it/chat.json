@@ -7,6 +7,7 @@
     "thinking": "Sto pensando..."
   },
   "header": {
+    "back": "Indietro",
     "manageModeTooltip": "Questa chat può installare modelli, modificare configurazioni e gestire i backend parlando con LocalAI.",
     "modelInfo": "Info modello",
     "chatSettings": "Impostazioni chat",

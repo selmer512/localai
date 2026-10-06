@@ -13,6 +13,8 @@ import '@fontsource-variable/geist-mono'
 import './index.css'
 import './theme.css'
 import './App.css'
+import './styles/app.css'
+import './styles/ios-phone.css'
 import LoadingSpinner from './components/LoadingSpinner'
 
 function BootFallback() {

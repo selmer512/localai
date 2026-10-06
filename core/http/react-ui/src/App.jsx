@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import Sidebar from './components/Sidebar'
 import OperationsBar from './components/OperationsBar'
 import MobileTabBar from './components/MobileTabBar'
+import NavBar from './components/mobile/NavBar'
+import { useIsPhone } from './hooks/useIsPhone'
 import { ToastContainer, useToast } from './components/Toast'
 import { systemApi } from './utils/api'
 import { useTheme } from './contexts/ThemeContext'
@@ -39,6 +41,7 @@ export default function App() {
   const branding = useBranding()
   const { t } = useTranslation('nav')
   const hamburgerRef = useRef(null)
+  const isPhone = useIsPhone()
   const isChatRoute = location.pathname.match(/\/chat(\/|$)/) || location.pathname.match(/\/agents\/[^/]+\/chat/)
 
   useEffect(() => {
@@ -103,6 +106,9 @@ export default function App() {
             drawer. Hamburger is the only way to expand the nav on phones;
             theme toggle and account avatar are mirrored from the sidebar
             footer so they remain one tap away. */}
+        {/* Phones get the iOS navigation bar; tablets keep the hamburger
+            header, since they keep the sidebar drawer. */}
+        {isPhone ? (!isChatRoute && <NavBar />) : (
         <header className="mobile-header">
           <button
             ref={hamburgerRef}
@@ -142,6 +148,7 @@ export default function App() {
             )}
           </div>
         </header>
+        )}
         <div className="main-content-inner">
           <div className="page-transition" key={pageTransitionKey(location.pathname)}>
             {/* Per-route Suspense catches React.lazy chunk loads (router.jsx)
@@ -182,8 +189,8 @@ export default function App() {
         )}
       </main>
       {/* Hidden on chat routes: the composer owns the bottom edge there, and
-          the header's hamburger still reaches every destination. */}
-      {!isChatRoute && <MobileTabBar drawerOpen={sidebarOpen} onOpenMore={() => setSidebarOpen(true)} />}
+          the conversation's own header leads back out. */}
+      {!isChatRoute && <MobileTabBar />}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   )

@@ -74,5 +74,11 @@
   "console": {
     "automation": "自动化",
     "training": "训练"
+  },
+  "more_page": {
+    "preferences": "偏好设置",
+    "darkMode": "深色模式",
+    "about": "关于",
+    "version": "版本"
   }
 }

@@ -1,43 +1,32 @@
 import { test, expect } from './coverage-fixtures.js'
 
-test.describe('Operate console on a narrow screen', () => {
-  // Phones get the console's pages as one swipeable strip of pills: nothing to
-  // expand first, and it costs a single line above the page.
-  test('ignores the desktop collapsed preference', async ({ page }) => {
+test.describe('Operate console on a phone', () => {
+  // Phones reach console pages from the More tab and return with Back, as in
+  // an iOS app; the section strip would only repeat More above the title.
+  test('hides the section strip and opens on the large title', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.addInitScript(() => localStorage.setItem('localai_console_rail_collapsed', 'true'))
     await page.goto('/app/operate')
-
-    const rail = page.locator('.console-rail')
-    await expect(rail).toHaveCSS('width', '390px')
-    // Labels stay visible: the icon-only desktop rail does not leak through.
-    await expect(rail.locator('a.nav-item', { hasText: 'Overview' }).locator('.nav-label')).toBeVisible()
-    await expect(rail.locator('.console-rail-collapse')).toBeHidden()
-  })
-
-  test('the navigation leaves the overview on screen', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 800 })
-    await page.goto('/app/operate')
-
-    await expect(page.locator('.console-rail-groups')).toBeVisible()
+    await expect(page.locator('.console-rail')).toBeHidden()
     const heading = page.getByRole('heading', { name: 'Overview', exact: true })
-    const box = await heading.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box.y).toBeLessThan(800)
+    await expect(heading).toBeVisible()
+    expect((await heading.boundingBox()).y).toBeLessThan(160)
+    await expect(page.locator('.ios-navbar__back')).toContainText('More')
   })
 
-  test('the navigation is one line that scrolls sideways', async ({ page }) => {
+  test('More lists every Operate page', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
-    await page.goto('/app/operate')
+    await page.goto('/app/more')
+    for (const name of ['Overview', 'Backends', 'Activity', 'Usage', 'Traces', 'Settings']) {
+      await expect(page.locator('.more-page').getByRole('link', { name, exact: true })).toBeVisible()
+    }
+  })
 
-    const groups = page.locator('.console-rail-groups')
-    await expect(groups).toBeVisible()
-    const { height, scrolls } = await groups.evaluate(el => ({
-      height: el.getBoundingClientRect().height,
-      scrolls: el.scrollWidth > el.clientWidth && getComputedStyle(el).overflowX === 'auto',
-    }))
-    expect(height).toBeLessThan(80)
-    expect(scrolls).toBe(true)
+  test('tablets keep the console rail', async ({ page }) => {
+    await page.setViewportSize({ width: 768, height: 1000 })
+    await page.goto('/app/operate')
+    await expect(page.locator('.console-rail')).toBeVisible()
+    await expect(page.locator('.ios-navbar')).toHaveCount(0)
   })
 })
 

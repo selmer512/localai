@@ -52,24 +52,20 @@ test.describe('Nodes fleet dashboard', () => {
     await expect(rail.locator('a[href$="/swagger/index.html"]')).toHaveAttribute('target', '_blank')
   })
 
-  test('shows the Operate pages as one strip on mobile', async ({ page }) => {
+  test('lists every Operate page in More on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await mockFullOperateNavigation(page)
     await mockNodes(page, [baseNodes[0]])
-    await page.goto('/app/nodes')
+    await page.goto('/app/more')
 
-    await page.getByRole('button', { name: 'Open menu' }).click()
-    await expect(page.locator('.sidebar-nav a.nav-item', { hasText: 'Operate' })).toBeVisible()
-    await page.getByRole('button', { name: 'Close menu' }).click()
-
-    // Phones get every Operate page in one swipeable strip rather than a
-    // menu that has to be expanded first.
-    const rail = page.locator('.console-layout > .console-rail')
-    await expect(rail).toBeVisible()
-    await expect(rail.locator('.console-rail-groups')).toBeVisible()
-    await expect(rail.getByRole('button', { name: 'Expand Operate navigation' })).toBeHidden()
-    await expect(rail.locator('a.nav-item')).toHaveCount(14)
-    await expect(rail.locator('a[href="/app/nodes"]')).toHaveClass(/active/)
+    // Phones reach the Operate pages from the More tab, all fourteen of them,
+    // under the same gates the desktop rail applies.
+    const more = page.locator('.more-page')
+    const operateLinks = more.locator('section', { has: page.locator('h2', { hasText: /^Operate/ }) }).locator('a')
+    await expect(operateLinks).toHaveCount(14)
+    await more.locator('a[href="/app/nodes"]').click()
+    await expect(page).toHaveURL(/\/app\/nodes/)
+    await expect(page.getByRole('navigation', { name: 'Mobile navigation' }).getByRole('link', { name: 'More' })).toHaveAttribute('aria-current', 'page')
   })
 
   test('shows aggregate health, capacity, attention filtering, search, sorting, and grouping', async ({ page }) => {

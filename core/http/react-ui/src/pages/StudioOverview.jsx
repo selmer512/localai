@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom'
+import { useIsPhone } from '../hooks/useIsPhone'
+import { InsetGroup, ListRow, IconTile } from '../components/ui/list'
+import { Button } from '../components/ui/button'
 import { useTranslation } from 'react-i18next'
 import PageHeader from '../components/PageHeader'
 import { formatBytes } from '../utils/format'
@@ -18,10 +21,72 @@ import { staggerStyle } from '../hooks/useStagger'
 // Lanes, not a SplitView: six modalities each carrying one decision-relevant
 // fact are read in sequence, not compared as candidates.
 
+const TILE_COLORS = { images: 'purple', video: 'teal', threed: 'orange', tts: 'soft', sound: 'amber', transform: 'mint' }
+
+// Phones: the iOS layout from the "v2 · iPhone app" design. One inset group
+// per modality group, a row per generator with what serves it, and an
+// install capsule where nothing does yet.
+function PhoneStudioOverview({ modalities, recent, running, onPick, t }) {
+  const groups = [...new Set(modalities.map(m => m.group))]
+  return (
+    <div data-testid="studio-overview" className="tw:flex tw:flex-col tw:gap-7 tw:pt-1">
+      <div className="tw:flex tw:flex-col tw:gap-1 tw:px-4">
+        <h1 className="page-title tw:m-0">{t('studio.overview.title')}</h1>
+        <p className="tw:m-0 tw:text-[15px] tw:text-muted">{t('studio.overview.subtitle')}</p>
+      </div>
+      {groups.map(g => (
+        <InsetGroup key={g} header={t(`studio.groups.${g}`)}>
+          {modalities.filter(m => m.group === g).map(m => {
+            const hasModel = m.installed.length > 0
+            const served = hasModel ? m.installed[0] + (m.installed.length > 1 ? ` +${m.installed.length - 1}` : '') : null
+            return (
+              <ListRow
+                key={m.key}
+                data-testid="studio-modality"
+                data-modality={m.key}
+                onClick={hasModel ? () => onPick(m.key) : undefined}
+                chevron={hasModel}
+                leading={<IconTile icon={m.icon} color={TILE_COLORS[m.key]} />}
+                title={t(`studio.tabs.${m.key}`)}
+                subtitle={hasModel ? [served, m.typical].filter(Boolean).join(' · ') : t(`studio.overview.describe.${m.key}`)}
+                trailing={!hasModel ? (
+                  <Button asChild variant="secondary" size="sm">
+                    <Link to={`/app/models?capability=${m.key}`} aria-label={`${t('studio.overview.install')}: ${t(`studio.tabs.${m.key}`)}`}>{t('studio.overview.get')}</Link>
+                  </Button>
+                ) : undefined}
+              />
+            )
+          })}
+        </InsetGroup>
+      ))}
+      {running.length > 0 && (
+        <InsetGroup header={t('studio.overview.running')} data-testid="studio-running">
+          {running.map(op => (
+            <ListRow key={op.id || op.name} title={op.name || op.id} chevron={false}
+              trailing={typeof op.progress === 'number' ? <span className="tw:text-[15px] tw:text-faint">{Math.round(op.progress)}%</span> : undefined} />
+          ))}
+        </InsetGroup>
+      )}
+      {recent.length > 0 && (
+        <InsetGroup header={t('studio.overview.recent')} data-testid="studio-recent">
+          {recent.map(entry => (
+            <ListRow key={entry.id} onClick={() => onPick(entry.modality)}
+              leading={<IconTile icon={(modalities.find(m => m.key === entry.modality) || {}).icon || 'fas fa-clock'} color="gray" />}
+              title={entry.model || entry.modality} subtitle={describeEntry(entry, t)} />
+          ))}
+        </InsetGroup>
+      )}
+    </div>
+  )
+}
+
 export default function StudioOverview({ modalities, recent, running, onPick }) {
   const { t } = useTranslation('media')
+  const isPhone = useIsPhone()
 
   const ready = modalities.filter(m => m.installed.length > 0).length
+
+  if (isPhone) return <PhoneStudioOverview modalities={modalities} recent={recent} running={running} onPick={onPick} t={t} />
 
   return (
     <div data-testid="studio-overview" className="page-pad">

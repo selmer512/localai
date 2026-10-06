@@ -7,6 +7,7 @@
     "thinking": "Berpikir..."
   },
   "header": {
+    "back": "Kembali",
     "manageModeTooltip": "Obrolan ini dapat menginstal model, mengedit konfigurasi, dan mengelola backend dengan berbicara melalui LocalAI.",
     "modelInfo": "Info model",
     "chatSettings": "Pengaturan Obrolan",

@@ -100,5 +100,24 @@
     "createSummary": "Open a chat, image or voice session",
     "operate": "Operate",
     "operateSummary": "{{models}} models configured · nodes, activity and traces"
+  },
+  "phone": {
+    "chat": "Obrolan baru",
+    "chatHint": "Pilih model dan mulai",
+    "talk": "Bicara",
+    "talkHint": "Percakapan suara waktu nyata",
+    "stop": "Hentikan",
+    "create": {
+      "image": "Gambar",
+      "imageHint": "Buat gambar",
+      "speech": "Suara",
+      "speechHint": "Teks ke suara",
+      "sound": "Bunyi",
+      "soundHint": "Musik dan efek",
+      "video": "Video",
+      "videoHint": "Klip pendek"
+    },
+    "status_one": "{{count}} model dimuat",
+    "status_other": "{{count}} model dimuat"
   }
 }

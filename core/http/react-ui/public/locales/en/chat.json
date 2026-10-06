@@ -7,6 +7,7 @@
     "thinking": "Thinking..."
   },
   "header": {
+    "back": "Back",
     "manageModeTooltip": "This chat can install models, edit configs and manage backends by talking to LocalAI.",
     "modelInfo": "Model info",
     "chatSettings": "Chat settings",

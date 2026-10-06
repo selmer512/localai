@@ -1,0 +1,45 @@
+/* Tailwind for the phone app shell and the shadcn-style components in
+   components/ui. Only the theme and utilities are imported, not preflight:
+   preflight would reset every element the existing App.css already styles.
+   The tw: prefix keeps the generated class names and CSS variables from
+   colliding with LocalAI's own (--color-*, --font-*). Utilities are left
+   unlayered on purpose, so a utility class still beats App.css's bare element
+   rules (button, a, h1…) by specificity. */
+@import "tailwindcss/theme.css" prefix(tw);
+@import "tailwindcss/utilities.css" prefix(tw);
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant phone (@media (max-width: 639px));
+
+/* shadcn's semantic colour names, bound to LocalAI's tokens so both themes
+   follow the existing ThemeContext switch with no second palette. */
+@theme inline {
+  --color-background: var(--color-bg-primary);
+  --color-cell: var(--color-bg-secondary);
+  --color-well: var(--color-bg-tertiary);
+  --color-elevated: var(--color-surface-elevated);
+  --color-sunken: var(--color-surface-sunken);
+  --color-separator: var(--color-border-subtle);
+  --color-line: var(--color-border-default);
+  --color-line-strong: var(--color-border-strong);
+  --color-foreground: var(--color-text-primary);
+  --color-foreground-2: var(--color-text-secondary);
+  --color-muted: var(--color-text-muted);
+  --color-faint: var(--color-text-tertiary);
+  --color-action: var(--color-primary);
+  --color-action-soft: var(--color-primary-light);
+  --color-on-action: var(--color-primary-text);
+  --color-live: var(--color-success);
+  --color-attention: var(--color-warning);
+  --color-danger: var(--color-error);
+  --color-tile-blue: var(--color-data-1);
+  --color-tile-red: var(--color-data-2);
+  --color-tile-purple: var(--color-data-3);
+  --color-tile-amber: var(--color-data-4);
+  --color-tile-mint: var(--color-data-5);
+  --color-tile-orange: var(--color-data-6);
+  --color-tile-soft: var(--color-data-7);
+  --color-tile-teal: var(--color-data-8);
+  --font-sans: var(--font-sans);
+  --radius-cell: 12px;
+}

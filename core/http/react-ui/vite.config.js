@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
 import istanbul from 'vite-plugin-istanbul'
 
 const backendUrl = process.env.LOCALAI_URL || 'http://localhost:8080'
@@ -18,6 +19,9 @@ const coverageV8 = process.env.COVERAGE_V8 === 'true'
 export default defineConfig({
   plugins: [
     react(),
+    // Utilities only, behind a tw: prefix (see src/styles/app.css): the
+    // phone app shell uses them; the existing stylesheet is left untouched.
+    tailwindcss(),
     ...(coverage
       ? [
           istanbul({

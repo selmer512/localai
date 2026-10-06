@@ -87,6 +87,7 @@ const TTS = page('tts', () => import('./pages/TTS'))
 const Sound = page('sound', () => import('./pages/Sound'))
 const AudioTransform = page('transform', () => import('./pages/AudioTransform'))
 const Talk = page('talk', () => import('./pages/Talk'))
+const More = page('more', () => import('./pages/More'))
 // Referenced only from JSX below — same blind spot as Activity further down.
 // eslint-disable-next-line no-unused-vars
 const OperateOverview = page('operate', () => import('./pages/OperateOverview'))
@@ -172,6 +173,7 @@ const appChildren = [
   // navigation, and ?tab= reads like a filter. Legacy ?tab= links redirect.
   { path: 'studio/:tab', element: <Studio /> },
   { path: 'talk', element: <Talk /> },
+  { path: 'more', element: <More /> },
   { path: 'account', element: <Account /> },
 
   // Build console — Automation, Training, and Recognition groups share one rail.
