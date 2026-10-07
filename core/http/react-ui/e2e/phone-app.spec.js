@@ -63,6 +63,76 @@ test.describe('phone app shell', () => {
     }).toEqual([844, true])
   })
 
+  test('the picker traps focus, dismisses and returns to its trigger', async ({ page }) => {
+    await page.route('**/api/models/capabilities', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: ['alpha-7b', 'beta-3b'].map(id => ({ id, capabilities: ['FLAG_CHAT'] })) }),
+    }))
+    await page.goto('/app/chat')
+    const trigger = page.locator('.chat-header-model > button.input')
+    await trigger.click()
+    const sheet = page.getByRole('dialog', { name: 'Select model...' })
+    const cancel = sheet.getByRole('button', { name: 'Cancel' })
+    await expect(cancel).toBeFocused()
+    await expect(page.locator('body')).toHaveAttribute('data-scroll-locked', '1')
+    await page.keyboard.press('Shift+Tab')
+    await expect(sheet.getByRole('option', { name: 'beta-3b' })).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(cancel).toBeFocused()
+    await sheet.getByRole('searchbox').fill('beta')
+    await sheet.getByRole('searchbox').press('Enter')
+    await expect(sheet).toHaveCount(0)
+    await expect(trigger).toContainText('beta-3b')
+    await expect(trigger).toBeFocused()
+    await trigger.click()
+    await sheet.getByRole('button', { name: 'Cancel' }).click()
+    await expect(trigger).toContainText('beta-3b')
+    await expect(trigger).toBeFocused()
+    await expect(page.locator('body')).not.toHaveAttribute('data-scroll-locked', '1')
+  })
+
+  test('More search finds pages, recovers from no results and keeps preferences in reach', async ({ page }) => {
+    await page.goto('/app/more')
+    const more = page.locator('.more-page')
+    const search = more.getByRole('searchbox', { name: 'Find a page' })
+    const dark = more.getByRole('switch', { name: 'Dark mode' })
+    expect((await dark.boundingBox()).y).toBeLessThan(600)
+    await search.fill('settings')
+    await expect(more.getByRole('link', { name: 'Settings', exact: true })).toBeVisible()
+    await expect(more.getByRole('link', { name: 'Agents', exact: true })).toHaveCount(0)
+    await search.fill('no such page')
+    await expect(more.getByRole('status')).toHaveText('No pages found. Try another search.')
+    await search.fill('')
+    await expect(more.getByRole('link', { name: 'Agents', exact: true })).toBeVisible()
+    await expect(dark).toBeVisible()
+  })
+
+  test('More search cannot reveal administrator pages to a regular user', async ({ page }) => {
+    await page.route('**/api/auth/status', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ authEnabled: true, user: { role: 'user', permissions: {} } }),
+    }))
+    await page.goto('/app/more')
+    const more = page.locator('.more-page')
+    await more.getByRole('searchbox', { name: 'Find a page' }).fill('settings')
+    await expect(more.getByRole('link', { name: 'Settings', exact: true })).toHaveCount(0)
+    await expect(more.getByRole('status')).toBeVisible()
+  })
+
+  test('narrow chat retains a usable message field and 44px controls', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 844 })
+    await page.goto('/app/chat')
+    await expect(page.getByRole('textbox', { name: 'Message...' })).toBeVisible()
+    for (const selector of ['.chat-attach-btn', '.chat-send-btn', '.chat-mode-chip', '.chat-header-model > button.input']) {
+      const box = await page.locator(selector).boundingBox()
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.width).toBeGreaterThanOrEqual(44)
+    }
+    const field = await page.locator('.chat-input').boundingBox()
+    expect(field.width).toBeGreaterThanOrEqual(160)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320)
+  })
+
   test('the light theme carries through the shell', async ({ page }) => {
     await page.addInitScript(() => localStorage.setItem('localai-theme', 'light'))
     await page.goto('/app/more')

@@ -1522,6 +1522,7 @@ export default function Chat() {
                   if (!next) setCanvasOpen(false)
                 }}
                 aria-pressed={canvasMode}
+                aria-label={t('input.canvasLabel')}
                 title={t('input.canvasTitle')}
               >
                 <i className="fas fa-columns" />
@@ -1592,6 +1593,7 @@ export default function Chat() {
               className="btn btn-secondary btn-sm chat-attach-btn"
               onClick={() => fileInputRef.current?.click()}
               title={t('input.attachFile')}
+              aria-label={t('input.attachFile')}
             >
               <i className="fas fa-paperclip" />
             </button>
@@ -1606,6 +1608,7 @@ export default function Chat() {
             <textarea
               ref={textareaRef}
               className="chat-input"
+              aria-label={t('input.placeholder')}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
