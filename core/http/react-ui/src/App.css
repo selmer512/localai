@@ -14045,6 +14045,7 @@ button, a, [role="button"], select, summary, label, input[type="checkbox"], inpu
    the component styles it inline.
    =========================================================================== */
 .searchable-select__backdrop { display: none; }
+.searchable-select__search { padding: 6px; border-bottom: 1px solid var(--color-border-subtle); }
 
 @media (max-width: 639px) {
   .searchable-select__backdrop {

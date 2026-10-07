@@ -26,6 +26,7 @@ export default function More() {
   const { operations } = useOperations()
   const [features, setFeatures] = useState({})
   const [version, setVersion] = useState('')
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     fetch(apiUrl('/api/features')).then(r => r.json()).then(setFeatures).catch(() => {})
@@ -33,6 +34,14 @@ export default function More() {
   }, [])
 
   const auth = { isAdmin, authEnabled, hasFeature, features }
+  const needle = query.trim().toLocaleLowerCase(i18n.resolvedLanguage)
+  const matches = label => !needle || label.toLocaleLowerCase(i18n.resolvedLanguage).includes(needle)
+  const groups = consoles.flatMap(config => config.groups.map(group => ({
+    config,
+    group,
+    items: group.items.filter(item => isConsoleItemVisible(item, auth) && matches(t(item.labelKey))),
+  }))).filter(({ items }) => items.length > 0)
+  const showTalk = matches(t('items.talk'))
   const failedOps = operations.filter(op => op.error).length
   const language = SUPPORTED_LANGUAGES.find(l => l.code === i18n.resolvedLanguage) || SUPPORTED_LANGUAGES[0]
   let colorIndex = 0
@@ -41,7 +50,18 @@ export default function More() {
     <div className="page more-page tw:flex tw:flex-col tw:gap-7 tw:pb-4">
       <h1 className="page-title tw:m-0 tw:px-4">{t('more')}</h1>
 
-      <InsetGroup>
+      <div className="more-page__search">
+        <input
+          type="search"
+          className="input"
+          aria-label={t('more_page.searchPages')}
+          placeholder={t('more_page.searchPages')}
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+        />
+      </div>
+
+      {!needle && <InsetGroup>
         <ListRow
           to={isAdmin ? '/app/operate' : undefined}
           leading={<span className="tw:flex tw:size-[52px] tw:shrink-0 tw:items-center tw:justify-center tw:rounded-full tw:bg-elevated tw:text-live"><Server aria-hidden="true" className="tw:size-[26px]" strokeWidth={1.9} /></span>}
@@ -50,9 +70,9 @@ export default function More() {
           titleClassName="tw:font-semibold"
           className="tw:py-1.5"
         />
-      </InsetGroup>
+      </InsetGroup>}
 
-      {authEnabled && user && (
+      {!needle && authEnabled && user && (
         <InsetGroup header={t('account')}>
           <ListRow
             to="/app/account"
@@ -67,36 +87,7 @@ export default function More() {
         </InsetGroup>
       )}
 
-      <InsetGroup header={t('sections.create')}>
-        <ListRow to="/app/talk" leading={<IconTile icon="fas fa-wave-square" color="mint" />} title={t('items.talk')} />
-      </InsetGroup>
-
-      {consoles.flatMap(config => config.groups.map(group => {
-        const items = group.items.filter(item => isConsoleItemVisible(item, auth))
-        if (items.length === 0) return null
-        const color = GROUP_COLORS[colorIndex++ % GROUP_COLORS.length]
-        return (
-          <InsetGroup key={`${config.id}-${group.titleKey}`} header={`${t(config.titleKey)} · ${t(group.titleKey)}`}>
-            {items.map(item => (
-              <ListRow
-                key={item.path || item.href}
-                to={item.path}
-                href={item.href ? apiUrl(item.href) : undefined}
-                external={item.external}
-                leading={<IconTile icon={item.icon} color={color} />}
-                title={t(item.labelKey)}
-                trailing={item.badge === 'operations' && operations.length > 0 ? (
-                  <span className={`tw:min-w-6 tw:rounded-full tw:px-2 tw:py-0.5 tw:text-center tw:text-[13px] tw:font-semibold tw:text-on-action ${failedOps > 0 ? 'tw:bg-danger' : 'tw:bg-action'}`}>
-                    {failedOps > 0 ? failedOps : operations.length}
-                  </span>
-                ) : undefined}
-              />
-            ))}
-          </InsetGroup>
-        )
-      }))}
-
-      <InsetGroup header={t('more_page.preferences')}>
+      {!needle && <InsetGroup header={t('more_page.preferences')} className="more-page__preferences">
         <ListRow
           leading={<IconTile icon="fas fa-moon" color="blue" />}
           title={t('more_page.darkMode')}
@@ -124,17 +115,48 @@ export default function More() {
             )}
           />
         </label>
-      </InsetGroup>
+      </InsetGroup>}
 
-      <InsetGroup header={t('more_page.about')}>
+      {showTalk && <InsetGroup header={t('sections.create')}>
+        <ListRow to="/app/talk" leading={<IconTile icon="fas fa-wave-square" color="mint" />} title={t('items.talk')} />
+      </InsetGroup>}
+
+      {groups.map(({ config, group, items }) => {
+        const color = GROUP_COLORS[colorIndex++ % GROUP_COLORS.length]
+        return (
+          <InsetGroup key={`${config.id}-${group.titleKey}`} header={`${t(config.titleKey)} · ${t(group.titleKey)}`}>
+            {items.map(item => (
+              <ListRow
+                key={item.path || item.href}
+                to={item.path}
+                href={item.href ? apiUrl(item.href) : undefined}
+                external={item.external}
+                leading={<IconTile icon={item.icon} color={color} />}
+                title={t(item.labelKey)}
+                trailing={item.badge === 'operations' && operations.length > 0 ? (
+                  <span className={`tw:min-w-6 tw:rounded-full tw:px-2 tw:py-0.5 tw:text-center tw:text-[13px] tw:font-semibold tw:text-on-action ${failedOps > 0 ? 'tw:bg-danger' : 'tw:bg-action'}`}>
+                    {failedOps > 0 ? failedOps : operations.length}
+                  </span>
+                ) : undefined}
+              />
+            ))}
+          </InsetGroup>
+        )
+      })}
+
+      {needle && !showTalk && groups.length === 0 && (
+        <p className="more-page__no-results" role="status">{t('more_page.noPages')}</p>
+      )}
+
+      {!needle && <InsetGroup header={t('more_page.about')}>
         <ListRow href="https://localai.io" external leading={<IconTile icon="fas fa-book" color="gray" />} title={t('footer.documentation')} />
         <ListRow href="https://github.com/mudler/LocalAI" external leading={<IconTile icon="fab fa-github" color="gray" />} title={t('footer.github')} />
         {/\d/.test(version) && <ListRow leading={<IconTile icon="fas fa-circle-info" color="gray" />} title={t('more_page.version')} trailing={<RowValue>{version}</RowValue>} chevron={false} />}
-      </InsetGroup>
+      </InsetGroup>}
 
-      <p className="tw:m-0 tw:px-8 tw:text-center tw:text-[13px] tw:text-faint">
+      {!needle && <p className="tw:m-0 tw:px-8 tw:text-center tw:text-[13px] tw:text-faint">
         &copy; 2023-2026 <a href="https://mudler.pm" target="_blank" rel="noopener noreferrer" className="tw:text-faint">Ettore Di Giacinto</a>
-      </p>
+      </p>}
     </div>
   )
 }

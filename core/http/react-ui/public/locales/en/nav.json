@@ -79,6 +79,8 @@
     "collapseNavigation": "Collapse {{section}} navigation"
   },
   "more_page": {
+    "searchPages": "Find a page",
+    "noPages": "No pages found. Try another search.",
     "preferences": "Preferences",
     "darkMode": "Dark mode",
     "about": "About",

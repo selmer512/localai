@@ -1,19 +1,35 @@
+import { useEffect, useState } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { cn } from '../../lib/utils'
 
 // iOS bottom sheet on Radix Dialog: focus trap, Escape, scroll lock and
 // aria wiring come from Radix; the look is the iOS page sheet (grabber,
 // Cancel / title / Done bar, rounded top, content scrolls inside).
-export function Sheet({ open, onOpenChange, title, cancelLabel, onCancel, doneLabel, onDone, children, className, description }) {
+export function Sheet({ open, onOpenChange, title, cancelLabel, onCancel, doneLabel, onDone, children, className, description, overlayClassName, onCloseAutoFocus, id }) {
+  const [viewport, setViewport] = useState(null)
+
+  useEffect(() => {
+    if (!open || !window.visualViewport) return
+    const vv = window.visualViewport
+    const sync = () => setViewport({ height: vv.height, bottom: Math.max(0, window.innerHeight - vv.height - vv.offsetTop) })
+    sync()
+    vv.addEventListener('resize', sync)
+    vv.addEventListener('scroll', sync)
+    return () => { vv.removeEventListener('resize', sync); vv.removeEventListener('scroll', sync) }
+  }, [open])
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="ios-sheet-overlay tw:fixed tw:inset-0 tw:z-[1000] tw:bg-black/55" />
+        <Dialog.Overlay className={cn("ios-sheet-overlay tw:fixed tw:inset-0 tw:z-[1000] tw:bg-black/55", overlayClassName)} />
         <Dialog.Content
-          className={cn('ios-sheet tw:fixed tw:inset-x-0 tw:bottom-0 tw:z-[1001] tw:flex tw:max-h-[calc(100dvh-env(safe-area-inset-top,0px)-10px)] tw:flex-col tw:rounded-t-[12px] tw:bg-background tw:text-foreground tw:shadow-[0_-1px_0_var(--color-border-default)] tw:outline-none', className)}
+          id={id}
+          aria-modal="true"
+          onCloseAutoFocus={onCloseAutoFocus}
+          style={viewport ? { '--sheet-viewport-height': `${viewport.height}px`, '--sheet-viewport-bottom': `${viewport.bottom}px` } : undefined}
+          className={cn('ios-sheet tw:fixed tw:inset-x-0 tw:bottom-[var(--sheet-viewport-bottom,0px)] tw:z-[1001] tw:flex tw:max-h-[calc(var(--sheet-viewport-height,100dvh)-env(safe-area-inset-top,0px)-10px)] tw:flex-col tw:rounded-t-[12px] tw:bg-background tw:text-foreground tw:shadow-[0_-1px_0_var(--color-border-default)] tw:outline-none', className)}
         >
           <span aria-hidden="true" className="tw:mx-auto tw:mt-1.5 tw:h-[5px] tw:w-9 tw:shrink-0 tw:rounded-full tw:bg-line-strong" />
-          <div className="tw:grid tw:grid-cols-[1fr_auto_1fr] tw:items-center tw:px-4">
+          <div className="ios-sheet__header tw:grid tw:grid-cols-[1fr_minmax(0,auto)_1fr] tw:items-center tw:px-4">
             <span className="tw:justify-self-start">
               {cancelLabel && (
                 <Dialog.Close asChild>
@@ -21,7 +37,7 @@ export function Sheet({ open, onOpenChange, title, cancelLabel, onCancel, doneLa
                 </Dialog.Close>
               )}
             </span>
-            <Dialog.Title className="tw:m-0 tw:text-[17px] tw:font-semibold">{title}</Dialog.Title>
+            <Dialog.Title className="tw:m-0 tw:truncate tw:text-[17px] tw:font-semibold">{title}</Dialog.Title>
             <span className="tw:justify-self-end">
               {doneLabel && (
                 <button type="button" onClick={onDone || (() => onOpenChange?.(false))} className="tw:min-h-11 tw:border-0 tw:bg-transparent tw:p-0 tw:text-[17px] tw:font-semibold tw:text-action tw:cursor-pointer">{doneLabel}</button>
@@ -29,7 +45,7 @@ export function Sheet({ open, onOpenChange, title, cancelLabel, onCancel, doneLa
             </span>
           </div>
           {description ? <Dialog.Description className="tw:sr-only">{description}</Dialog.Description> : <Dialog.Description className="tw:sr-only">{title}</Dialog.Description>}
-          <div className="tw:flex tw:min-h-0 tw:flex-1 tw:flex-col tw:gap-5 tw:overflow-y-auto tw:overscroll-contain tw:pb-[max(16px,env(safe-area-inset-bottom))] tw:pt-1">
+          <div className="ios-sheet__body tw:flex tw:min-h-0 tw:flex-1 tw:flex-col tw:gap-5 tw:overflow-y-auto tw:overscroll-contain tw:pb-[max(16px,env(safe-area-inset-bottom))] tw:pt-1">
             {children}
           </div>
         </Dialog.Content>

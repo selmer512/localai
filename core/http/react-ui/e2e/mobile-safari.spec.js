@@ -136,7 +136,7 @@ test.describe('model picker sheet', () => {
   })
 
   test('opens as a bottom sheet and selects', async ({ page }) => {
-    const trigger = page.locator('.main-content button.input[aria-haspopup="listbox"]').first()
+    const trigger = page.locator('.main-content button.input[aria-haspopup="dialog"]').first()
     await trigger.click()
     const panel = page.locator('.searchable-select__panel')
     await expect(panel).toBeVisible()
@@ -161,7 +161,7 @@ test.describe('model picker sheet', () => {
     // On touch the search field is not autofocused (it would raise the
     // keyboard over the options), so a hardware keyboard's Escape has to be
     // handled by the component, not only by the field.
-    const trigger = page.locator('.main-content button.input[aria-haspopup="listbox"]').first()
+    const trigger = page.locator('.main-content button.input[aria-haspopup="dialog"]').first()
     await trigger.click()
     await expect(page.locator('.searchable-select__panel')).toBeVisible()
     await expect(page.locator('.searchable-select__panel input')).not.toBeFocused()
@@ -197,7 +197,7 @@ test.describe('chat', () => {
   test('the header gives the model picker a full row', async ({ page }) => {
     await json(page, '**/api/models/capabilities', { data: [{ id: 'llama-3.2-3b-instruct', capabilities: ['FLAG_CHAT'] }] })
     await page.goto('/app/chat')
-    const picker = page.locator('.chat-header button.input[aria-haspopup="listbox"]')
+    const picker = page.locator('.chat-header button.input[aria-haspopup="dialog"]')
     await expect(picker).toContainText('llama-3.2-3b-instruct')
     // The full name fits: nothing is cut off with an ellipsis.
     expect(await picker.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true)
@@ -413,7 +413,7 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
   test.beforeEach(async ({ page }) => {
     await json(page, '**/api/models/capabilities', { data: [{ id: 'Muse-Glimmer-30B-KQuant-17GB-Q4_K_M.gguf', capabilities: ['FLAG_CHAT', 'FLAG_IMAGE'] }] })
     await page.goto('/app/image')
-    await expect(page.locator('.main-content button.input[aria-haspopup="listbox"]').first()).toBeVisible()
+    await expect(page.locator('.main-content button.input[aria-haspopup="dialog"]').first()).toBeVisible()
     await page.evaluate(() => window.scrollTo(0, 250))
   })
 
@@ -422,7 +422,7 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
     // wrapper the containing block for position:fixed, so sheets opened from
     // a scrolled page landed inside the page, off screen.
     await expect.poll(() => page.locator('.page-transition').evaluate(el => getComputedStyle(el).transform)).toBe('none')
-    await page.locator('.main-content button.input[aria-haspopup="listbox"]').first().click()
+    await page.locator('.main-content button.input[aria-haspopup="dialog"]').first().click()
     const vh = page.viewportSize().height
     await expect.poll(async () => {
       const box = await page.locator('.searchable-select__panel').boundingBox()

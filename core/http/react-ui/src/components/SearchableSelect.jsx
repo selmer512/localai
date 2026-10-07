@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useId } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useIsPhone } from '../hooks/useIsPhone'
+import { Sheet } from './ui/sheet'
 
 const coarsePointer = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: coarse)').matches
 
@@ -9,6 +11,8 @@ export default function SearchableSelect({
   disabled = false, style, className = '',
 }) {
   const { t } = useTranslation('common')
+  const isPhone = useIsPhone()
+  const listId = useId()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [focusIndex, setFocusIndex] = useState(-1)
@@ -27,10 +31,11 @@ export default function SearchableSelect({
   const isHeader = (o) => !!(o && o.isHeader)
 
   useEffect(() => {
+    if (isPhone) return
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
+  }, [isPhone])
 
   const filtered = query
     ? items.filter(o => !isHeader(o) && o.label.toLowerCase().includes(query.toLowerCase()))
@@ -54,7 +59,7 @@ export default function SearchableSelect({
     setOpen(false)
     setQuery('')
     setFocusIndex(-1)
-    buttonRef.current?.focus()
+    if (!isPhone) buttonRef.current?.focus()
   }
 
   const handleKeyDown = (e) => {
@@ -83,10 +88,11 @@ export default function SearchableSelect({
         if (target && !isHeader(target)) select(target.value)
       }
     } else if (e.key === 'Escape') {
+      e.stopPropagation()
       setOpen(false)
       setQuery('')
       setFocusIndex(-1)
-      buttonRef.current?.focus()
+      if (!isPhone) buttonRef.current?.focus()
     }
   }
 
@@ -110,6 +116,116 @@ export default function SearchableSelect({
     background: isFocused ? 'var(--color-bg-tertiary)' : (isActive ? 'var(--color-bg-tertiary)' : 'transparent'),
   })
 
+  const popupContent = (
+    <>
+      <div className="searchable-select__search">
+        <input
+          // On touch devices autofocus raises the keyboard over the phone
+          // sheet before the options are even visible; let the user tap in.
+          autoFocus={!isPhone && !coarsePointer}
+          className="input"
+          type="search"
+          aria-label={searchPlaceholder}
+          aria-controls={listId}
+          aria-activedescendant={focusIndex >= 0 ? `${listId}-${focusIndex}` : undefined}
+          placeholder={searchPlaceholder}
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setFocusIndex(-1) }}
+          onKeyDown={handleKeyDown}
+          style={{ width: '100%', padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.8125rem' }}
+        />
+      </div>
+      <div ref={listRef} id={listId} role="listbox" aria-label={placeholder} className="searchable-select__list" style={{ overflowY: 'auto', maxHeight: 'min(200px, 50vh)' }}>
+        {allOption && (
+          <div
+            role="option"
+            className="searchable-select__option"
+            tabIndex={isPhone ? 0 : undefined}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select('') } }}
+            aria-selected={!value}
+            onClick={() => select('')}
+            style={itemStyle(!value, focusIndex === -1 && enterTarget?.type === 'all')}
+            onMouseEnter={focusIndex !== -1 ? () => setFocusIndex(-1) : undefined}
+          >
+            <span className="flex-1">{allOption}</span>
+            {enterTarget?.type === 'all' && (
+              <span className="searchable-select__hint" style={{ marginLeft: 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
+            )}
+          </div>
+        )}
+        {filtered.map((o, i) => {
+          if (isHeader(o)) {
+            return (
+              <div
+                key={`__header_${i}_${o.label}`}
+                role="presentation"
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '0.6875rem',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'var(--color-text-muted)',
+                  background: 'var(--color-bg-tertiary)',
+                  borderTop: '1px solid var(--color-border-subtle)',
+                  borderBottom: '1px solid var(--color-border-subtle)',
+                  cursor: 'default',
+                }}
+              >
+                {o.label}
+              </div>
+            )
+          }
+          const isActive = value === o.value
+          const isEnterTarget = enterTarget?.type === 'item' && enterTarget.index === i
+          const isFocused = focusIndex === i || isEnterTarget
+          return (
+            <div
+              key={o.value}
+              role="option"
+              id={`${listId}-${i}`}
+              tabIndex={isPhone ? 0 : undefined}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(o.value) } }}
+              className="searchable-select__option"
+              aria-selected={isActive}
+              onClick={() => select(o.value)}
+              style={itemStyle(isActive, isFocused)}
+              onMouseEnter={focusIndex !== i ? () => setFocusIndex(i) : undefined}
+            >
+              <span className="flex-1">{o.label}</span>
+              {o.badge && (
+                <span
+                  title={o.badgeTooltip || undefined}
+                  style={{
+                    marginLeft: 'auto',
+                    padding: '1px 6px',
+                    borderRadius: '999px',
+                    fontSize: '0.6875rem',
+                    fontWeight: 500,
+                    color: 'var(--color-text-muted)',
+                    background: 'var(--color-bg-tertiary)',
+                    border: '1px solid var(--color-border-subtle)',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {o.badge}
+                </span>
+              )}
+              {isEnterTarget && (
+                <span className="searchable-select__hint" style={{ marginLeft: o.badge ? '6px' : 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
+              )}
+            </div>
+          )
+        })}
+        {filtered.length === 0 && !allOption && (
+          <div role="status" style={{ padding: '6px 10px', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+            {t('forms.noMatch')}
+          </div>
+        )}
+      </div>
+    </>
+  )
+
   return (
     <div
       ref={ref}
@@ -119,7 +235,7 @@ export default function SearchableSelect({
       // field is not autofocused, so its own handler alone would leave a
       // hardware-keyboard user (iPad) stuck behind the sheet's backdrop.
       onKeyDown={(e) => {
-        if (e.key === 'Escape' && open) {
+        if (e.key === 'Escape' && open && !isPhone) {
           setOpen(false)
           setQuery('')
           setFocusIndex(-1)
@@ -132,7 +248,8 @@ export default function SearchableSelect({
         type="button"
         className="input"
         disabled={disabled}
-        aria-haspopup="listbox"
+        aria-haspopup={isPhone ? 'dialog' : 'listbox'}
+        aria-controls={open ? (isPhone ? `${listId}-dialog` : listId) : undefined}
         aria-expanded={open}
         onClick={() => { if (!disabled) { setOpen(!open); setQuery(''); setFocusIndex(-1) } }}
         style={{
@@ -148,8 +265,8 @@ export default function SearchableSelect({
         <span style={{ flex: 1, textAlign: 'left' }}>{displayLabel}</span>
         <i className="fas fa-chevron-down" aria-hidden="true" style={{ fontSize: '0.5rem', color: 'var(--color-text-muted)' }} />
       </button>
-      {open && <div className="searchable-select__backdrop" onClick={() => { setOpen(false); setQuery(''); setFocusIndex(-1) }} aria-hidden="true" />}
-      {open && (
+      {open && !isPhone && <div className="searchable-select__backdrop" onClick={() => { setOpen(false); setQuery(''); setFocusIndex(-1) }} aria-hidden="true" />}
+      {open && !isPhone && (
         <div className="searchable-select__panel" style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100, marginTop: 4,
           minWidth: 200, maxHeight: 'min(260px, 60vh)', background: 'var(--color-bg-secondary)',
@@ -157,103 +274,22 @@ export default function SearchableSelect({
           boxShadow: 'var(--shadow-md)', display: 'flex', flexDirection: 'column',
           animation: 'dropdownIn 120ms ease-out',
         }}>
-          <div style={{ padding: '6px', borderBottom: '1px solid var(--color-border-subtle)' }}>
-            <input
-              // On touch devices autofocus raises the keyboard over the phone
-              // sheet before the options are even visible; let the user tap in.
-              autoFocus={!coarsePointer}
-              className="input"
-              type="text"
-              placeholder={searchPlaceholder}
-              value={query}
-              onChange={(e) => { setQuery(e.target.value); setFocusIndex(-1) }}
-              onKeyDown={handleKeyDown}
-              style={{ width: '100%', padding: 'var(--spacing-xs) var(--spacing-sm)', fontSize: '0.8125rem' }}
-            />
-          </div>
-          <div ref={listRef} role="listbox" className="searchable-select__list" style={{ overflowY: 'auto', maxHeight: 'min(200px, 50vh)' }}>
-            {allOption && (
-              <div
-                role="option"
-                aria-selected={!value}
-                onClick={() => select('')}
-                style={itemStyle(!value, focusIndex === -1 && enterTarget?.type === 'all')}
-                onMouseEnter={focusIndex !== -1 ? () => setFocusIndex(-1) : undefined}
-              >
-                <span className="flex-1">{allOption}</span>
-                {enterTarget?.type === 'all' && (
-                  <span className="searchable-select__hint" style={{ marginLeft: 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
-                )}
-              </div>
-            )}
-            {filtered.map((o, i) => {
-              if (isHeader(o)) {
-                return (
-                  <div
-                    key={`__header_${i}_${o.label}`}
-                    role="presentation"
-                    style={{
-                      padding: '6px 10px',
-                      fontSize: '0.6875rem',
-                      fontWeight: 600,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      color: 'var(--color-text-muted)',
-                      background: 'var(--color-bg-tertiary)',
-                      borderTop: '1px solid var(--color-border-subtle)',
-                      borderBottom: '1px solid var(--color-border-subtle)',
-                      cursor: 'default',
-                    }}
-                  >
-                    {o.label}
-                  </div>
-                )
-              }
-              const isActive = value === o.value
-              const isEnterTarget = enterTarget?.type === 'item' && enterTarget.index === i
-              const isFocused = focusIndex === i || isEnterTarget
-              return (
-                <div
-                  key={o.value}
-                  role="option"
-                  className="searchable-select__option"
-                  aria-selected={isActive}
-                  onClick={() => select(o.value)}
-                  style={itemStyle(isActive, isFocused)}
-                  onMouseEnter={focusIndex !== i ? () => setFocusIndex(i) : undefined}
-                >
-                  <span className="flex-1">{o.label}</span>
-                  {o.badge && (
-                    <span
-                      title={o.badgeTooltip || undefined}
-                      style={{
-                        marginLeft: 'auto',
-                        padding: '1px 6px',
-                        borderRadius: '999px',
-                        fontSize: '0.6875rem',
-                        fontWeight: 500,
-                        color: 'var(--color-text-muted)',
-                        background: 'var(--color-bg-tertiary)',
-                        border: '1px solid var(--color-border-subtle)',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {o.badge}
-                    </span>
-                  )}
-                  {isEnterTarget && (
-                    <span className="searchable-select__hint" style={{ marginLeft: o.badge ? '6px' : 'auto', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>↵</span>
-                  )}
-                </div>
-              )
-            })}
-            {filtered.length === 0 && !allOption && (
-              <div style={{ padding: '6px 10px', fontSize: '0.8125rem', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                {t('forms.noMatch')}
-              </div>
-            )}
-          </div>
+          {popupContent}
         </div>
+      )}
+      {isPhone && (
+        <Sheet
+          id={`${listId}-dialog`}
+          open={open}
+          onOpenChange={next => { setOpen(next); if (!next) { setQuery(''); setFocusIndex(-1) } }}
+          title={placeholder}
+          cancelLabel={t('actions.cancel')}
+          className="searchable-select__panel"
+          overlayClassName="searchable-select__backdrop"
+          onCloseAutoFocus={event => { event.preventDefault(); buttonRef.current?.focus({ preventScroll: true }) }}
+        >
+          {popupContent}
+        </Sheet>
       )}
     </div>
   )
