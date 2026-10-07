@@ -100,6 +100,7 @@
     "usage": "{{prompt}}p + {{completion}}c = {{total}}"
   },
   "input": {
+    "tools": "Attachments and tools",
     "placeholder": "Message...",
     "attachFile": "Attach file",
     "send": "Send message",

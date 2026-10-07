@@ -89,6 +89,7 @@
     "usage": "{{prompt}}p + {{completion}}c = {{total}}"
   },
   "input": {
+    "tools": "附件和工具",
     "placeholder": "消息...",
     "attachFile": "附加文件",
     "stopGenerating": "停止生成",

@@ -35,13 +35,28 @@ export default function More() {
 
   const auth = { isAdmin, authEnabled, hasFeature, features }
   const needle = query.trim().toLocaleLowerCase(i18n.resolvedLanguage)
-  const matches = label => !needle || label.toLocaleLowerCase(i18n.resolvedLanguage).includes(needle)
-  const groups = consoles.flatMap(config => config.groups.map(group => ({
-    config,
-    group,
-    items: group.items.filter(item => isConsoleItemVisible(item, auth) && matches(t(item.labelKey))),
-  }))).filter(({ items }) => items.length > 0)
-  const showTalk = matches(t('items.talk'))
+  const matches = label => !needle || (label || '').toLocaleLowerCase(i18n.resolvedLanguage).includes(needle)
+  // Search covers every row on the screen, settings included. Typing a
+  // section's name ("Operate", "About") keeps that whole section.
+  const inSection = (headers, ...labels) => headers.some(matches) || labels.some(matches)
+  const groups = consoles.flatMap(config => config.groups.map(group => {
+    const headers = [t(config.titleKey), t(group.titleKey)]
+    return {
+      config,
+      group,
+      items: group.items.filter(item => isConsoleItemVisible(item, auth) && inSection(headers, t(item.labelKey))),
+    }
+  })).filter(({ items }) => items.length > 0)
+  const showInstance = matches(branding.instanceName) || matches(window.location.host)
+  const showUser = authEnabled && user && inSection([t('account')], user.name, user.email)
+  const showLogout = authEnabled && user && inSection([t('account')], t('logout'))
+  const showDark = inSection([t('more_page.preferences')], t('more_page.darkMode'))
+  const showLanguage = inSection([t('more_page.preferences')], t('changeLanguage'), ...SUPPORTED_LANGUAGES.map(l => l.name))
+  const showTalk = inSection([t('sections.create')], t('items.talk'))
+  const showDocs = inSection([t('more_page.about')], t('footer.documentation'))
+  const showGithub = inSection([t('more_page.about')], t('footer.github'))
+  const showVersion = /\d/.test(version) && inSection([t('more_page.about')], t('more_page.version'), version)
+  const anyResult = showInstance || showUser || showLogout || showDark || showLanguage || showTalk || showDocs || showGithub || showVersion || groups.length > 0
   const failedOps = operations.filter(op => op.error).length
   const language = SUPPORTED_LANGUAGES.find(l => l.code === i18n.resolvedLanguage) || SUPPORTED_LANGUAGES[0]
   let colorIndex = 0
@@ -61,7 +76,7 @@ export default function More() {
         />
       </div>
 
-      {!needle && <InsetGroup>
+      {showInstance && <InsetGroup>
         <ListRow
           to={isAdmin ? '/app/operate' : undefined}
           leading={<span className="tw:flex tw:size-[52px] tw:shrink-0 tw:items-center tw:justify-center tw:rounded-full tw:bg-elevated tw:text-live"><Server aria-hidden="true" className="tw:size-[26px]" strokeWidth={1.9} /></span>}
@@ -72,29 +87,29 @@ export default function More() {
         />
       </InsetGroup>}
 
-      {!needle && authEnabled && user && (
+      {(showUser || showLogout) && (
         <InsetGroup header={t('account')}>
-          <ListRow
+          {showUser && <ListRow
             to="/app/account"
             leading={user.avatarUrl
               ? <img src={user.avatarUrl} alt="" className="tw:size-[30px] tw:shrink-0 tw:rounded-full" />
               : <IconTile icon="fas fa-user" color="gray" />}
             title={user.name || user.email}
             subtitle={user.name && user.email ? user.email : undefined}
-          />
-          <ListRow onClick={logout} title={t('logout')} titleClassName="tw:text-danger" chevron={false}
-            leading={<IconTile icon="fas fa-arrow-right-from-bracket" color="red" />} />
+          />}
+          {showLogout && <ListRow onClick={logout} title={t('logout')} titleClassName="tw:text-danger" chevron={false}
+            leading={<IconTile icon="fas fa-arrow-right-from-bracket" color="red" />} />}
         </InsetGroup>
       )}
 
-      {!needle && <InsetGroup header={t('more_page.preferences')} className="more-page__preferences">
-        <ListRow
+      {(showDark || showLanguage) && <InsetGroup header={t('more_page.preferences')} className="more-page__preferences">
+        {showDark && <ListRow
           leading={<IconTile icon="fas fa-moon" color="blue" />}
           title={t('more_page.darkMode')}
           trailing={<Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} aria-label={t('more_page.darkMode')} />}
           chevron={false}
-        />
-        <label className="tw:block">
+        />}
+        {showLanguage && <label className="tw:block">
           <ListRow
             leading={<IconTile icon="fas fa-globe" color="soft" />}
             title={t('changeLanguage')}
@@ -114,7 +129,7 @@ export default function More() {
               </span>
             )}
           />
-        </label>
+        </label>}
       </InsetGroup>}
 
       {showTalk && <InsetGroup header={t('sections.create')}>
@@ -144,14 +159,14 @@ export default function More() {
         )
       })}
 
-      {needle && !showTalk && groups.length === 0 && (
+      {!anyResult && (
         <p className="more-page__no-results" role="status">{t('more_page.noPages')}</p>
       )}
 
-      {!needle && <InsetGroup header={t('more_page.about')}>
-        <ListRow href="https://localai.io" external leading={<IconTile icon="fas fa-book" color="gray" />} title={t('footer.documentation')} />
-        <ListRow href="https://github.com/mudler/LocalAI" external leading={<IconTile icon="fab fa-github" color="gray" />} title={t('footer.github')} />
-        {/\d/.test(version) && <ListRow leading={<IconTile icon="fas fa-circle-info" color="gray" />} title={t('more_page.version')} trailing={<RowValue>{version}</RowValue>} chevron={false} />}
+      {(showDocs || showGithub || showVersion) && <InsetGroup header={t('more_page.about')}>
+        {showDocs && <ListRow href="https://localai.io" external leading={<IconTile icon="fas fa-book" color="gray" />} title={t('footer.documentation')} />}
+        {showGithub && <ListRow href="https://github.com/mudler/LocalAI" external leading={<IconTile icon="fab fa-github" color="gray" />} title={t('footer.github')} />}
+        {showVersion && <ListRow leading={<IconTile icon="fas fa-circle-info" color="gray" />} title={t('more_page.version')} trailing={<RowValue>{version}</RowValue>} chevron={false} />}
       </InsetGroup>}
 
       {!needle && <p className="tw:m-0 tw:px-8 tw:text-center tw:text-[13px] tw:text-faint">

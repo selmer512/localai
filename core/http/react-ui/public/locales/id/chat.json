@@ -89,6 +89,7 @@
     "usage": "{{prompt}}p + {{completion}}c = {{total}}"
   },
   "input": {
+    "tools": "Lampiran dan alat",
     "placeholder": "Pesan...",
     "attachFile": "Lampirkan file",
     "stopGenerating": "Hentikan pembuatan",

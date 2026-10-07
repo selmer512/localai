@@ -76,8 +76,8 @@
     "training": "训练"
   },
   "more_page": {
-    "searchPages": "查找页面",
-    "noPages": "未找到页面，请尝试其他搜索。",
+    "searchPages": "搜索",
+    "noPages": "无结果，请尝试其他搜索。",
     "preferences": "偏好设置",
     "darkMode": "深色模式",
     "about": "关于",

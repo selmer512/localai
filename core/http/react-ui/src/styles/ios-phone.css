@@ -163,7 +163,7 @@
   .chat-input-wrapper {
     display: grid !important;
     grid-template-columns: 44px minmax(0, 1fr) 44px;
-    grid-template-areas: "modes modes modes" "attach input send";
+    grid-template-areas: "modes modes modes" "tools input send";
     row-gap: 2px;
     border-radius: 22px !important;
     border: 0.5px solid var(--color-border-default) !important;
@@ -173,7 +173,39 @@
     box-shadow: none !important;
   }
   .chat-input-modes { grid-area: modes; justify-content: flex-start; }
-  .chat-attach-btn { grid-area: attach; }
+  /* One row, like Messages: "+" opens a tray above the field holding attach,
+     Canvas and MCP. A dot on "+" says a mode is on while the tray is shut. */
+  .chat-tools-btn {
+    grid-area: tools;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 22px;
+    background: transparent;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chat-tools-btn svg { width: 24px; height: 24px; transition: transform 150ms ease; }
+  .chat-tools-btn[aria-expanded="true"] svg { transform: rotate(45deg); }
+  .chat-tools-btn--active::after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--color-primary);
+  }
+  .chat-input-modes--closed { display: none !important; }
+  .chat-input-modes { flex-wrap: wrap; border-bottom: 0.5px solid var(--color-border-subtle); padding-bottom: 2px; }
+  .chat-input-modes .chat-attach-btn { display: inline-flex; align-items: center; gap: 6px; }
   .chat-send-btn, .chat-stop-btn { grid-area: send; }
   .chat-input { grid-area: input; min-height: 44px; font-size: 17px !important; padding: 7px 8px !important; }
   .chat-attach-btn, .chat-stop-btn {
@@ -982,4 +1014,23 @@
      the "Attach files" hint: the composer's paperclip already says it. */
   .chat-empty-state { max-width: none !important; width: 100%; padding-left: 16px !important; padding-right: 16px !important; }
   .chat-empty-hints { display: none !important; }
+}
+
+@media (max-width: 639px) {
+  /* Every tap into a text field matches :focus-visible, so the global
+     outline boxed the message field on each tap. The composer's own border
+     carries the focus state instead. */
+  .chat-input:focus, .chat-input:focus-visible { outline: none !important; box-shadow: none !important; }
+  .chat-input-wrapper:focus-within { border-color: var(--color-primary) !important; }
+  /* Tray items read as one set: same size, weight and colour. */
+  .chat-input-modes > button,
+  .chat-input-modes > div > button,
+  .chat-input-modes .btn {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: var(--color-text-secondary) !important;
+    gap: 6px;
+  }
+  .chat-input-modes .chat-mode-chip-on { color: var(--color-primary) !important; }
+  .chat-input-modes .chat-mode-chip-label { font-size: 15px; }
 }

@@ -89,6 +89,7 @@
     "usage": "{{prompt}}p + {{completion}}c = {{total}}"
   },
   "input": {
+    "tools": "첨부 파일 및 도구",
     "placeholder": "메시지...",
     "attachFile": "파일 첨부",
     "stopGenerating": "생성 중지",

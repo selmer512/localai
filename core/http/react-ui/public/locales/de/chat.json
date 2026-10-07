@@ -89,6 +89,7 @@
     "usage": "{{prompt}}p + {{completion}}c = {{total}}"
   },
   "input": {
+    "tools": "Anhänge und Werkzeuge",
     "placeholder": "Nachricht...",
     "attachFile": "Datei anhängen",
     "stopGenerating": "Generierung stoppen",

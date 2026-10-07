@@ -94,17 +94,35 @@ test.describe('phone app shell', () => {
   test('More search finds pages, recovers from no results and keeps preferences in reach', async ({ page }) => {
     await page.goto('/app/more')
     const more = page.locator('.more-page')
-    const search = more.getByRole('searchbox', { name: 'Find a page' })
+    const search = more.getByRole('searchbox', { name: 'Search' })
     const dark = more.getByRole('switch', { name: 'Dark mode' })
     expect((await dark.boundingBox()).y).toBeLessThan(600)
     await search.fill('settings')
     await expect(more.getByRole('link', { name: 'Settings', exact: true })).toBeVisible()
     await expect(more.getByRole('link', { name: 'Agents', exact: true })).toHaveCount(0)
     await search.fill('no such page')
-    await expect(more.getByRole('status')).toHaveText('No pages found. Try another search.')
+    await expect(more.getByRole('status')).toHaveText('No results. Try another search.')
     await search.fill('')
     await expect(more.getByRole('link', { name: 'Agents', exact: true })).toBeVisible()
     await expect(dark).toBeVisible()
+  })
+
+  test('More search also finds settings and whole sections', async ({ page }) => {
+    await page.goto('/app/more')
+    const more = page.locator('.more-page')
+    const search = more.getByRole('searchbox', { name: 'Search' })
+    await search.fill('dark')
+    await expect(more.getByRole('switch', { name: 'Dark mode' })).toBeVisible()
+    await expect(more.getByLabel('Change language')).toHaveCount(0)
+    await search.fill('language')
+    await expect(more.getByLabel('Change language')).toBeVisible()
+    await search.fill('github')
+    await expect(more.getByRole('link', { name: /GitHub/ })).toBeVisible()
+    // A section's name keeps every row in it.
+    await search.fill('operate')
+    await expect(more.getByRole('link', { name: 'Traces', exact: true })).toBeVisible()
+    await expect(more.getByRole('link', { name: 'Backends', exact: true })).toBeVisible()
+    await expect(more.getByRole('link', { name: 'Agents', exact: true })).toHaveCount(0)
   })
 
   test('More search cannot reveal administrator pages to a regular user', async ({ page }) => {
@@ -114,7 +132,7 @@ test.describe('phone app shell', () => {
     }))
     await page.goto('/app/more')
     const more = page.locator('.more-page')
-    await more.getByRole('searchbox', { name: 'Find a page' }).fill('settings')
+    await more.getByRole('searchbox', { name: 'Search' }).fill('settings')
     await expect(more.getByRole('link', { name: 'Settings', exact: true })).toHaveCount(0)
     await expect(more.getByRole('status')).toBeVisible()
   })
@@ -123,7 +141,8 @@ test.describe('phone app shell', () => {
     await page.setViewportSize({ width: 320, height: 844 })
     await page.goto('/app/chat')
     await expect(page.getByRole('textbox', { name: 'Message...' })).toBeVisible()
-    for (const selector of ['.chat-attach-btn', '.chat-send-btn', '.chat-mode-chip', '.chat-header-model > button.input']) {
+    await page.getByRole('button', { name: 'Attachments and tools' }).click()
+    for (const selector of ['.chat-tools-btn', '.chat-attach-btn', '.chat-send-btn', '.chat-mode-chip', '.chat-header-model > button.input']) {
       const box = await page.locator(selector).boundingBox()
       expect(box.height).toBeGreaterThanOrEqual(44)
       expect(box.width).toBeGreaterThanOrEqual(44)
@@ -203,6 +222,60 @@ test.describe('phone pages read and flow like an app', () => {
       document.body.appendChild(user)
     })
     await expect(page.locator('.chat-message-user .chat-message-model')).toBeHidden()
+  })
+})
+
+test.describe('the phone composer', () => {
+  test.use(phone)
+
+  test('keeps one row, with attach, Canvas and MCP behind "+"', async ({ page }) => {
+    await page.goto('/app/chat')
+    const tools = page.getByRole('button', { name: 'Attachments and tools' })
+    const field = page.locator('.chat-input')
+    await expect(page.locator('.chat-input-modes')).toBeHidden()
+    // "+", the field and send share one row.
+    const tops = await Promise.all([tools, field, page.locator('.chat-send-btn')].map(async l => Math.round((await l.boundingBox()).y + (await l.boundingBox()).height)))
+    expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(2)
+
+    await tools.click()
+    await expect(tools).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.getByRole('button', { name: 'Attach file' })).toBeVisible()
+    await page.getByRole('button', { name: 'Canvas' }).click()
+    // Tapping into the field shuts the tray; the dot keeps Canvas visible.
+    await field.click()
+    await expect(page.locator('.chat-input-modes')).toBeHidden()
+    await expect(tools).toHaveClass(/chat-tools-btn--active/)
+    await expect(field).toHaveCSS('outline-style', 'none')
+  })
+
+  test('desktop keeps the modes and attach button in the composer', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/app/chat')
+    await expect(page.locator('.chat-tools-btn')).toHaveCount(0)
+    await expect(page.locator('.chat-input-modes')).toBeVisible()
+    await expect(page.locator('.chat-attach-btn')).toBeVisible()
+  })
+
+  test('a picker sheet rises above the on-screen keyboard', async ({ page }) => {
+    // Chromium has no on-screen keyboard; stand in for iOS, where the
+    // keyboard shrinks the visual viewport and leaves innerHeight alone.
+    await page.addInitScript(() => {
+      const vv = new EventTarget()
+      Object.assign(vv, { height: window.innerHeight, width: window.innerWidth, offsetTop: 0, offsetLeft: 0, scale: 1, pageTop: 0, pageLeft: 0 })
+      Object.defineProperty(window, 'visualViewport', { value: vv, configurable: true })
+      window.__keyboard = (h) => { vv.height = window.innerHeight - h; vv.dispatchEvent(new Event('resize')) }
+    })
+    await page.route('**/api/models/capabilities', route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: ['alpha-7b', 'beta-3b'].map(id => ({ id, capabilities: ['FLAG_CHAT'] })) }),
+    }))
+    await page.goto('/app/chat')
+    await page.locator('.chat-header-model > button.input').click()
+    const panel = page.locator('.searchable-select__panel')
+    await expect.poll(async () => Math.round((await panel.boundingBox()).y + (await panel.boundingBox()).height)).toBe(844)
+    await page.evaluate(() => window.__keyboard(336))
+    await expect.poll(async () => Math.round((await panel.boundingBox()).y + (await panel.boundingBox()).height)).toBe(508)
+    expect((await panel.boundingBox()).y).toBeGreaterThanOrEqual(0)
   })
 })
 

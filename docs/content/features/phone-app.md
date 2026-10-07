@@ -12,7 +12,7 @@ Desktop and tablet layouts are unchanged.
 ## Navigation
 
 - **Tab bar.** Home, Chat, Studio, Models (administrators only) and More sit at the bottom of the screen, within thumb reach.
-- **More.** Use **Find a page** to filter destinations by their translated name. Clear the search to restore the full menu. Preferences (dark mode and language) sit near the top, before the navigation groups. More lists every other page, grouped as on the desktop sidebar: Talk, the Build pages (agents, skills, memory, jobs, fine-tuning, quantization, face and voice recognition) and the Operate pages (overview, backends, activity, usage, traces, nodes, settings and the rest). It also holds your account and sign out. A page appears here under the same access rules as on the desktop sidebar, including while searching.
+- **More.** Use **Search** to filter everything on the screen by its translated name: pages, preferences such as dark mode and language, your account and sign out, and the About links. Type a section name, such as Operate or About, to see every row in that section. Clear the search to restore the full menu. Preferences (dark mode and language) sit near the top, before the navigation groups. More lists every other page, grouped as on the desktop sidebar: Talk, the Build pages (agents, skills, memory, jobs, fine-tuning, quantization, face and voice recognition) and the Operate pages (overview, backends, activity, usage, traces, nodes, settings and the rest). It also holds your account and sign out. A page appears here under the same access rules as on the desktop sidebar, including while searching.
 - **Large titles and Back.** Each page opens with a large title. When you scroll, the title moves into the navigation bar. A page opened from a tab has a Back button labelled with the screen you came from. A page opened directly by its address goes back to its tab.
 
 Pages you open from More, such as Traces or Settings, show their content straight away. On a desktop or tablet these pages keep the section rail for switching between them; on a phone you go back to More instead.
@@ -32,7 +32,7 @@ Pages you open from More, such as Traces or Settings, show their content straigh
 - **Lists** (agents, usage, jobs and similar) appear as a grouped list with one row per item.
 - **Text** follows the iOS sizes: 17px body, 15px secondary text and 13px captions. Only tab bar labels and status badges are smaller.
 - **Talk** keeps its Connect button docked above the tab bar, so it stays in reach while you scroll through the options.
-- **Chat composer** keeps Canvas and MCP in a separate row above the message field. Attach, send, stop, mode controls and the model title have at least 44px touch targets; the field keeps room for writing on narrow phones. The model title shows a visible focus outline for keyboard navigation.
+- **Chat composer** is one row, as in Messages: **+**, the message field and send. Tap **+** to open a tray above the field with Attach file, Canvas and MCP; tapping into the field closes it. While the tray is closed, a dot on **+** shows that Canvas or an MCP server is on. Every composer control and the model title has at least a 44px touch target. The model title shows a visible focus outline for keyboard navigation.
 
 ## Themes
 

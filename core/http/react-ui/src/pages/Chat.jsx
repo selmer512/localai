@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Plus } from 'lucide-react'
 import { useParams, useOutletContext, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fromState } from '../utils/editorNav'
@@ -19,6 +19,7 @@ import { loadClientMCPServers } from '../utils/mcpClientStorage'
 import ConfirmDialog from '../components/ConfirmDialog'
 import ChatsMenu from '../components/ChatsMenu'
 import { useAuth } from '../context/AuthContext'
+import { useIsPhone } from '../hooks/useIsPhone'
 import { useOperations } from '../hooks/useOperations'
 import { relativeTime } from '../utils/format'
 import { copyToClipboard } from '../utils/clipboard'
@@ -385,6 +386,10 @@ export default function Chat() {
   const [modelInfo, setModelInfo] = useState(null)
   const [showModelInfo, setShowModelInfo] = useState(false)
   const [canvasMode, setCanvasMode] = useState(false)
+  // Phones keep the composer to one row; attach, Canvas and MCP live in a
+  // tray behind "+", as the Messages app does with its app drawer.
+  const isPhone = useIsPhone()
+  const [toolsOpen, setToolsOpen] = useState(false)
   const [canvasOpen, setCanvasOpen] = useState(false)
   const [selectedArtifactId, setSelectedArtifactId] = useState(null)
   const [clientMCPServers, setClientMCPServers] = useState(() => loadClientMCPServers())
@@ -991,6 +996,20 @@ export default function Chat() {
     focusActive ? 'chat--focus' : '',
   ].filter(Boolean).join(' ')
 
+  const toolsActive = canvasMode || (activeChat.mcpServers || []).length > 0 || (activeChat.clientMCPServers || []).length > 0
+  const attachButton = (
+    <button
+      type="button"
+      className="btn btn-secondary btn-sm chat-attach-btn"
+      onClick={() => { setToolsOpen(false); fileInputRef.current?.click() }}
+      title={t('input.attachFile')}
+      aria-label={t('input.attachFile')}
+    >
+      <i className="fas fa-paperclip" />
+      {isPhone && <span className="chat-mode-chip-label">{t('input.attachFile')}</span>}
+    </button>
+  )
+
   return (
     <div className={layoutClasses}>
       {/* Chat main area */}
@@ -1512,7 +1531,20 @@ export default function Chat() {
         {/* Input area */}
         <div className="chat-input-area">
           <div className="chat-input-wrapper">
-            <div className="chat-input-modes">
+            {isPhone && (
+              <button
+                type="button"
+                className={`chat-tools-btn${toolsActive ? ' chat-tools-btn--active' : ''}`}
+                aria-expanded={toolsOpen}
+                aria-controls="chat-input-tools"
+                aria-label={t('input.tools')}
+                onClick={() => setToolsOpen(open => !open)}
+              >
+                <Plus aria-hidden="true" strokeWidth={2.2} />
+              </button>
+            )}
+            <div id="chat-input-tools" className={`chat-input-modes${isPhone && !toolsOpen ? ' chat-input-modes--closed' : ''}`}>
+              {isPhone && attachButton}
               <button
                 type="button"
                 className={`chat-mode-chip${canvasMode ? ' chat-mode-chip-on' : ''}`}
@@ -1588,15 +1620,7 @@ export default function Chat() {
                 onToggleResource={toggleMcpResource}
               />
             </div>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm chat-attach-btn"
-              onClick={() => fileInputRef.current?.click()}
-              title={t('input.attachFile')}
-              aria-label={t('input.attachFile')}
-            >
-              <i className="fas fa-paperclip" />
-            </button>
+            {!isPhone && attachButton}
             <input
               ref={fileInputRef}
               type="file"
@@ -1613,6 +1637,7 @@ export default function Chat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
+              onFocus={() => setToolsOpen(false)}
               placeholder={t('input.placeholder')}
               rows={1}
               disabled={isStreaming}

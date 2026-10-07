@@ -76,8 +76,8 @@
     "training": "Entrenamiento"
   },
   "more_page": {
-    "searchPages": "Buscar una página",
-    "noPages": "No se encontraron páginas. Prueba otra búsqueda.",
+    "searchPages": "Buscar",
+    "noPages": "Sin resultados. Prueba otra búsqueda.",
     "preferences": "Preferencias",
     "darkMode": "Modo oscuro",
     "about": "Acerca de",
