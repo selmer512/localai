@@ -16,7 +16,7 @@
       "canMake": "What you can make",
       "running": "Running now",
       "recent": "Recent outputs",
-      "noModel": "No model installed",
+      "noModel": "Ningún modelo instalado",
       "install": "Install a model",
       "ready": "Ready",
       "seconds": "{{seconds}}s",

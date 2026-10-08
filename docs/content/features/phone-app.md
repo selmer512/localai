@@ -12,7 +12,7 @@ Desktop and tablet keep their sidebar layout. Home uses one entry per resource, 
 ## Navigation
 
 - **Tab bar.** Home, Chat, Studio, Models (administrators only) and More sit at the bottom of the screen, within thumb reach.
-- **More.** Preferences stay near the top. **Build** and **Operate** open expandable sections containing the same pages and access rules as the desktop sidebar. One section is open at a time, so advanced controls do not crowd the initial menu. **Search** finds pages, preferences, account actions and About information even when their section is closed; searching a section name shows its matching rows directly. **About** contains instance details and documentation. Talk remains on Home and can also be found through Search.
+- **More.** Preferences stay near the top. **Build** and **Operate** open expandable sections containing the same pages and access rules as the desktop sidebar. One section is open at a time, so advanced controls do not crowd the initial menu. More remembers the open section for the rest of the browser tab's session, so Back from a page such as Traces returns to the same list. **Search** finds pages, preferences, account actions and About information even when their section is closed; searching a section name shows its matching rows directly. **About** contains instance details and documentation. Talk remains on Home and can also be found through Search.
 - **Large titles and Back.** Each page opens with a large title. When you scroll, the title moves into the navigation bar. A page opened from a tab has a Back button labelled with the screen you came from. A page opened directly by its address goes back to its tab.
 
 Pages you open from More, such as Traces or Settings, show their content straight away. On a desktop or tablet these pages keep the section rail for switching between them; on a phone you go back to More instead.
@@ -32,7 +32,7 @@ Pages you open from More, such as Traces or Settings, show their content straigh
 - **Lists** (agents, usage, jobs and similar) appear as a grouped list with one row per item.
 - **Text** follows the iOS sizes: 17px body, 15px secondary text and 13px captions. Only tab bar labels and status badges are smaller.
 - **Talk** keeps its Connect button docked above the tab bar, so it stays in reach while you scroll through the options.
-- **Chat composer** is one row, as in Messages: **+**, the message field and send. Tap **+** to open a tray above the field with Attach file, Canvas and MCP; tapping into the field closes it. While the tray is closed, a dot on **+** shows that Canvas or an MCP server is on. Every composer control and the model title has at least a 44px touch target. The model title shows a visible focus outline for keyboard navigation.
+- **Chat composer** is one row, as in Messages: **+**, the message field and send. Tap **+** to open a tray above the field with Attach file, Canvas and MCP; tapping into the field closes it. While the tray is closed, a dot on **+** shows that Canvas, an MCP server or an MCP resource is on. Every composer control and the model title has at least a 44px touch target. The model title shows a visible focus outline for keyboard navigation.
 
 ## Themes
 

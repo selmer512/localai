@@ -16,6 +16,19 @@ import { Switch } from '../components/ui/switch'
 // the same console config the sidebar renders, with the same gates, so every
 // destination the desktop sidebar offers is here too and the two cannot drift.
 
+// Which section was open, so Back from a page lands on the same list. Per
+// tab and best effort: storage can be missing or throw in private browsing.
+const OPEN_SECTION_KEY = 'localai_more_open_section'
+function readOpenSection() {
+  try { return sessionStorage.getItem(OPEN_SECTION_KEY) } catch { return null }
+}
+function writeOpenSection(value) {
+  try {
+    if (value) sessionStorage.setItem(OPEN_SECTION_KEY, value)
+    else sessionStorage.removeItem(OPEN_SECTION_KEY)
+  } catch { /* ignore */ }
+}
+
 const GROUP_COLORS = ['blue', 'purple', 'teal', 'mint', 'soft', 'amber', 'orange']
 
 export default function More() {
@@ -27,6 +40,20 @@ export default function More() {
   const [features, setFeatures] = useState({})
   const [version, setVersion] = useState('')
   const [query, setQuery] = useState('')
+  const [openSection, setOpenSection] = useState(readOpenSection)
+  // The details share a name, so opening one closes the other and both fire
+  // toggle in either order; a close only clears the section it names.
+  const sectionProps = key => ({
+    open: openSection === key,
+    onToggle: event => {
+      const isOpen = event.currentTarget.open
+      setOpenSection(previous => {
+        const next = isOpen ? key : (previous === key ? null : previous)
+        writeOpenSection(next)
+        return next
+      })
+    },
+  })
 
   useEffect(() => {
     fetch(apiUrl('/api/features')).then(r => r.json()).then(setFeatures).catch(() => {})
@@ -160,7 +187,7 @@ export default function More() {
       )) : menu.length > 0 && (
         <InsetGroup header={t('more_page.tools')} data-testid="more-tools">
           {menu.map(({ config, groups: visibleGroups }) => (
-            <details key={config.id} name="more-sections" className="more-page__section" data-console={config.id}>
+            <details key={config.id} name="more-sections" className="more-page__section" data-console={config.id} {...sectionProps(config.id)}>
               <summary className="more-page__summary">
                 <IconTile icon={config.icon} color={config.id === 'build' ? 'purple' : 'teal'} />
                 <span className="more-page__summary-copy">
@@ -194,7 +221,7 @@ export default function More() {
       {(showInstance || showDocs || showGithub || showVersion) && (
         <InsetGroup header={needle ? t('more_page.about') : undefined}>
           {needle ? aboutRows : (
-            <details name="more-sections" className="more-page__section">
+            <details name="more-sections" className="more-page__section" data-section="about" {...sectionProps('about')}>
               <summary className="more-page__summary">
                 <IconTile icon="fas fa-circle-info" color="gray" />
                 <span className="more-page__summary-copy">{t('more_page.about')}</span>

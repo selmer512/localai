@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "Kelola LocalAI melalui obrolan",
     "description": "Instal model, ganti backend, edit konfigurasi dan periksa status dengan berbicara pada LocalAI.",
-    "open": "Buka asisten",
     "tooltip": "Kelola LocalAI melalui obrolan"
   },
   "input": {
@@ -39,9 +37,6 @@
   },
   "quickLinks": {
     "manageByChat": "Kelola melalui obrolan",
-    "installedModels": "Model Terinstal",
-    "browseGallery": "Jelajahi Galeri",
-    "importModel": "Impor Model",
     "documentation": "Dokumentasi"
   },
   "loadedModels": {
@@ -107,16 +102,6 @@
     "talk": "Bicara",
     "talkHint": "Percakapan suara waktu nyata",
     "stop": "Hentikan",
-    "create": {
-      "image": "Gambar",
-      "imageHint": "Buat gambar",
-      "speech": "Suara",
-      "speechHint": "Teks ke suara",
-      "sound": "Bunyi",
-      "soundHint": "Musik dan efek",
-      "video": "Video",
-      "videoHint": "Klip pendek"
-    },
     "status_one": "{{count}} model dimuat",
     "status_other": "{{count}} model dimuat"
   }

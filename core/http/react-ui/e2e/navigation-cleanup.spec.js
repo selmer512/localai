@@ -41,6 +41,10 @@ test.describe('focused phone navigation', () => {
     await expect(more.getByRole('link', { name: 'Settings', exact: true })).toBeVisible()
     await expect(more.locator('details')).toHaveCount(0)
     await more.getByRole('searchbox', { name: 'Search' }).fill('')
+    // Clearing the search returns to the menu as it was: Operate still open.
+    await expect(operate).toHaveAttribute('open', '')
+    await expect(build).not.toHaveAttribute('open', '')
+    await operate.locator('summary').click()
     await expect(more.getByRole('link', { name: 'Settings', exact: true })).toBeHidden()
   })
 })

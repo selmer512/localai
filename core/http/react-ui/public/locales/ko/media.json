@@ -16,7 +16,7 @@
       "canMake": "What you can make",
       "running": "Running now",
       "recent": "Recent outputs",
-      "noModel": "No model installed",
+      "noModel": "설치된 모델 없음",
       "install": "Install a model",
       "ready": "Ready",
       "seconds": "{{seconds}}s",

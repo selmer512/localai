@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "LocalAI per Chat verwalten",
     "description": "Modelle installieren, Backends wechseln, Konfigurationen bearbeiten und Status prüfen — durch Gespräche mit LocalAI.",
-    "open": "Assistent öffnen",
     "tooltip": "LocalAI per Chat verwalten"
   },
   "input": {
@@ -39,9 +37,6 @@
   },
   "quickLinks": {
     "manageByChat": "Per Chat verwalten",
-    "installedModels": "Installierte Modelle",
-    "browseGallery": "Galerie durchsuchen",
-    "importModel": "Modell importieren",
     "documentation": "Dokumentation"
   },
   "loadedModels": {
@@ -107,16 +102,6 @@
     "talk": "Sprechen",
     "talkHint": "Sprachgespräch in Echtzeit",
     "stop": "Stoppen",
-    "create": {
-      "image": "Bild",
-      "imageHint": "Bilder erzeugen",
-      "speech": "Sprache",
-      "speechHint": "Text zu Sprache",
-      "sound": "Klang",
-      "soundHint": "Musik und Effekte",
-      "video": "Video",
-      "videoHint": "Kurze Clips"
-    },
     "status_one": "{{count}} Modell geladen",
     "status_other": "{{count}} Modelle geladen"
   }

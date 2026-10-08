@@ -996,7 +996,10 @@ export default function Chat() {
     focusActive ? 'chat--focus' : '',
   ].filter(Boolean).join(' ')
 
-  const toolsActive = canvasMode || (activeChat.mcpServers || []).length > 0 || (activeChat.clientMCPServers || []).length > 0
+  const toolsActive = canvasMode
+    || (activeChat.mcpServers || []).length > 0
+    || (activeChat.clientMCPServers || []).length > 0
+    || (activeChat.mcpResources || []).length > 0
   const attachButton = (
     <button
       type="button"

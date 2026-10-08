@@ -17,6 +17,8 @@ test.describe('Operate console on a phone', () => {
   test('More lists every Operate page', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 800 })
     await page.goto('/app/more')
+    // Operate is a collapsed section; its pages appear once it is opened.
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
     for (const name of ['Overview', 'Backends', 'Activity', 'Usage', 'Traces', 'Settings']) {
       await expect(page.locator('.more-page').getByRole('link', { name, exact: true })).toBeVisible()
     }

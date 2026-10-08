@@ -98,8 +98,9 @@ test.describe('navigation', () => {
     await expect(page).toHaveURL(/\/app\/studio/)
     await bar.getByRole('link', { name: 'More' }).click()
     await expect(page).toHaveURL(/\/app\/more$/)
-    // Every console destination is listed, and opening one keeps More as
-    // the selected tab, as on iOS.
+    // Every console destination is listed under its section, and opening one
+    // keeps More as the selected tab, as on iOS.
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
     await page.locator('.more-page').getByRole('link', { name: 'Traces' }).click()
     await expect(page).toHaveURL(/\/app\/traces/)
     await expect(bar.getByRole('link', { name: 'More' })).toHaveAttribute('aria-current', 'page')
@@ -323,17 +324,21 @@ test.describe('content that used to widen pages', () => {
 })
 
 test.describe('home', () => {
-  test('is the iOS layout: status, places to go, and an even grid of create tiles', async ({ page }) => {
+  test('is the iOS layout: status, places to go, then what is running', async ({ page }) => {
     await page.goto('/app')
-    await expect(page.getByTestId('phone-home-status')).toContainText(/models? loaded/)
-    await expect(page.locator('.phone-home').getByRole('link', { name: /New chat/ })).toBeVisible()
-    const tiles = page.getByTestId('phone-home-create').locator('button')
-    await expect(tiles).toHaveCount(4)
-    const [a, b, c] = await Promise.all([tiles.nth(0).boundingBox(), tiles.nth(1).boundingBox(), tiles.nth(2).boundingBox()])
-    expect(Math.abs(a.width - b.width)).toBeLessThan(2)
-    expect(Math.abs(a.y - b.y)).toBeLessThan(2)
-    expect(c.y).toBeGreaterThan(a.y + a.height - 1)
-    expect(a.height).toBeGreaterThanOrEqual(44)
+    const status = page.getByTestId('phone-home-status')
+    await expect(status).toContainText(/models? loaded/)
+    const chat = page.locator('.phone-home').getByRole('link', { name: /New chat/ })
+    await expect(chat).toBeVisible()
+    const running = page.getByTestId('phone-home-running')
+    await expect(running).toBeVisible()
+    // Read top to bottom: status, the places to go, the running models.
+    const [s, c, r] = await Promise.all([status.boundingBox(), chat.boundingBox(), running.boundingBox()])
+    expect(s.y).toBeLessThan(c.y)
+    expect(c.y).toBeLessThan(r.y)
+    expect(c.height).toBeGreaterThanOrEqual(44)
+    // Creation tools live in Studio, not on Home.
+    await expect(page.getByTestId('phone-home-create')).toHaveCount(0)
   })
 })
 
@@ -370,6 +375,7 @@ test('a landscape phone keeps the rail language control inside the rail', async 
 test.describe('console navigation and detail panes on a phone', () => {
   test('console pages open from More with the large title first, and Back returns there', async ({ page }) => {
     await page.goto('/app/more')
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
     await page.locator('.more-page').getByRole('link', { name: 'Traces' }).click()
     // The section strip would repeat More above the title, so phones hide it.
     await expect(page.locator('.console-layout > .console-rail')).toBeHidden()
@@ -432,6 +438,8 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
 
   test('the MCP menu opens as a sheet that fits the screen', async ({ page }) => {
     await page.goto('/app/chat')
+    // MCP sits in the composer's "+" tray on phones.
+    await page.getByRole('button', { name: 'Attachments and tools' }).click()
     await page.locator('.chat-input-area .chat-mcp-dropdown > button').click()
     const menu = page.locator('.chat-mcp-dropdown-menu')
     await expect(menu).toBeVisible()
@@ -496,6 +504,8 @@ test.describe('mobile polish from device testing', () => {
 
   test('the navigation bar shows the title once the large title scrolls under it', async ({ page }) => {
     await page.goto('/app/more')
+    // An open section makes More long enough to scroll the title away.
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
     const small = page.locator('.ios-navbar__title')
     await expect(small).toHaveText('More')
     await expect(small).toHaveCSS('opacity', '0')

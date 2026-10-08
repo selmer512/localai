@@ -125,11 +125,15 @@ test.describe('Personality Library', () => {
   test('on a phone it opens from More and returns there', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/app/more')
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
     await page.locator('.more-page').getByRole('link', { name: 'Voice Library' }).click()
     await expect(page).toHaveURL(/\/app\/voice-library/)
     await expect(page.locator('.console-rail')).toBeHidden()
     await page.locator('.ios-navbar__back').click()
     await expect(page).toHaveURL(/\/app\/more$/)
+    // Back lands on the same list: the section the page came from is open.
+    await expect(page.locator('.more-page details[data-console="operate"]')).toHaveAttribute('open', '')
+    await expect(page.locator('.more-page').getByRole('link', { name: 'Voice Library' })).toBeVisible()
   })
 
   test('passes the stable voice URI from the library into TTS', async ({ page }) => {

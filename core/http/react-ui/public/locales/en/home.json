@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "Manage LocalAI by chatting",
     "description": "Install models, switch backends, edit configs and check status by talking to LocalAI.",
-    "open": "Open assistant",
     "tooltip": "Manage LocalAI by chatting"
   },
   "input": {
@@ -40,9 +38,6 @@
   },
   "quickLinks": {
     "manageByChat": "Manage by chat",
-    "installedModels": "Installed Models",
-    "browseGallery": "Browse Gallery",
-    "importModel": "Import Model",
     "documentation": "Documentation"
   },
   "loadedModels": {
@@ -123,16 +118,6 @@
     "talk": "Talk",
     "talkHint": "Real-time voice conversation",
     "stop": "Stop",
-    "create": {
-      "image": "Image",
-      "imageHint": "Generate pictures",
-      "speech": "Speech",
-      "speechHint": "Text to voice",
-      "sound": "Sound",
-      "soundHint": "Music and effects",
-      "video": "Video",
-      "videoHint": "Short clips"
-    },
     "status_one": "{{count}} model loaded",
     "status_other": "{{count}} models loaded"
   }

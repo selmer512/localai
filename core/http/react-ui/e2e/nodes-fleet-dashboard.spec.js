@@ -61,7 +61,8 @@ test.describe('Nodes fleet dashboard', () => {
     // Phones reach the Operate pages from the More tab, all fourteen of them,
     // under the same gates the desktop rail applies.
     const more = page.locator('.more-page')
-    const operateLinks = more.locator('section', { has: page.locator('h2', { hasText: /^Operate/ }) }).locator('a')
+    await page.locator('.more-page details[data-console="operate"] > summary').click()
+    const operateLinks = more.locator('details[data-console="operate"] a')
     await expect(operateLinks).toHaveCount(14)
     await more.locator('a[href="/app/nodes"]').click()
     await expect(page).toHaveURL(/\/app\/nodes/)

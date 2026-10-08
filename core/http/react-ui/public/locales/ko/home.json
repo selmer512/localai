@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "채팅으로 LocalAI 관리",
     "description": "LocalAI와 대화하여 모델을 설치하고, 백엔드를 전환하고, 구성을 편집하고, 상태를 확인하세요.",
-    "open": "어시스턴트 열기",
     "tooltip": "채팅으로 LocalAI 관리"
   },
   "input": {
@@ -39,9 +37,6 @@
   },
   "quickLinks": {
     "manageByChat": "채팅으로 관리",
-    "installedModels": "설치된 모델",
-    "browseGallery": "갤러리 둘러보기",
-    "importModel": "모델 가져오기",
     "documentation": "문서"
   },
   "loadedModels": {
@@ -107,16 +102,6 @@
     "talk": "음성 대화",
     "talkHint": "실시간 음성 대화",
     "stop": "중지",
-    "create": {
-      "image": "이미지",
-      "imageHint": "그림 생성",
-      "speech": "음성",
-      "speechHint": "텍스트를 음성으로",
-      "sound": "사운드",
-      "soundHint": "음악과 효과음",
-      "video": "동영상",
-      "videoHint": "짧은 클립"
-    },
     "status_one": "모델 {{count}}개 로드됨",
     "status_other": "모델 {{count}}개 로드됨"
   }

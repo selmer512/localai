@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "Gestisci LocalAI chattando",
     "description": "Installa modelli, cambia backend, modifica configurazioni e controlla lo stato parlando con LocalAI.",
-    "open": "Apri assistente",
     "tooltip": "Gestisci LocalAI chattando"
   },
   "input": {
@@ -39,9 +37,6 @@
   },
   "quickLinks": {
     "manageByChat": "Gestisci via chat",
-    "installedModels": "Modelli installati",
-    "browseGallery": "Sfoglia galleria",
-    "importModel": "Importa modello",
     "documentation": "Documentazione"
   },
   "loadedModels": {
@@ -107,16 +102,6 @@
     "talk": "Parla",
     "talkHint": "Conversazione vocale in tempo reale",
     "stop": "Ferma",
-    "create": {
-      "image": "Immagini",
-      "imageHint": "Genera immagini",
-      "speech": "Voce",
-      "speechHint": "Da testo a voce",
-      "sound": "Suoni",
-      "soundHint": "Musica ed effetti",
-      "video": "Video",
-      "videoHint": "Brevi clip"
-    },
     "status_one": "{{count}} modello caricato",
     "status_other": "{{count}} modelli caricati"
   }

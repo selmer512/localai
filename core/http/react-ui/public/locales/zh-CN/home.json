@@ -22,9 +22,7 @@
     "nodesLabel": "Nodes"
   },
   "assistant": {
-    "title": "通过聊天管理 LocalAI",
     "description": "通过与 LocalAI 对话来安装模型、切换后端、编辑配置和查看状态。",
-    "open": "打开助手",
     "tooltip": "通过聊天管理 LocalAI"
   },
   "input": {
@@ -39,9 +37,6 @@
   },
   "quickLinks": {
     "manageByChat": "通过聊天管理",
-    "installedModels": "已安装的模型",
-    "browseGallery": "浏览模型库",
-    "importModel": "导入模型",
     "documentation": "文档"
   },
   "loadedModels": {
@@ -107,16 +102,6 @@
     "talk": "语音",
     "talkHint": "实时语音对话",
     "stop": "停止",
-    "create": {
-      "image": "图像",
-      "imageHint": "生成图片",
-      "speech": "语音合成",
-      "speechHint": "文字转语音",
-      "sound": "声音",
-      "soundHint": "音乐和音效",
-      "video": "视频",
-      "videoHint": "短视频"
-    },
     "status_one": "已加载 {{count}} 个模型",
     "status_other": "已加载 {{count}} 个模型"
   }
