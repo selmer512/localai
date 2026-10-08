@@ -96,8 +96,8 @@
     "heading": "Jump back in",
     "models": "Models",
     "modelsSummary": "Explore, install, and manage models",
-    "create": "Create",
-    "createSummary": "Open a chat, image or voice session",
+    "create": "Studio",
+    "createSummary": "Bilder, Videos, Sprache und Klänge erzeugen",
     "operate": "Operate",
     "operateSummary": "{{models}} models configured · nodes, activity and traces"
   },

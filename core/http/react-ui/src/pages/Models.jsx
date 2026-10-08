@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { Link, useNavigate, useOutletContext, useLocation, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fromState } from '../utils/editorNav'
@@ -90,6 +90,13 @@ const FILTERS = [
   { key: 'token_classify', labelKey: 'filters.ner', icon: 'fa-tags' },
 ]
 
+// Old Studio bookmarks used modality names instead of gallery use-case tags.
+const LEGACY_USE_CASES = { images: 'image', threed: '3d', sound: 'sound_generation', transform: 'audio_transform' }
+function parseUseCases(value) {
+  const keys = value.split(',').map(key => LEGACY_USE_CASES[key] || key)
+  return [...new Set(keys.filter(key => key && FILTERS.some(filter => filter.key === key)))]
+}
+
 // The chips grouped, using the families the rest of the UI already speaks. The
 // unlabelled first section holds "All" on its own, because it is a reset rather
 // than a use case and grouping it under a heading would imply otherwise.
@@ -159,7 +166,20 @@ export default function Models() {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [search, setSearch] = useState(() => searchParams.get('q') || '')
-  const [filters, setFilters] = useState([])
+  const useCaseParam = searchParams.get('usecase') ?? searchParams.get('capability') ?? ''
+  const filters = useMemo(() => parseUseCases(useCaseParam), [useCaseParam])
+  const setFilters = useCallback(update => {
+    setSearchParams(previous => {
+      const current = parseUseCases(previous.get('usecase') ?? previous.get('capability') ?? '')
+      const value = typeof update === 'function' ? update(current) : update
+      const next = new URLSearchParams(previous)
+      next.delete('capability')
+      next.delete('model')
+      if (value.length > 0) next.set('usecase', value.join(','))
+      else next.delete('usecase')
+      return next
+    }, { replace: true })
+  }, [setSearchParams])
   const [sort, setSort] = useState('')
   const [order, setOrder] = useState('asc')
   const [installing, setInstalling] = useState(new Map())
@@ -285,7 +305,7 @@ export default function Models() {
         return filtered.length !== prev.length ? filtered : prev
       })
     }
-  }, [backendFilter, backendUsecases])
+  }, [backendFilter, backendUsecases, setFilters])
 
   // Re-fetch when operations change (install/delete completion)
   useEffect(() => {
@@ -887,7 +907,19 @@ export default function Models() {
               {(search || filters.length > 0 || backendFilter || fitsFilter || !collapseVariants) && (
                 <button
                   className="btn btn-secondary btn-sm"
-                  onClick={() => { handleSearch(''); setFilters([]); setBackendFilter(''); setFitsFilter(false); setCollapseVariants(COLLAPSE_VARIANTS_DEFAULT); setPage(1) }}
+                  onClick={() => {
+                    setSearchParams(previous => {
+                      const next = new URLSearchParams(previous)
+                      for (const key of ['q', 'model', 'usecase', 'capability']) next.delete(key)
+                      return next
+                    }, { replace: true })
+                    setSearch('')
+                    setBackendFilter('')
+                    setFitsFilter(false)
+                    setCollapseVariants(COLLAPSE_VARIANTS_DEFAULT)
+                    setPage(1)
+                    debouncedFetch('')
+                  }}
                 >
                   <i className="fas fa-times" /> {t('search.clearFilters')}
                 </button>

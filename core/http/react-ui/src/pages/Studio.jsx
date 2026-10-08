@@ -22,12 +22,12 @@ import {
 // under. Studio owns this so the tab strip and the overview cannot disagree
 // about what exists.
 const MODALITIES = [
-  { key: 'images', capability: CAP_IMAGE, icon: 'fas fa-image', group: 'create', history: 'image' },
-  { key: 'video', capability: CAP_VIDEO, icon: 'fas fa-video', group: 'create', history: 'video' },
-  { key: 'threed', capability: CAP_3D, icon: 'fas fa-cube', group: 'create', feature: '3d' },
-  { key: 'tts', capability: CAP_TTS, icon: 'fas fa-headphones', group: 'voice', history: 'tts' },
-  { key: 'sound', capability: CAP_SOUND_GENERATION, icon: 'fas fa-music', group: 'voice', history: 'sound' },
-  { key: 'transform', capability: CAP_AUDIO_TRANSFORM, icon: 'fas fa-wave-square', group: 'transform', feature: 'audio_transform' },
+  { key: 'images', galleryTag: 'image', capability: CAP_IMAGE, icon: 'fas fa-image', group: 'create', history: 'image' },
+  { key: 'video', galleryTag: 'video', capability: CAP_VIDEO, icon: 'fas fa-video', group: 'create', history: 'video' },
+  { key: 'threed', galleryTag: '3d', capability: CAP_3D, icon: 'fas fa-cube', group: 'create', feature: '3d' },
+  { key: 'tts', galleryTag: 'tts', capability: CAP_TTS, icon: 'fas fa-headphones', group: 'voice', history: 'tts' },
+  { key: 'sound', galleryTag: 'sound_generation', capability: CAP_SOUND_GENERATION, icon: 'fas fa-music', group: 'voice', history: 'sound' },
+  { key: 'transform', galleryTag: 'audio_transform', capability: CAP_AUDIO_TRANSFORM, icon: 'fas fa-wave-square', group: 'transform', feature: 'audio_transform' },
 ]
 
 const OVERVIEW_TAB = { key: 'overview', icon: 'fas fa-compass' }
@@ -43,7 +43,7 @@ const TAB_COMPONENTS = {
 
 export default function Studio() {
   const { t } = useTranslation('media')
-  const { hasFeature } = useAuth()
+  const { hasFeature, isAdmin } = useAuth()
   const navigate = useNavigate()
   const { tab: pathTab } = useParams()
   const [searchParams] = useSearchParams()
@@ -126,6 +126,7 @@ export default function Studio() {
         <ActiveComponent />
       ) : (
         <StudioOverview
+          canInstall={isAdmin}
           modalities={modalities}
           recent={recentAcross(available, history, threeDEntries)}
           running={operations.filter(isGeneration)}

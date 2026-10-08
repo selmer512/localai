@@ -103,6 +103,8 @@ test.describe('phone app shell', () => {
     await search.fill('no such page')
     await expect(more.getByRole('status')).toHaveText('No results. Try another search.')
     await search.fill('')
+    await expect(more.getByRole('link', { name: 'Agents', exact: true })).toBeHidden()
+    await more.locator('details[data-console="build"] > summary').click()
     await expect(more.getByRole('link', { name: 'Agents', exact: true })).toBeVisible()
     await expect(dark).toBeVisible()
   })

@@ -111,8 +111,8 @@
     "heading": "Continue de onde parou",
     "models": "Modelos",
     "modelsSummary": "Explore, instale e gerencie modelos",
-    "create": "Criar",
-    "createSummary": "Abra uma sessão de chat, imagem ou voz",
+    "create": "Studio",
+    "createSummary": "Gere imagens, vídeos, fala e sons",
     "operate": "Operar",
     "operateSummary": "{{models}} modelos configurados · nós, atividade e rastreamentos"
   },

@@ -79,6 +79,7 @@
     "collapseNavigation": "Collapse {{section}} navigation"
   },
   "more_page": {
+    "tools": "Tools",
     "searchPages": "Search",
     "noPages": "No results. Try another search.",
     "preferences": "Preferences",

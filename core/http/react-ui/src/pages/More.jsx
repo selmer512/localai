@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Server, ChevronsUpDown } from 'lucide-react'
+import { ChevronsUpDown, ChevronRight } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useBranding } from '../contexts/BrandingContext'
@@ -59,10 +59,36 @@ export default function More() {
   const anyResult = showInstance || showUser || showLogout || showDark || showLanguage || showTalk || showDocs || showGithub || showVersion || groups.length > 0
   const failedOps = operations.filter(op => op.error).length
   const language = SUPPORTED_LANGUAGES.find(l => l.code === i18n.resolvedLanguage) || SUPPORTED_LANGUAGES[0]
-  let colorIndex = 0
+  const menu = consoles.map(config => ({
+    config,
+    groups: groups.filter(entry => entry.config.id === config.id),
+  })).filter(entry => entry.groups.length > 0)
+
+  const destination = (item, color) => (
+    <ListRow
+      key={item.path || item.href}
+      to={item.path}
+      href={item.href ? apiUrl(item.href) : undefined}
+      external={item.external}
+      leading={<IconTile icon={item.icon} color={color} />}
+      title={t(item.labelKey)}
+      trailing={item.badge === 'operations' && operations.length > 0 ? (
+        <span className={`more-page__badge ${failedOps > 0 ? 'tw:bg-danger' : 'tw:bg-action'}`}>
+          {failedOps > 0 ? failedOps : operations.length}
+        </span>
+      ) : undefined}
+    />
+  )
+
+  const aboutRows = <>
+    {showInstance && <ListRow leading={<IconTile icon="fas fa-server" color="gray" />} title={branding.instanceName} subtitle={window.location.host} chevron={false} />}
+    {showDocs && <ListRow href="https://localai.io" external leading={<IconTile icon="fas fa-book" color="gray" />} title={t('footer.documentation')} />}
+    {showGithub && <ListRow href="https://github.com/mudler/LocalAI" external leading={<IconTile icon="fab fa-github" color="gray" />} title={t('footer.github')} />}
+    {showVersion && <ListRow leading={<IconTile icon="fas fa-circle-info" color="gray" />} title={t('more_page.version')} trailing={<RowValue>{version}</RowValue>} chevron={false} />}
+  </>
 
   return (
-    <div className="page more-page tw:flex tw:flex-col tw:gap-7 tw:pb-4">
+    <div className="page more-page tw:flex tw:flex-col tw:gap-5 tw:pb-4">
       <h1 className="page-title tw:m-0 tw:px-4">{t('more')}</h1>
 
       <div className="more-page__search">
@@ -75,17 +101,6 @@ export default function More() {
           onChange={event => setQuery(event.target.value)}
         />
       </div>
-
-      {showInstance && <InsetGroup>
-        <ListRow
-          to={isAdmin ? '/app/operate' : undefined}
-          leading={<span className="tw:flex tw:size-[52px] tw:shrink-0 tw:items-center tw:justify-center tw:rounded-full tw:bg-elevated tw:text-live"><Server aria-hidden="true" className="tw:size-[26px]" strokeWidth={1.9} /></span>}
-          title={branding.instanceName}
-          subtitle={[window.location.host, /\d/.test(version) ? version : ''].filter(Boolean).join(' · ')}
-          titleClassName="tw:font-semibold"
-          className="tw:py-1.5"
-        />
-      </InsetGroup>}
 
       {(showUser || showLogout) && (
         <InsetGroup header={t('account')}>
@@ -106,6 +121,7 @@ export default function More() {
         {showDark && <ListRow
           leading={<IconTile icon="fas fa-moon" color="blue" />}
           title={t('more_page.darkMode')}
+          titleClassName="more-page__preference-label"
           trailing={<Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} aria-label={t('more_page.darkMode')} />}
           chevron={false}
         />}
@@ -113,9 +129,10 @@ export default function More() {
           <ListRow
             leading={<IconTile icon="fas fa-globe" color="soft" />}
             title={t('changeLanguage')}
+            titleClassName="more-page__preference-label"
             chevron={false}
             trailing={(
-              <span className="tw:relative tw:flex tw:items-center tw:gap-1 tw:text-faint">
+              <span className="tw:relative tw:flex tw:min-h-11 tw:items-center tw:gap-1 tw:text-faint">
                 <RowValue>{language.name}</RowValue>
                 <ChevronsUpDown aria-hidden="true" className="tw:size-4" />
                 <select
@@ -132,42 +149,62 @@ export default function More() {
         </label>}
       </InsetGroup>}
 
-      {showTalk && <InsetGroup header={t('sections.create')}>
+      {needle && showTalk && <InsetGroup header={t('sections.create')}>
         <ListRow to="/app/talk" leading={<IconTile icon="fas fa-wave-square" color="mint" />} title={t('items.talk')} />
       </InsetGroup>}
 
-      {groups.map(({ config, group, items }) => {
-        const color = GROUP_COLORS[colorIndex++ % GROUP_COLORS.length]
-        return (
-          <InsetGroup key={`${config.id}-${group.titleKey}`} header={`${t(config.titleKey)} · ${t(group.titleKey)}`}>
-            {items.map(item => (
-              <ListRow
-                key={item.path || item.href}
-                to={item.path}
-                href={item.href ? apiUrl(item.href) : undefined}
-                external={item.external}
-                leading={<IconTile icon={item.icon} color={color} />}
-                title={t(item.labelKey)}
-                trailing={item.badge === 'operations' && operations.length > 0 ? (
-                  <span className={`tw:min-w-6 tw:rounded-full tw:px-2 tw:py-0.5 tw:text-center tw:text-[13px] tw:font-semibold tw:text-on-action ${failedOps > 0 ? 'tw:bg-danger' : 'tw:bg-action'}`}>
+      {needle ? groups.map(({ config, group, items }, index) => (
+        <InsetGroup key={`${config.id}-${group.titleKey}`} header={`${t(config.titleKey)} · ${t(group.titleKey)}`}>
+          {items.map(item => destination(item, GROUP_COLORS[index % GROUP_COLORS.length]))}
+        </InsetGroup>
+      )) : menu.length > 0 && (
+        <InsetGroup header={t('more_page.tools')} data-testid="more-tools">
+          {menu.map(({ config, groups: visibleGroups }) => (
+            <details key={config.id} name="more-sections" className="more-page__section" data-console={config.id}>
+              <summary className="more-page__summary">
+                <IconTile icon={config.icon} color={config.id === 'build' ? 'purple' : 'teal'} />
+                <span className="more-page__summary-copy">
+                  <span>{t(config.titleKey)}</span>
+                  <span className="more-page__summary-hint">{visibleGroups.map(({ group }) => t(group.titleKey)).join(' · ')}</span>
+                </span>
+                {config.id === 'operate' && operations.length > 0 && (
+                  <span className={`more-page__badge ${failedOps > 0 ? 'tw:bg-danger' : 'tw:bg-action'}`}>
                     {failedOps > 0 ? failedOps : operations.length}
                   </span>
-                ) : undefined}
-              />
-            ))}
-          </InsetGroup>
-        )
-      })}
+                )}
+                <ChevronRight aria-hidden="true" className="more-page__chevron" size={18} />
+              </summary>
+              <div className="more-page__destinations">
+                {visibleGroups.map(({ group, items }, index) => (
+                  <div key={group.titleKey}>
+                    <h3 className="more-page__group-title">{t(group.titleKey)}</h3>
+                    {items.map(item => destination(item, GROUP_COLORS[index % GROUP_COLORS.length]))}
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        </InsetGroup>
+      )}
 
       {!anyResult && (
         <p className="more-page__no-results" role="status">{t('more_page.noPages')}</p>
       )}
 
-      {(showDocs || showGithub || showVersion) && <InsetGroup header={t('more_page.about')}>
-        {showDocs && <ListRow href="https://localai.io" external leading={<IconTile icon="fas fa-book" color="gray" />} title={t('footer.documentation')} />}
-        {showGithub && <ListRow href="https://github.com/mudler/LocalAI" external leading={<IconTile icon="fab fa-github" color="gray" />} title={t('footer.github')} />}
-        {showVersion && <ListRow leading={<IconTile icon="fas fa-circle-info" color="gray" />} title={t('more_page.version')} trailing={<RowValue>{version}</RowValue>} chevron={false} />}
-      </InsetGroup>}
+      {(showInstance || showDocs || showGithub || showVersion) && (
+        <InsetGroup header={needle ? t('more_page.about') : undefined}>
+          {needle ? aboutRows : (
+            <details name="more-sections" className="more-page__section">
+              <summary className="more-page__summary">
+                <IconTile icon="fas fa-circle-info" color="gray" />
+                <span className="more-page__summary-copy">{t('more_page.about')}</span>
+                <ChevronRight aria-hidden="true" className="more-page__chevron" size={18} />
+              </summary>
+              <div className="more-page__destinations">{aboutRows}</div>
+            </details>
+          )}
+        </InsetGroup>
+      )}
 
       {!needle && <p className="tw:m-0 tw:px-8 tw:text-center tw:text-[13px] tw:text-faint">
         &copy; 2023-2026 <a href="https://mudler.pm" target="_blank" rel="noopener noreferrer" className="tw:text-faint">Ettore Di Giacinto</a>

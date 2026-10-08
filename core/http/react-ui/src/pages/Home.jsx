@@ -49,13 +49,6 @@ export default function Home() {
   const [mcpSelectedServers, setMcpSelectedServers] = useState([])
   const [clientMCPSelectedIds, setClientMCPSelectedIds] = useState([])
   const [assistantAvailable, setAssistantAvailable] = useState(false)
-  // Progressive disclosure: the big "Manage by chatting" CTA card is a
-  // first-run affordance. Once the admin has clicked it, we collapse to
-  // a small entry in the quick-links row so the home page doesn't keep
-  // shouting at them about a feature they already know.
-  const [assistantUsed, setAssistantUsed] = useState(() => {
-    try { return localStorage.getItem('localai_assistant_used') === '1' } catch { return false }
-  })
   const [confirmDialog, setConfirmDialog] = useState(null)
   const [distributedMode, setDistributedMode] = useState(false)
   const [clusterData, setClusterData] = useState(null)
@@ -237,8 +230,6 @@ export default function Home() {
       newChat: true,
     }
     localStorage.setItem('localai_index_chat_data', JSON.stringify(chatData))
-    try { localStorage.setItem('localai_assistant_used', '1') } catch { /* ignore */ }
-    setAssistantUsed(true)
     navigate('/app/chat')
   }, [navigate, selectedModel])
 
@@ -347,26 +338,6 @@ export default function Home() {
             </div>
           </header>
 
-          {/* LocalAI Assistant — prominent CTA on first run. Once the
-              admin has used it, the big card collapses to a small entry in
-              the quick-links row below. */}
-          {isAdmin && assistantAvailable && !assistantUsed && (
-            <button
-              type="button"
-              onClick={openAssistantChat}
-              className="home-assistant-card"
-            >
-              <span className="home-assistant-icon"><i className="fas fa-user-shield" /></span>
-              <span className="home-assistant-text">
-                <span className="home-assistant-title">{t('assistant.title')}</span>
-                <span className="home-assistant-desc">{t('assistant.description')}</span>
-              </span>
-              <span className="home-assistant-cta">
-                {t('assistant.open')} <i className="fas fa-arrow-right" />
-              </span>
-            </button>
-          )}
-
           {/* Chat input form */}
           <div className="home-chat-card">
             <form onSubmit={handleSubmit}>
@@ -454,48 +425,25 @@ export default function Home() {
             </form>
           </div>
 
-          {/* Quick links */}
-          <div className="home-quick-links">
-            {isAdmin && (
-              <>
-                {assistantAvailable && assistantUsed && (
-                  <button
-                    className="home-link-btn"
-                    onClick={openAssistantChat}
-                    title={t('assistant.tooltip')}
-                  >
-                    <i className="fas fa-user-shield" /> {t('quickLinks.manageByChat')}
-                  </button>
-                )}
-                <button className="btn btn-primary" onClick={() => navigate('/app/models')}>
-                  <i className="fas fa-download" aria-hidden="true" /> {t('quickLinks.browseGallery')}
-                </button>
-                <button className="home-link-btn" onClick={() => navigate('/app/models?view=installed')}>
-                  <i className="fas fa-desktop" aria-hidden="true" /> {t('quickLinks.installedModels')}
-                </button>
-                <button className="home-link-btn" onClick={() => navigate('/app/import-model')}>
-                  <i className="fas fa-upload" aria-hidden="true" /> {t('quickLinks.importModel')}
-                </button>
-              </>
-            )}
-            <a className="home-link-btn home-link-btn--quiet" href="https://localai.io" target="_blank" rel="noopener noreferrer">
-              <i className="fas fa-book" aria-hidden="true" /> {t('quickLinks.documentation')}
-            </a>
-          </div>
+          {isAdmin && assistantAvailable && (
+            <div className="home-quick-links">
+              <button className="home-link-btn" onClick={openAssistantChat} title={t('assistant.tooltip')}>
+                <i className="fas fa-user-shield" aria-hidden="true" /> {t('quickLinks.manageByChat')}
+              </button>
+            </div>
+          )}
 
-          {/* Jump back in. The quick-links row above is a set of first-run
-              actions; these are the three places someone returns to, stated
-              with what they currently hold rather than as bare labels. */}
+          {/* Each resource has one entry; lifecycle actions live inside Models. */}
           <section className="home-jump">
             <div className="lane-head"><h2>{t('jump.heading')}</h2></div>
             <ul className="lanes lanes--jump reveal-stagger">
-              <li style={staggerStyle(0)}>
+              {isAdmin && <li style={staggerStyle(0)}>
                 <button type="button" className="lane" onClick={() => navigate('/app/models')}>
                   <span className="lane__tag">{t('jump.models')}</span>
                   <span className="lane__desc">{t('jump.modelsSummary')}</span>
                   <span className="lane__go" aria-hidden="true">→</span>
                 </button>
-              </li>
+              </li>}
               <li style={staggerStyle(1)}>
                 <button type="button" className="lane" onClick={() => navigate('/app/studio')}>
                   <span className="lane__tag">{t('jump.create')}</span>
@@ -503,13 +451,13 @@ export default function Home() {
                   <span className="lane__go" aria-hidden="true">→</span>
                 </button>
               </li>
-              <li style={staggerStyle(2)}>
+              {isAdmin && <li style={staggerStyle(2)}>
                 <button type="button" className="lane" onClick={() => navigate('/app/operate')}>
                   <span className="lane__tag">{t('jump.operate')}</span>
                   <span className="lane__desc">{t('jump.operateSummary', { models: configuredModels?.length ?? 0 })}</span>
                   <span className="lane__go" aria-hidden="true">→</span>
                 </button>
-              </li>
+              </li>}
             </ul>
           </section>
 
@@ -623,7 +571,7 @@ export default function Home() {
         </div>
       )}
 
-      <HomeConnect />
+      {!isPhone && <HomeConnect />}
 
       <ConfirmDialog
         open={!!confirmDialog}

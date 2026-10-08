@@ -26,7 +26,7 @@ const TILE_COLORS = { images: 'purple', video: 'teal', threed: 'orange', tts: 's
 // Phones: the iOS layout from the "v2 · iPhone app" design. One inset group
 // per modality group, a row per generator with what serves it, and an
 // install capsule where nothing does yet.
-function PhoneStudioOverview({ modalities, recent, running, onPick, t }) {
+function PhoneStudioOverview({ modalities, recent, running, onPick, canInstall, t }) {
   const groups = [...new Set(modalities.map(m => m.group))]
   return (
     <div data-testid="studio-overview" className="tw:flex tw:flex-col tw:gap-7 tw:pt-1">
@@ -48,10 +48,10 @@ function PhoneStudioOverview({ modalities, recent, running, onPick, t }) {
                 chevron={hasModel}
                 leading={<IconTile icon={m.icon} color={TILE_COLORS[m.key]} />}
                 title={t(`studio.tabs.${m.key}`)}
-                subtitle={hasModel ? [served, m.typical].filter(Boolean).join(' · ') : t(`studio.overview.describe.${m.key}`)}
-                trailing={!hasModel ? (
+                subtitle={hasModel ? [served, m.typical].filter(Boolean).join(' · ') : t(canInstall ? `studio.overview.describe.${m.key}` : 'studio.overview.noModel')}
+                trailing={!hasModel && canInstall ? (
                   <Button asChild variant="secondary" size="sm">
-                    <Link to={`/app/models?capability=${m.key}`} aria-label={`${t('studio.overview.install')}: ${t(`studio.tabs.${m.key}`)}`}>{t('studio.overview.get')}</Link>
+                    <Link to={`/app/models?usecase=${m.galleryTag}`} aria-label={`${t('studio.overview.install')}: ${t(`studio.tabs.${m.key}`)}`}>{t('studio.overview.get')}</Link>
                   </Button>
                 ) : undefined}
               />
@@ -80,13 +80,13 @@ function PhoneStudioOverview({ modalities, recent, running, onPick, t }) {
   )
 }
 
-export default function StudioOverview({ modalities, recent, running, onPick }) {
+export default function StudioOverview({ modalities, recent, running, onPick, canInstall = false }) {
   const { t } = useTranslation('media')
   const isPhone = useIsPhone()
 
   const ready = modalities.filter(m => m.installed.length > 0).length
 
-  if (isPhone) return <PhoneStudioOverview modalities={modalities} recent={recent} running={running} onPick={onPick} t={t} />
+  if (isPhone) return <PhoneStudioOverview modalities={modalities} recent={recent} running={running} onPick={onPick} canInstall={canInstall} t={t} />
 
   return (
     <div data-testid="studio-overview" className="page-pad">
@@ -107,7 +107,7 @@ export default function StudioOverview({ modalities, recent, running, onPick }) 
       <ul className="lanes lanes--modality reveal-stagger">
         {modalities.map((m, i) => (
           <li key={m.key} data-testid="studio-modality" data-modality={m.key} style={staggerStyle(i)}>
-            <ModalityLane modality={m} onPick={onPick} t={t} />
+            <ModalityLane modality={m} onPick={onPick} canInstall={canInstall} t={t} />
           </li>
         ))}
       </ul>
@@ -150,7 +150,7 @@ export default function StudioOverview({ modalities, recent, running, onPick }) 
   )
 }
 
-function ModalityLane({ modality, onPick, t }) {
+function ModalityLane({ modality, onPick, canInstall, t }) {
   const { key, installed, typical } = modality
   const hasModel = installed.length > 0
 
@@ -175,9 +175,9 @@ function ModalityLane({ modality, onPick, t }) {
     return (
       <span className="lane studio-modality--empty">
         {body}
-        <Link className="studio-modality__install" to={`/app/models?capability=${key}`}>
+        {canInstall && <Link className="studio-modality__install" to={`/app/models?usecase=${modality.galleryTag}`}>
           {t('studio.overview.install')}
-        </Link>
+        </Link>}
       </span>
     )
   }

@@ -39,7 +39,32 @@
   .more-page__search { padding: 0 16px; }
   .more-page__search .input { width: 100%; min-height: 44px; font-size: 17px; }
   .more-page__no-results { margin: 0; padding: 0 32px; color: var(--color-text-muted); font-size: 17px; }
+
 }
+
+/* More also remains usable when a phone tab is resized to desktop. */
+.more-page__summary {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 10px 16px;
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 0.5px solid var(--color-border-subtle);
+}
+.more-page__summary::-webkit-details-marker { display: none; }
+.more-page__summary::after { display: none; }
+.more-page__summary:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.more-page__summary-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; gap: 2px; font-size: 17px; line-height: 22px; }
+.more-page__summary-hint { color: var(--color-text-muted); font-size: 13px; line-height: 18px; }
+.more-page__chevron { flex-shrink: 0; color: var(--color-text-muted); transition: transform 150ms ease; }
+.more-page__section[open] > .more-page__summary .more-page__chevron { transform: rotate(90deg); }
+.more-page__section:last-child:not([open]) > .more-page__summary { border-bottom: 0; }
+.more-page__destinations { padding-bottom: 8px; background: var(--color-bg-primary); }
+.more-page__group-title { margin: 0; padding: 16px 16px 6px; font-size: 13px; font-weight: 500; text-transform: uppercase; color: var(--color-text-muted); }
+.more-page__badge { min-width: 24px; padding: 2px 8px; border-radius: 999px; color: var(--color-primary-text); text-align: center; font-size: 13px; font-weight: 600; }
+.more-page__preference-label { white-space: normal; }
 
 @media (max-width: 639px) {
   /* Console pages (Build, Operate) are opened from More and the back button

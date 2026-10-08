@@ -7,21 +7,21 @@ url = '/features/phone-app'
 
 On a phone (any screen narrower than 640px) the web UI is laid out like an iPhone app rather than a shrunk desktop page. It works the same in Safari, Chrome and any other mobile browser, and needs no install. Add it to your home screen from the browser's share menu for a full-screen app.
 
-Desktop and tablet layouts are unchanged.
+Desktop and tablet keep their sidebar layout. Home uses one entry per resource, and Studio's model-installation links select the matching gallery filter on every screen size.
 
 ## Navigation
 
 - **Tab bar.** Home, Chat, Studio, Models (administrators only) and More sit at the bottom of the screen, within thumb reach.
-- **More.** Use **Search** to filter everything on the screen by its translated name: pages, preferences such as dark mode and language, your account and sign out, and the About links. Type a section name, such as Operate or About, to see every row in that section. Clear the search to restore the full menu. Preferences (dark mode and language) sit near the top, before the navigation groups. More lists every other page, grouped as on the desktop sidebar: Talk, the Build pages (agents, skills, memory, jobs, fine-tuning, quantization, face and voice recognition) and the Operate pages (overview, backends, activity, usage, traces, nodes, settings and the rest). It also holds your account and sign out. A page appears here under the same access rules as on the desktop sidebar, including while searching.
+- **More.** Preferences stay near the top. **Build** and **Operate** open expandable sections containing the same pages and access rules as the desktop sidebar. One section is open at a time, so advanced controls do not crowd the initial menu. **Search** finds pages, preferences, account actions and About information even when their section is closed; searching a section name shows its matching rows directly. **About** contains instance details and documentation. Talk remains on Home and can also be found through Search.
 - **Large titles and Back.** Each page opens with a large title. When you scroll, the title moves into the navigation bar. A page opened from a tab has a Back button labelled with the screen you came from. A page opened directly by its address goes back to its tab.
 
 Pages you open from More, such as Traces or Settings, show their content straight away. On a desktop or tablet these pages keep the section rail for switching between them; on a phone you go back to More instead.
 
 ## Screens
 
-- **Home** shows how many models are loaded and how much memory is in use, then New chat, Talk and (for administrators) Manage by chat, a grid of creation tools, and the models running now with a Stop button on each.
+- **Home** shows live status, New chat, Talk and (for administrators) Manage by chat, followed by the running models and their Stop controls. Creation tools live in Studio; gallery, installation and import actions live in Models. Home does not repeat those menus or the desktop API introduction.
 - **Chat** opens as its own screen: Back on the left, the model name as the title (tap it to switch model), and the chat list and chat settings on the right. Messages appear as bubbles.
-- **Studio** lists each generator (images, video, 3D, speech, sound, audio transform) with the model that serves it, or a **Get** button that opens the gallery when none is installed. Each generator opens as its own screen.
+- **Studio** is the home for creation tools (images, video, 3D, speech, sound and audio transform). A ready tool opens its generator; for administrators, **Get** opens Models with that tool's use-case filter already selected. Other users see model availability without an installation link to administrator-only screens. Old `?capability=` links also work. The filter is saved in the URL, so reload and browser history retain the selected use cases.
 - **Models** uses a segmented control for Explore and Installed, and for the gallery or a [Hugging Face search]({{%relref "features/model-gallery#searching-hugging-face-from-the-web-ui" %}}). A model opens as a details page with its size and fit summarised under the name.
 - **Pickers** (model, backend and other searchable lists) open as a modal sheet from the bottom of the screen. Tap **Cancel**, the dimmed background, or press Escape to dismiss without changing the selection. The background cannot scroll while the sheet is open, keyboard focus stays inside it, and closing returns focus to the original control. Search is not automatically focused, so opening a picker does not immediately raise the phone keyboard. The sheet follows the visible viewport when the keyboard opens.
 
