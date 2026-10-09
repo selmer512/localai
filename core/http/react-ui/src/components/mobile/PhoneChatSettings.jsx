@@ -4,7 +4,7 @@ import { InsetGroup, ListRow, RowValue } from '../ui/list'
 import { Sheet } from '../ui/sheet'
 import { Switch } from '../ui/switch'
 
-export default function PhoneChatSettings({ open, onOpenChange, chat, onUpdate, isAdmin, modelInfo, contextPercent, onClear, onEditConfig, onCloseAutoFocus }) {
+export default function PhoneChatSettings({ open, onOpenChange, chat, onUpdate, isAdmin, modelInfo, contextPercent, tokensPerSecond, maxTokensPerSecond, onClear, onEditConfig, onCloseAutoFocus }) {
   const { t } = useTranslation('chat')
   const update = values => onUpdate(chat.id, values)
   return (
@@ -20,7 +20,16 @@ export default function PhoneChatSettings({ open, onOpenChange, chat, onUpdate, 
       </InsetGroup>
       <InsetGroup header={t('header.modelInfo')}>
         <ListRow title={chat.model || t('empty.selectModelText')} subtitle={modelInfo?.backend} chevron={false} titleClassName="phone-chat-wrap" />
+        {/* The same facts as the desktop model-info panel, which phones do not show. */}
+        {modelInfo?.parameters?.model && <ListRow title={t('modelInfo.modelFile')} subtitle={modelInfo.parameters.model} chevron={false} subtitleClassName="phone-chat-wrap" />}
+        {modelInfo?.context_size > 0 && <ListRow title={t('modelInfo.contextSize')} trailing={<RowValue>{modelInfo.context_size}</RowValue>} chevron={false} />}
+        {modelInfo?.gpu_layers > 0 && <ListRow title={t('modelInfo.gpuLayers')} trailing={<RowValue>{modelInfo.gpu_layers}</RowValue>} chevron={false} />}
+        {modelInfo?.threads > 0 && <ListRow title={t('modelInfo.threads')} trailing={<RowValue>{modelInfo.threads}</RowValue>} chevron={false} />}
+        {modelInfo?.template?.chat_message && <ListRow title={t('modelInfo.chatTemplate')} trailing={<RowValue>{t('modelInfo.yes')}</RowValue>} chevron={false} />}
+        {(modelInfo?.mcp?.remote || modelInfo?.mcp?.stdio) && <ListRow title={t('modelInfo.mcp')} trailing={<RowValue>{t('modelInfo.configured')}</RowValue>} chevron={false} />}
         {contextPercent !== null && <ListRow title={t('phone.contextUsage')} trailing={<RowValue>{Math.round(contextPercent)}%</RowValue>} chevron={false} />}
+        {tokensPerSecond != null && <ListRow title={t('phone.speed')} trailing={<RowValue>{t('tokens.perSec', { count: tokensPerSecond })}</RowValue>} chevron={false} />}
+        {maxTokensPerSecond != null && <ListRow title={t('phone.peakSpeed')} trailing={<RowValue>{t('tokens.perSec', { count: maxTokensPerSecond })}</RowValue>} chevron={false} />}
         {chat.tokenUsage?.total > 0 && <p className="phone-chat-footnote">{t('tokens.usage', { prompt: chat.tokenUsage.prompt, completion: chat.tokenUsage.completion, total: chat.tokenUsage.total })}</p>}
         {isAdmin && chat.model && <ListRow title={t('header.editConfig')} onClick={() => { onOpenChange(false); onEditConfig() }} chevron />}
       </InsetGroup>

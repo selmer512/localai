@@ -71,6 +71,7 @@
     "viewTraces": "Traces für Details anzeigen"
   },
   "actions": {
+    "branch": "Ab hier verzweigen",
     "copy": "Kopieren",
     "edit": "Bearbeiten",
     "editMessage": "Nachricht bearbeiten",
@@ -108,6 +109,8 @@
     "copyFailed": "Kopieren in die Zwischenablage fehlgeschlagen"
   },
   "menu": {
+    "copyChat": "Chat kopieren",
+    "duplicate": "Chat duplizieren",
     "trigger": "Chats",
     "triggerTitle": "Unterhaltungen (Strg/Cmd+K)",
     "search": "Unterhaltungen suchen...",
@@ -125,6 +128,8 @@
     "you": "You"
   },
   "phone": {
+    "speed": "Geschwindigkeit",
+    "peakSpeed": "Spitzengeschwindigkeit",
     "welcomeHint": "Stelle eine Frage, schreibe etwas oder erkunde eine Idee.",
     "ideas": "Prompt ausprobieren",
     "assistant": "Assistent",

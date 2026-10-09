@@ -71,6 +71,7 @@
     "viewTraces": "자세한 내용은 트레이스를 확인하세요"
   },
   "actions": {
+    "branch": "여기서 분기",
     "copy": "복사",
     "edit": "편집",
     "editMessage": "메시지 편집",
@@ -108,6 +109,8 @@
     "copyFailed": "클립보드에 복사할 수 없습니다"
   },
   "menu": {
+    "copyChat": "채팅 복사",
+    "duplicate": "채팅 복제",
     "trigger": "채팅",
     "triggerTitle": "대화 (Ctrl/Cmd+K)",
     "search": "대화 검색...",
@@ -125,6 +128,8 @@
     "you": "You"
   },
   "phone": {
+    "speed": "속도",
+    "peakSpeed": "최고 속도",
     "welcomeHint": "질문하거나, 글을 쓰거나, 아이디어를 탐색하세요.",
     "ideas": "프롬프트 시도",
     "assistant": "어시스턴트",

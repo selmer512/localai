@@ -34,7 +34,7 @@ export function IconTile({ icon, color = 'blue', className }) {
   )
 }
 
-export function ListRow({ to, href, onClick, external, leading, title, subtitle, trailing, chevron, className, titleClassName, ...props }) {
+export function ListRow({ to, href, onClick, external, leading, title, subtitle, trailing, chevron, className, titleClassName, subtitleClassName, ...props }) {
   const interactive = !!(to || href || onClick)
   const showChevron = chevron ?? (!!(to || href) && !external)
   const body = (
@@ -43,7 +43,7 @@ export function ListRow({ to, href, onClick, external, leading, title, subtitle,
       <span className={cn('ios-row-sep tw:flex tw:min-w-0 tw:flex-1 tw:items-center tw:gap-2 tw:self-stretch tw:border-b-[0.5px] tw:border-solid tw:border-0 tw:border-separator tw:pr-4', subtitle ? 'tw:min-h-[60px]' : 'tw:min-h-11')}>
         <span className="tw:flex tw:min-w-0 tw:flex-1 tw:flex-col tw:justify-center tw:py-2">
           <span className={cn('tw:truncate tw:text-[17px] tw:leading-[22px] tw:text-foreground', titleClassName)}>{title}</span>
-          {subtitle && <span className="tw:truncate tw:text-[13px] tw:leading-[18px] tw:text-muted">{subtitle}</span>}
+          {subtitle && <span className={cn('tw:truncate tw:text-[13px] tw:leading-[18px] tw:text-muted', subtitleClassName)}>{subtitle}</span>}
         </span>
         {trailing}
         {showChevron && <ChevronRight aria-hidden="true" className="tw:size-[18px] tw:shrink-0 tw:text-line-strong" strokeWidth={2.4} />}

@@ -891,6 +891,14 @@
   .phone-mcp-sheet .chat-mcp-server-tools { font-size: 13px; }
   .phone-mcp-sheet .chat-mcp-select-all { min-height: 44px; font-size: 15px; }
   .phone-chat-tools .chat-mode-chip i { width: 20px; font-size: 18px; }
+  /* MCP is a .btn, not a mode chip, so the composer's .btn rules gave it a
+     6px gap, a 13px icon and medium weight; match the rows above it. */
+  .phone-chat-tools .chat-mcp-dropdown > button { gap: 12px !important; font-weight: 400 !important; }
+  /* The composer mutes its attach button; in the sheet every row is an
+     ordinary list row, and only a mode that is on stands out. */
+  .phone-chat-tools .chat-input-modes > button, .phone-chat-tools .chat-mcp-dropdown > button { color: var(--color-text-primary) !important; }
+  .phone-chat-tools .chat-input-modes > .chat-mode-chip-on { color: var(--color-primary) !important; }
+  .phone-chat-tools .chat-mcp-dropdown > button > i { width: 20px; font-size: 18px; text-align: center; }
   .phone-conversations-top { display: flex; flex-direction: column; gap: 16px; padding: 0 16px; }
   .phone-conversations-top > button { min-height: 44px; justify-content: center; }
   .phone-conversations-row { display: flex; align-items: center; border-bottom: 0.5px solid var(--color-border-subtle); }

@@ -131,6 +131,8 @@
     "you": "Você"
   },
   "phone": {
+    "speed": "Velocidade",
+    "peakSpeed": "Velocidade máxima",
     "welcomeHint": "Faça uma pergunta, escreva algo ou explore uma ideia.",
     "ideas": "Experimente um prompt",
     "assistant": "Assistente",

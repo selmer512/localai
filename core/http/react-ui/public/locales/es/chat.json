@@ -71,6 +71,7 @@
     "viewTraces": "Ver trazas para más detalles"
   },
   "actions": {
+    "branch": "Ramificar desde aquí",
     "copy": "Copiar",
     "edit": "Editar",
     "editMessage": "Editar mensaje",
@@ -108,6 +109,8 @@
     "copyFailed": "No se pudo copiar al portapapeles"
   },
   "menu": {
+    "copyChat": "Copiar chat",
+    "duplicate": "Duplicar chat",
     "trigger": "Chats",
     "triggerTitle": "Conversaciones (Ctrl/Cmd+K)",
     "search": "Buscar conversaciones...",
@@ -125,6 +128,8 @@
     "you": "You"
   },
   "phone": {
+    "speed": "Velocidad",
+    "peakSpeed": "Velocidad máxima",
     "welcomeHint": "Haz una pregunta, escribe algo o explora una idea.",
     "ideas": "Prueba una solicitud",
     "assistant": "Asistente",

@@ -232,7 +232,9 @@ test.describe('the phone composer', () => {
 
   test('gives text a full row, with attach, Canvas and MCP in a sheet', async ({ page }) => {
     await page.goto('/app/chat')
-    const tools = page.getByRole('button', { name: 'Attachments and tools' })
+    // By class, not role: the open sheet hides the page behind it, trigger
+    // included, from the accessibility tree, as a modal sheet should.
+    const tools = page.locator('.chat-tools-btn')
     const field = page.locator('.chat-input')
     await expect(page.locator('.chat-input-modes')).toBeHidden()
     const fieldBox = await field.boundingBox()
@@ -252,6 +254,55 @@ test.describe('the phone composer', () => {
     await expect(page.locator('.chat-input-modes')).toBeHidden()
     await expect(tools).toHaveClass(/chat-tools-btn--active/)
     await expect(field).toHaveCSS('outline-style', 'none')
+  })
+
+  test('the tools sheet rows match: icon and label at the same offsets, same weight and colour', async ({ page }) => {
+    await page.goto('/app/chat')
+    await page.locator('.chat-tools-btn').click()
+    const rows = page.locator('.phone-chat-tools .chat-input-modes > button, .phone-chat-tools .chat-mcp-dropdown > button')
+    await expect(rows).toHaveCount(3)
+    const offsets = await rows.evaluateAll(buttons => buttons.map(button => {
+      const icon = button.querySelector('svg, i').getBoundingClientRect()
+      const label = document.createRange()
+      label.selectNodeContents(button.querySelector('.chat-mode-chip-label') || [...button.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()))
+      return [Math.round(icon.x), Math.round(label.getBoundingClientRect().x), getComputedStyle(button).fontWeight, getComputedStyle(button).color]
+    }))
+    expect(new Set(offsets.map(o => o.join()))).toHaveProperty('size', 1)
+  })
+
+  test('chat settings show the model details and the reply speed', async ({ page }) => {
+    await page.route('**/api/models/capabilities', route => route.fulfill({
+      json: { data: [{ id: 'alpha-7b', capabilities: ['FLAG_CHAT'] }] },
+    }))
+    await page.route('**/api/models/config-json/alpha-7b', route => route.fulfill({ json: {
+      name: 'alpha-7b', backend: 'llama-cpp', parameters: { model: 'alpha-7b-instruct.Q4_K_M.gguf' },
+      context_size: 8192, gpu_layers: 99, threads: 8, template: { chat_message: '{{.Content}}' },
+    } }))
+    await page.route('**/v1/chat/completions', async route => {
+      // A short delay so the speed has elapsed time to divide by.
+      await new Promise(resolve => setTimeout(resolve, 300))
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/event-stream',
+        body: 'data: {"choices":[{"delta":{"content":"Hello "}}]}\n\n'
+          + 'data: {"choices":[{"delta":{"content":"there"}}]}\n\n'
+          + 'data: [DONE]\n\n',
+      })
+    })
+    await page.goto('/app/chat')
+    await page.locator('.chat-input').fill('Hi')
+    await page.locator('.chat-send-btn').click()
+    await expect(page.locator('.chat-message-assistant')).toContainText('Hello there')
+
+    await page.getByRole('button', { name: 'Chat settings' }).click()
+    const sheet = page.locator('.phone-chat-settings')
+    for (const [label, value] of [['Model file', 'alpha-7b-instruct.Q4_K_M.gguf'], ['Context size', '8192'], ['GPU layers', '99'], ['Threads', '8'], ['Chat template', 'Yes']]) {
+      await expect(sheet.getByText(label, { exact: true })).toBeVisible()
+      await expect(sheet.getByText(value, { exact: true })).toBeVisible()
+    }
+    await expect(sheet.getByText('Speed', { exact: true })).toBeVisible()
+    await expect(sheet.getByText('Peak speed', { exact: true })).toBeVisible()
+    await expect(sheet.getByText(/^[\d.]+ tok\/s$/).first()).toBeVisible()
   })
 
   test('desktop keeps the modes and attach button in the composer', async ({ page }) => {

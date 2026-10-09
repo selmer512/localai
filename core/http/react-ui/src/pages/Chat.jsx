@@ -1343,7 +1343,7 @@ export default function Chat() {
           </div>
         </div>
         </>}
-        {isPhone && <PhoneChatSettings open={showSettings} onOpenChange={setShowSettings} onCloseAutoFocus={event => { event.preventDefault(); if (!confirmDialog) settingsTriggerRef.current?.focus() }} chat={activeChat} onUpdate={updateChatSettings} isAdmin={isAdmin} modelInfo={modelInfo} contextPercent={contextPercent} onEditConfig={() => navigate(`/app/model-editor/${encodeURIComponent(activeChat.model)}`, { state: fromState(location, 'Chat') })} onClear={() => {
+        {isPhone && <PhoneChatSettings open={showSettings} onOpenChange={setShowSettings} onCloseAutoFocus={event => { event.preventDefault(); if (!confirmDialog) settingsTriggerRef.current?.focus() }} chat={activeChat} onUpdate={updateChatSettings} isAdmin={isAdmin} modelInfo={modelInfo} contextPercent={contextPercent} tokensPerSecond={tokensPerSecond} maxTokensPerSecond={isStreaming ? null : maxTokensPerSecond} onEditConfig={() => navigate(`/app/model-editor/${encodeURIComponent(activeChat.model)}`, { state: fromState(location, 'Chat') })} onClear={() => {
           setShowSettings(false)
           setConfirmDialog({ title: t('settings.clearHistory'), message: t('phone.clearHistoryMessage'), confirmLabel: t('settings.clearHistory'), danger: true, onConfirm: () => { clearHistory(activeChat.id); setConfirmDialog(null) } })
         }} />}
