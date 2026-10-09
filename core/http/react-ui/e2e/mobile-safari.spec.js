@@ -195,7 +195,7 @@ test.describe('chat', () => {
     expect(box).toEqual({ scrollLeft: 0, header: 0 })
   })
 
-  test('the header gives the model picker a full row', async ({ page }) => {
+  test('the header keeps the model picker readable', async ({ page }) => {
     await json(page, '**/api/models/capabilities', { data: [{ id: 'llama-3.2-3b-instruct', capabilities: ['FLAG_CHAT'] }] })
     await page.goto('/app/chat')
     const picker = page.locator('.chat-header button.input[aria-haspopup="dialog"]')
@@ -440,8 +440,8 @@ test.describe('overlays and chrome on a scrolled phone page', () => {
     await page.goto('/app/chat')
     // MCP sits in the composer's "+" tray on phones.
     await page.getByRole('button', { name: 'Attachments and tools' }).click()
-    await page.locator('.chat-input-area .chat-mcp-dropdown > button').click()
-    const menu = page.locator('.chat-mcp-dropdown-menu')
+    await page.locator('.phone-chat-tools .chat-mcp-dropdown > button').click()
+    const menu = page.locator('.phone-mcp-sheet')
     await expect(menu).toBeVisible()
     const { width, height } = page.viewportSize()
     await expect.poll(async () => {

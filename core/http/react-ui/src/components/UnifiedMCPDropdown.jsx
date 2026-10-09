@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useIsPhone } from '../hooks/useIsPhone'
+import { Sheet } from './ui/sheet'
 import { loadClientMCPServers, addClientMCPServer, removeClientMCPServer } from '../utils/mcpClientStorage'
 
 export default function UnifiedMCPDropdown({
@@ -37,6 +40,9 @@ export default function UnifiedMCPDropdown({
   selectedResources = [],
   onToggleResource,
 }) {
+  const { t } = useTranslation('chat')
+  const isPhone = useIsPhone()
+  const triggerRef = useRef(null)
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState(() => serverMCPAvailable ? 'servers' : 'client')
   const [addDialog, setAddDialog] = useState(false)
@@ -56,13 +62,13 @@ export default function UnifiedMCPDropdown({
 
   // Click outside to close
   useEffect(() => {
-    if (!open) return
+    if (!open || isPhone) return
     const handleClick = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
+  }, [open, isPhone])
 
   const handleOpen = useCallback(() => {
     if (!open) {
@@ -112,21 +118,7 @@ export default function UnifiedMCPDropdown({
   if (promptsAvailable) tabs.push({ key: 'prompts', label: 'Prompts' })
   if (resourcesAvailable) tabs.push({ key: 'resources', label: 'Resources' })
 
-  return (
-    <div className="chat-mcp-dropdown" ref={ref}>
-      <button
-        type="button"
-        className={`btn btn-sm ${totalBadge > 0 ? 'btn-primary' : 'btn-secondary'}`}
-        title="MCP servers, prompts, and resources"
-        onClick={handleOpen}
-      >
-        <i className="fas fa-plug" /> MCP
-        {totalBadge > 0 && (
-          <span className="chat-mcp-badge">{totalBadge}</span>
-        )}
-      </button>
-      {open && (
-        <div className="chat-mcp-dropdown-menu" style={{ minWidth: '300px' }}>
+  const menuContent = <>
           {/* Tab bar */}
           <div className="unified-mcp-tabs">
             {tabs.map(tab => (
@@ -347,8 +339,27 @@ export default function UnifiedMCPDropdown({
               </>
             )
           )}
-        </div>
-      )}
+  </>
+
+  return (
+    <div className="chat-mcp-dropdown" ref={ref}>
+      <button
+        ref={triggerRef}
+        type="button"
+        className={`btn btn-sm ${totalBadge > 0 ? 'btn-primary' : 'btn-secondary'}`}
+        title="MCP servers, prompts, and resources"
+        aria-haspopup={isPhone ? 'dialog' : undefined}
+        aria-expanded={open}
+        onClick={handleOpen}
+      >
+        <i className="fas fa-plug" /> MCP
+        {totalBadge > 0 && (
+          <span className="chat-mcp-badge">{totalBadge}</span>
+        )}
+      </button>
+      {isPhone ? <Sheet open={open} onOpenChange={setOpen} title="MCP" doneLabel={t('header.close')} className="phone-mcp-sheet" onCloseAutoFocus={event => { event.preventDefault(); triggerRef.current?.focus() }}>
+        {menuContent}
+      </Sheet> : open && <div className="chat-mcp-dropdown-menu" style={{ minWidth: '300px' }}>{menuContent}</div>}
 
       <style>{`
         .unified-mcp-tabs {

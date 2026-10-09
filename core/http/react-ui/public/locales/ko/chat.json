@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "질문하거나, 글을 쓰거나, 아이디어를 탐색하세요.",
+    "ideas": "프롬프트 시도",
+    "assistant": "어시스턴트",
+    "messageActions": "메시지 작업",
+    "conversationActions": "대화 작업",
+    "generationSettings": "생성 설정",
+    "toolsActive": "도구 활성화됨",
+    "clearHistoryMessage": "이 대화의 모든 메시지를 지울까요? 되돌릴 수 없습니다.",
+    "contextUsage": "사용한 컨텍스트"
   }
 }

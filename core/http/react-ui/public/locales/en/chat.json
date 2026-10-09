@@ -140,5 +140,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "Ask a question, write something, or explore an idea.",
+    "ideas": "Try a prompt",
+    "assistant": "Assistant",
+    "messageActions": "Message actions",
+    "conversationActions": "Conversation actions",
+    "generationSettings": "Generation settings",
+    "toolsActive": "Tools enabled",
+    "clearHistoryMessage": "Clear all messages in this conversation? This cannot be undone.",
+    "contextUsage": "Context used"
   }
 }

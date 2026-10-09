@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { relativeTime } from '../utils/format'
+import { MessagesSquare } from 'lucide-react'
+import { useIsPhone } from '../hooks/useIsPhone'
+import PhoneConversations from './mobile/PhoneConversations'
 
 function getLastMessagePreview(chat) {
   if (!chat?.history || chat.history.length === 0) return ''
@@ -28,6 +31,7 @@ const ChatsMenu = forwardRef(function ChatsMenu({
   onDuplicate,
 }, ref) {
   const { t } = useTranslation('chat')
+  const isPhone = useIsPhone()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
   const [editingId, setEditingId] = useState(null)
@@ -37,6 +41,7 @@ const ChatsMenu = forwardRef(function ChatsMenu({
   const searchRef = useRef(null)
   const triggerRef = useRef(null)
   const listRef = useRef(null)
+  const wasOpenRef = useRef(false)
 
   useImperativeHandle(ref, () => ({
     open: () => setOpen(true),
@@ -57,13 +62,13 @@ const ChatsMenu = forwardRef(function ChatsMenu({
 
   // Click-outside to close
   useEffect(() => {
-    if (!open) return
+    if (!open || isPhone) return
     const handleClick = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
+  }, [open, isPhone])
 
   // Esc closes; focus search on open; reset state on close
   useEffect(() => {
@@ -72,12 +77,15 @@ const ChatsMenu = forwardRef(function ChatsMenu({
       setEditingId(null)
       setActiveIdx(0)
       // Restore focus to trigger when closing
-      triggerRef.current?.focus()
+      if (wasOpenRef.current) triggerRef.current?.focus()
+      wasOpenRef.current = false
       return
     }
+    wasOpenRef.current = true
+    if (isPhone) return
     setActiveIdx(filtered.findIndex(c => c.id === activeChatId))
     // Focus search shortly after open so the popover animation doesn't fight focus
-    const t = setTimeout(() => searchRef.current?.focus(), 20)
+    const t = !isPhone ? setTimeout(() => searchRef.current?.focus(), 20) : null
     const onKey = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -89,7 +97,7 @@ const ChatsMenu = forwardRef(function ChatsMenu({
       clearTimeout(t)
       window.removeEventListener('keydown', onKey)
     }
-  }, [open])
+  }, [open, isPhone])
 
   const handleSelect = useCallback((id) => {
     onSelect?.(id)
@@ -134,6 +142,15 @@ const ChatsMenu = forwardRef(function ChatsMenu({
     const el = listRef.current?.querySelector(`[data-idx="${activeIdx}"]`)
     el?.scrollIntoView({ block: 'nearest' })
   }, [activeIdx, open])
+
+  if (isPhone) return (
+    <div className="chats-menu">
+      <button ref={triggerRef} type="button" className="phone-chat-icon chats-menu-trigger" aria-label={t('menu.trigger')} aria-haspopup="dialog" aria-expanded={open} onClick={() => setOpen(value => !value)}>
+        <MessagesSquare aria-hidden="true" size={21} />
+      </button>
+      <PhoneConversations open={open} onOpenChange={setOpen} chats={filtered} totalChats={chats.length} activeChatId={activeChatId} streamingChatId={streamingChatId} search={search} onSearch={setSearch} onSelect={handleSelect} onNew={handleNew} onDelete={onDelete} onDeleteAll={onDeleteAll} onRename={onRename} onCopyChat={onCopyChat} onExport={onExport} onDuplicate={onDuplicate} onCloseAutoFocus={event => { event.preventDefault(); triggerRef.current?.focus() }} />
+    </div>
+  )
 
   return (
     <div className="chats-menu" ref={containerRef}>

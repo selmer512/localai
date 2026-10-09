@@ -74,207 +74,6 @@
   .console-layout { display: block; }
 }
 
-/* --- Chat ---------------------------------------------------------------- */
-.chat-header-back { display: none; }
-
-@media (max-width: 639px) {
-  /* iOS conversation bar: back | model as the title, chat name beneath |
-     Chats and settings. */
-  .chat-header {
-    display: grid !important;
-    grid-template-columns: 44px auto minmax(0, 1fr) auto auto;
-    grid-template-areas:
-      "back model model chats actions"
-      "back shield title chats actions";
-    align-items: center;
-    column-gap: 2px;
-    row-gap: 0;
-    min-height: 52px;
-    padding: env(safe-area-inset-top) 4px 2px !important;
-    /* Solid, not blurred: backdrop-filter would make the header the
-       containing block for the picker sheet inside it (position: fixed), and
-       the sheet would open off the top of the screen. */
-    background: var(--color-bg-primary);
-    border-bottom: 0.5px solid var(--color-border-subtle);
-  }
-  .chat-header-back {
-    grid-area: back;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    color: var(--color-primary);
-    cursor: pointer;
-  }
-  .chat-header-back svg { width: 28px; height: 28px; }
-  .chat-header-back:active { opacity: 0.5; }
-  .chat-header > .chats-menu { grid-area: chats; }
-  .chat-header-shield { grid-area: shield; font-size: 11px; }
-  .chat-header-title {
-    grid-area: title;
-    order: 0 !important;
-    flex: none !important;
-    text-align: center;
-    padding: 0 !important;
-    font-size: 12px !important;
-    font-weight: 400 !important;
-    color: var(--color-text-tertiary) !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .chat-header-model { grid-area: model; min-width: 0 !important; justify-self: center; max-width: 100%; }
-  .chat-header-actions { grid-area: actions; gap: 0 !important; }
-  /* The model picker reads as the screen title: no field chrome. */
-  .chat-header-model > button.input {
-    background: transparent !important;
-    border: 0 !important;
-    padding: 0 4px !important;
-    min-height: 44px !important;
-    font-size: 17px !important;
-    font-weight: 600 !important;
-    color: var(--color-text-primary) !important;
-    justify-content: center;
-  }
-  .chat-header-model > button.input > span { flex: 0 1 auto !important; text-align: center !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chat-header-model > button.input > i { font-size: 10px !important; }
-  /* Header icon buttons become plain iOS bar buttons. */
-  .chat-header .chats-menu-trigger,
-  .chat-header-actions .btn {
-    background: transparent !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    color: var(--color-primary) !important;
-    min-width: 44px;
-    min-height: 44px;
-    padding: 0 8px !important;
-    font-size: 19px;
-  }
-  .chat-header-actions .btn.active, .chat-header .chats-menu-trigger.active { color: var(--color-text-primary) !important; }
-
-  /* Messages as iOS bubbles: yours on the right in action blue, the model's
-     on the left on a raised fill. */
-  .chat-message { border-bottom: 0 !important; padding-bottom: 6px !important; gap: 0 !important; }
-  .chat-message-user { justify-content: flex-end; }
-  .chat-message-user .chat-message-bubble { align-items: flex-end; max-width: 82%; margin-left: auto; }
-  .chat-message-assistant .chat-message-bubble { max-width: 92%; }
-  .chat-message-content {
-    border: 0 !important;
-    border-radius: 19px 19px 19px 5px !important;
-    background: var(--color-bg-tertiary) !important;
-    padding: 9px 14px !important;
-    font-size: 17px !important;
-    line-height: 23px !important;
-  }
-  .chat-message-user .chat-message-content {
-    border-radius: 19px 19px 5px 19px !important;
-    background: var(--color-primary) !important;
-    color: var(--color-primary-text) !important;
-  }
-  .chat-message-user .chat-message-content a { color: inherit; text-decoration: underline; }
-  .chat-message-model { padding: 0 14px 2px; letter-spacing: 0.06em; }
-
-  /* Composer: rounded field and a round send button above the home bar. */
-  .chat-input-area {
-    /* Solid for the same reason as the header: the MCP sheet lives inside. */
-    background: var(--color-bg-primary);
-    border-top: 0.5px solid var(--color-border-subtle);
-    padding-top: 8px;
-  }
-  .chat-input-wrapper {
-    display: grid !important;
-    grid-template-columns: 44px minmax(0, 1fr) 44px;
-    grid-template-areas: "modes modes modes" "tools input send";
-    row-gap: 2px;
-    border-radius: 22px !important;
-    border: 0.5px solid var(--color-border-default) !important;
-    background: var(--color-bg-primary) !important;
-    padding: 4px 4px 4px 6px !important;
-    align-items: flex-end !important;
-    box-shadow: none !important;
-  }
-  .chat-input-modes { grid-area: modes; justify-content: flex-start; }
-  /* One row, like Messages: "+" opens a tray above the field holding attach,
-     Canvas and MCP. A dot on "+" says a mode is on while the tray is shut. */
-  .chat-tools-btn {
-    grid-area: tools;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border: 0;
-    border-radius: 22px;
-    background: transparent;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .chat-tools-btn svg { width: 24px; height: 24px; transition: transform 150ms ease; }
-  .chat-tools-btn[aria-expanded="true"] svg { transform: rotate(45deg); }
-  .chat-tools-btn--active::after {
-    content: "";
-    position: absolute;
-    top: 9px;
-    right: 9px;
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--color-primary);
-  }
-  .chat-input-modes--closed { display: none !important; }
-  .chat-input-modes { flex-wrap: wrap; border-bottom: 0.5px solid var(--color-border-subtle); padding-bottom: 2px; }
-  .chat-input-modes .chat-attach-btn { display: inline-flex; align-items: center; gap: 6px; }
-  .chat-send-btn, .chat-stop-btn { grid-area: send; }
-  .chat-input { grid-area: input; min-height: 44px; font-size: 17px !important; padding: 7px 8px !important; }
-  .chat-attach-btn, .chat-stop-btn {
-    min-width: 44px !important;
-    min-height: 44px !important;
-    flex-shrink: 0;
-  }
-  .chat-send-btn {
-    width: 44px !important;
-    height: 44px !important;
-    min-width: 44px !important;
-    min-height: 44px !important;
-    border-radius: 22px !important;
-    align-self: flex-end !important;
-  }
-  .chat-empty-state .btn, .chat-suggestion { border-radius: 14px; }
-}
-
-@media (max-width: 639px) {
-  /* Keep modes above the field so narrow phones have room to write. */
-  .chat-mode-chip-label { display: inline; }
-  .chat-input-modes .chat-mode-chip,
-  .chat-input-modes button {
-    border: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    color: var(--color-text-tertiary) !important;
-    min-width: 44px;
-    min-height: 44px !important;
-    padding: 0 6px !important;
-    border-radius: 18px !important;
-  }
-  .chat-input-modes .chat-mode-chip.active,
-  .chat-input-modes .chat-mode-chip-on { color: var(--color-primary) !important; background: var(--color-primary-light) !important; }
-  /* Suggestions as rounded iOS pills. */
-  .chat-empty-suggestion {
-    border: 0 !important;
-    border-radius: 18px !important;
-    background: var(--color-bg-secondary) !important;
-    min-height: 44px;
-    font-size: 15px !important;
-  }
-}
-
 @media (max-width: 639px) {
   /* Studio: each generator is a screen pushed from the Studio tab (the back
      button returns there), so the web tab strip is not shown. */
@@ -782,20 +581,7 @@
   .chat-empty-hints, .chat-empty-hints span, .chat-empty-attach, .chat-recent-strip { font-size: 15px !important; }
   .filter-bar-group label, .filter-bar label { font-size: 15px; }
 
-  /* --- Chat transcript --------------------------------------------------- */
-  /* Bubbles carry the speaker; the header names the model. */
-  .chat-message-user .chat-message-model { display: none; }
-  .chat-message-model {
-    font-family: var(--font-sans) !important;
-    font-size: 13px !important;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
-    color: var(--color-text-tertiary) !important;
-    padding: 0 14px 3px !important;
-  }
-  .chat-context-bar { height: 22px; background: var(--color-bg-primary); }
-  .chat-context-label { font-size: 13px !important; line-height: 22px; }
-  .chat-mode-chip-label { font-size: 15px; }
+
 }
 
 /* --- Talk as an iOS settings screen ---------------------------------------- */
@@ -990,72 +776,140 @@
   .bk-filters:has(.bk-toggles) > * { flex: none !important; width: 100%; min-width: 0; }
 }
 
-/* --- Pass 3 (device feedback) ---------------------------------------------- */
+/* --- Mobile chat: one conversation surface, shared app sheets ------------- */
+.chat-header:not(.phone-chat-header) .chat-header-model { flex: 1 1 0; min-width: 120px; }
 @media (max-width: 639px) {
-  /* The chat title is a picker button styled from .input; drop everything
-     the field look carries (focus ring, tap highlight, transitions) so Safari
-     draws it as plain text in the bar, not with a soft halo. */
-  .chat-header-model > button.input,
-  .chat-header-model > button.input:focus,
-  .chat-header-model > button.input:focus-visible {
-    box-shadow: none !important;
-    outline: none !important;
-    transition: none !important;
-    transform: none !important;
+  .chat-layout { flex: 0 0 auto; height: var(--chat-viewport-height, 100dvh); background: var(--color-bg-primary); }
+  .phone-chat-header.chat-header {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+    min-height: 68px;
+    padding: calc(env(safe-area-inset-top) + 4px) 8px 4px;
+    background: var(--color-bg-primary);
+    border-bottom: 0.5px solid var(--color-border-subtle);
+  }
+  .phone-chat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--color-primary);
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    -webkit-font-smoothing: antialiased;
-    background: transparent !important;
   }
-  .chat-header-model > button.input:focus-visible {
-    outline: 2px solid var(--color-primary) !important;
-    outline-offset: -2px;
-  }
-
-  /* Recent chats on the empty conversation: one inset group, a row each. */
-  .chat-recent-strip { width: 100%; }
-  .chat-recent-strip-label { font-size: 13px; letter-spacing: 0.02em; color: var(--color-text-tertiary); padding: 0 16px 7px; }
-  .chat-recent-strip-list { display: flex !important; flex-direction: column; gap: 0 !important; border-radius: 12px; overflow: hidden; background: var(--color-bg-secondary); }
-  .chat-recent-strip-item {
+  .phone-chat-icon:active { background: var(--color-primary-light); }
+  .phone-chat-heading { min-width: 0; display: flex; flex-direction: column; gap: 1px; text-align: center; }
+  .phone-chat-title { position: relative; z-index: 1; pointer-events: none; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: 0; }
+  .phone-chat-manage { display: inline-flex; vertical-align: -2px; margin-right: 5px; color: var(--color-primary); }
+  .phone-chat-header .chat-header-model { min-width: 0; max-width: 100%; }
+  .phone-chat-header .chat-header-model > button.input {
+    min-height: 44px;
+    height: 44px;
+    margin-top: -14px;
+    padding: 14px 4px 0;
     border: 0 !important;
-    border-radius: 0 !important;
-    border-bottom: 0.5px solid var(--color-border-subtle) !important;
-    background: var(--color-bg-secondary) !important;
-    padding: 10px 16px !important;
-    text-align: left;
-    min-height: 60px;
-    box-shadow: none !important;
-    transform: none !important;
+    background: transparent !important;
+    box-shadow: none;
+    font-size: 13px !important;
+    color: var(--color-text-secondary);
   }
-  .chat-recent-strip-item:last-child { border-bottom: 0 !important; }
-  .chat-recent-strip-item-name { font-size: 17px !important; font-weight: 400 !important; }
-  .chat-recent-strip-item-preview, .chat-recent-strip-item-time { font-size: 15px !important; color: var(--color-text-muted); }
-  .chat-recent-strip-item-time { font-size: 13px !important; color: var(--color-text-tertiary); }
-  /* Suggestions: full-width rows rather than floating pills. */
-  .chat-empty-suggestions { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-  .chat-empty-suggestion { width: 100%; text-align: left; justify-content: flex-start; padding: 0 16px !important; }
-}
-@media (max-width: 639px) {
-  /* Use the screen's 16px gutters like every other grouped list, and drop
-     the "Attach files" hint: the composer's paperclip already says it. */
-  .chat-empty-state { max-width: none !important; width: 100%; padding-left: 16px !important; padding-right: 16px !important; }
-  .chat-empty-hints { display: none !important; }
-}
-
-@media (max-width: 639px) {
-  /* Every tap into a text field matches :focus-visible, so the global
-     outline boxed the message field on each tap. The composer's own border
-     carries the focus state instead. */
+  .phone-chat-header .chat-header-model > button.input > span { min-width: 0; flex: 0 1 auto !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: center; }
+  .phone-chat-header .chat-header-model > button.input > i { font-size: 10px !important; }
+  /* The full heading is the model picker's touch target. */
+  .phone-chat-heading { position: relative; }
+  .phone-chat-heading .chat-header-model > button::after { content: ''; position: absolute; inset: 0; }
+  .phone-chat-header .chats-menu-trigger { background: transparent; border: 0; padding: 0; color: var(--color-primary); }
+  .chat-messages { padding: 0 16px 16px; gap: 20px; scroll-padding: 16px; }
+  .phone-chat-welcome { display: flex; flex-direction: column; gap: 24px; margin: 0 -16px; padding: 28px 0 12px; }
+  .phone-chat-intro { padding: 0 24px; }
+  .phone-chat-intro h2 { margin: 0 0 10px; font-size: 30px; line-height: 35px; font-weight: 650; letter-spacing: -0.5px; }
+  .phone-chat-intro p { margin: 0; font-size: 15px; line-height: 22px; color: var(--color-text-secondary); }
+  .phone-chat-welcome .ios-row-sep > span > span:first-child { white-space: normal; }
+  .chat--has-messages .chat-messages { padding-top: 20px; }
+  .chat-message { border: 0; padding: 0; gap: 0; flex-shrink: 0; }
+  .chat-message-avatar { display: none; }
+  .chat-message-user .chat-message-bubble { align-items: flex-end; max-width: 88%; margin-left: auto; }
+  .chat-message-assistant .chat-message-bubble { width: 100%; max-width: 100%; }
+  .chat-message-content { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; font-size: 17px; line-height: 26px; overflow-wrap: anywhere; }
+  .chat-message-user .chat-message-content { padding: 12px 16px; border: 0; background: var(--color-bg-secondary); border-radius: 16px 16px 4px 16px; color: var(--color-text-primary); }
+  .chat-message-model { padding: 0 0 8px; font-family: var(--font-sans); font-size: 13px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--color-text-tertiary); }
+  .chat-message-user .chat-message-model { display: none; }
+  .chat-message-content ul, .chat-message-content ol { padding-left: 22px; }
+  .chat-message-content pre { max-width: 100%; overflow-x: auto; border-radius: 12px; font-size: 13px; }
+  .chat-message .code-copy-btn { min-width: 44px; min-height: 44px; }
+  .chat-message-content table { display: block; max-width: 100%; overflow-x: auto; }
+  .phone-message-actions { display: flex; align-items: center; gap: 2px; margin-top: 4px; }
+  .phone-message-actions .phone-chat-icon { color: var(--color-text-tertiary); }
+  .chat-message-edit { width: 100%; }
+  .chat-message-edit-input { min-height: 100px; font-size: 17px; }
+  .chat-message-edit-actions .btn { min-height: 44px; }
+  .chat-input-area { padding: 8px 16px max(12px, env(safe-area-inset-bottom)); border: 0; background: var(--color-bg-primary); }
+  .chat-input-wrapper {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    grid-template-areas: 'input input input' 'tools status send';
+    gap: 0;
+    padding: 8px;
+    border: 0.5px solid var(--color-border-default);
+    border-radius: 20px;
+    background: var(--color-bg-secondary);
+    box-shadow: none;
+  }
+  .chat-input-wrapper:focus-within { border-color: var(--color-primary); box-shadow: none; }
+  .chat-input { grid-area: input; min-height: 44px; max-height: 144px; width: 100%; padding: 8px !important; font-size: 17px !important; line-height: 24px; }
   .chat-input:focus, .chat-input:focus-visible { outline: none !important; box-shadow: none !important; }
-  .chat-input-wrapper:focus-within { border-color: var(--color-primary) !important; }
-  /* Tray items read as one set: same size, weight and colour. */
-  .chat-input-modes > button,
-  .chat-input-modes > div > button,
-  .chat-input-modes .btn {
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    color: var(--color-text-secondary) !important;
-    gap: 6px;
-  }
-  .chat-input-modes .chat-mode-chip-on { color: var(--color-primary) !important; }
-  .chat-input-modes .chat-mode-chip-label { font-size: 15px; }
+  .chat-tools-btn { grid-area: tools; position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 0; border-radius: 12px; padding: 0; background: transparent; color: var(--color-text-secondary); cursor: pointer; }
+  .chat-tools-btn--active::after { content: ''; position: absolute; width: 6px; height: 6px; right: 7px; top: 7px; border-radius: 50%; background: var(--color-primary); }
+  .phone-chat-tools-status { grid-area: status; align-self: center; padding: 0 8px; font-size: 13px; color: var(--color-text-secondary); }
+  .chat-send-btn, .chat-stop-btn { grid-area: send; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; min-height: 44px; border: 0; border-radius: 50%; padding: 0; }
+  .chat-send-btn { background: var(--color-primary); color: var(--color-primary-text); }
+  .chat-send-btn:disabled { background: var(--color-bg-tertiary); color: var(--color-text-tertiary); opacity: 1; }
+  .chat-stop-btn { background: var(--color-primary); color: var(--color-primary-text); }
+  .chat-files { padding: 8px 16px 0; background: var(--color-bg-primary); }
+  .chat-file-badge button { min-width: 44px; min-height: 44px; }
+  .chat-streaming-speed { font-size: 13px; }
+  .phone-chat-tools .chat-input-modes { display: flex; flex-direction: column; align-items: stretch; gap: 0; margin: 0 16px; overflow: visible; border-radius: 12px; background: var(--color-bg-secondary); }
+  .phone-chat-tools .chat-input-modes > button, .phone-chat-tools .chat-mcp-dropdown > button { display: flex; justify-content: flex-start; align-items: center; gap: 12px; min-height: 56px; height: auto; width: 100%; padding: 0 16px !important; border: 0 !important; border-bottom: 0.5px solid var(--color-border-subtle) !important; border-radius: 0 !important; background: transparent; color: var(--color-text-primary); box-shadow: none; font-size: 17px; }
+  .phone-chat-tools .chat-mode-chip-label { display: inline; font-size: 17px; }
+  .phone-chat-tools .chat-mode-chip-on { color: var(--color-primary); background: var(--color-primary-light); }
+  .phone-chat-tools .chat-input-modes button { font-size: 17px !important; font-weight: 400; }
+  .phone-chat-tools .chat-mcp-dropdown > button { border-bottom: 0 !important; }
+  .phone-mcp-sheet .ios-sheet__body { padding-left: 16px; padding-right: 16px; }
+  .phone-mcp-sheet .unified-mcp-tabs { gap: 4px; flex-wrap: wrap; }
+  .phone-mcp-sheet .unified-mcp-tab { min-height: 44px; font-size: 15px; }
+  .phone-mcp-sheet .chat-mcp-server-item { min-height: 56px; border-radius: 12px; }
+  .phone-mcp-sheet .chat-mcp-server-name { font-size: 17px; }
+  .phone-mcp-sheet .chat-mcp-server-tools { font-size: 13px; }
+  .phone-mcp-sheet .chat-mcp-select-all { min-height: 44px; font-size: 15px; }
+  .phone-chat-tools .chat-mode-chip i { width: 20px; font-size: 18px; }
+  .phone-conversations-top { display: flex; flex-direction: column; gap: 16px; padding: 0 16px; }
+  .phone-conversations-top > button { min-height: 44px; justify-content: center; }
+  .phone-conversations-row { display: flex; align-items: center; border-bottom: 0.5px solid var(--color-border-subtle); }
+  .phone-conversations-row > button:first-child { min-width: 0; flex: 1; }
+  .phone-conversations-row .ios-row-sep { border-bottom: 0; }
+  .phone-conversations-row--active { color: var(--color-primary); background: var(--color-primary-light); }
+  .phone-conversations-row > .phone-chat-icon { margin-right: 8px; }
+  .phone-conversations-actions { padding-left: 16px; background: var(--color-bg-primary); }
+  .phone-conversations-rename { display: flex; align-items: center; gap: 8px; padding: 12px 16px; }
+  .phone-chat-field { display: block; padding: 12px 16px; }
+  .phone-chat-field .textarea { width: 100%; resize: none; border: 0 !important; background: transparent !important; padding: 0; font-size: 17px; line-height: 24px; }
+  .phone-chat-wrap { white-space: normal; overflow-wrap: anywhere; }
+  .phone-chat-footnote { margin: 0; padding: 10px 16px; color: var(--color-text-secondary); font-size: 13px; line-height: 19px; }
+  .phone-chat-advanced > summary { min-height: 52px; display: flex; align-items: center; padding: 0 16px; cursor: pointer; font-size: 17px; }
+  .phone-chat-sampling { display: flex; flex-direction: column; gap: 20px; padding: 12px 16px 20px; border-top: 0.5px solid var(--color-border-subtle); }
+  .phone-chat-slider { display: flex; flex-direction: column; gap: 8px; }
+  .phone-chat-slider > span { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+  .phone-chat-slider output { color: var(--color-text-secondary); }
+  .phone-chat-slider input { width: 100%; min-height: 44px; accent-color: var(--color-primary); }
+  .phone-chat-number { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+  .phone-chat-number .input { width: 110px; margin-left: auto; }
 }

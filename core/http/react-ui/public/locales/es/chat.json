@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "Haz una pregunta, escribe algo o explora una idea.",
+    "ideas": "Prueba una solicitud",
+    "assistant": "Asistente",
+    "messageActions": "Acciones del mensaje",
+    "conversationActions": "Acciones de la conversación",
+    "generationSettings": "Ajustes de generación",
+    "toolsActive": "Herramientas activadas",
+    "clearHistoryMessage": "¿Borrar todos los mensajes de esta conversación? Esta acción no se puede deshacer.",
+    "contextUsage": "Contexto utilizado"
   }
 }

@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "Stelle eine Frage, schreibe etwas oder erkunde eine Idee.",
+    "ideas": "Prompt ausprobieren",
+    "assistant": "Assistent",
+    "messageActions": "Nachrichtenaktionen",
+    "conversationActions": "Unterhaltungsaktionen",
+    "generationSettings": "Generierungseinstellungen",
+    "toolsActive": "Werkzeuge aktiviert",
+    "clearHistoryMessage": "Alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.",
+    "contextUsage": "Verwendeter Kontext"
   }
 }

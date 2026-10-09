@@ -50,7 +50,7 @@ test.describe('phone app shell', () => {
       body: JSON.stringify({ data: ['alpha-7b', 'beta-3b'].map(id => ({ id, capabilities: ['FLAG_CHAT'] })) }),
     }))
     await page.goto('/app/chat')
-    // The header is the conversation bar: back, model as title, actions.
+    // The conversation title sits above the compact model picker.
     await expect(page.locator('.chat-header-back')).toBeVisible()
     await page.locator('.chat-header-model > button.input').click()
     const panel = page.locator('.searchable-select__panel')
@@ -230,20 +230,24 @@ test.describe('phone pages read and flow like an app', () => {
 test.describe('the phone composer', () => {
   test.use(phone)
 
-  test('keeps one row, with attach, Canvas and MCP behind "+"', async ({ page }) => {
+  test('gives text a full row, with attach, Canvas and MCP in a sheet', async ({ page }) => {
     await page.goto('/app/chat')
     const tools = page.getByRole('button', { name: 'Attachments and tools' })
     const field = page.locator('.chat-input')
     await expect(page.locator('.chat-input-modes')).toBeHidden()
-    // "+", the field and send share one row.
-    const tops = await Promise.all([tools, field, page.locator('.chat-send-btn')].map(async l => Math.round((await l.boundingBox()).y + (await l.boundingBox()).height)))
-    expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(2)
+    const fieldBox = await field.boundingBox()
+    const toolsBox = await tools.boundingBox()
+    const sendBox = await page.locator('.chat-send-btn').boundingBox()
+    expect(fieldBox.width).toBeGreaterThan(300)
+    expect(fieldBox.y + fieldBox.height).toBeLessThanOrEqual(toolsBox.y + 1)
+    expect(Math.round(toolsBox.y)).toBe(Math.round(sendBox.y))
 
     await tools.click()
     await expect(tools).toHaveAttribute('aria-expanded', 'true')
     await expect(page.getByRole('button', { name: 'Attach file' })).toBeVisible()
     await page.getByRole('button', { name: 'Canvas' }).click()
-    // Tapping into the field shuts the tray; the dot keeps Canvas visible.
+    // Choosing Canvas closes the sheet; the dot keeps its state visible.
+    await expect(tools).toBeFocused()
     await field.click()
     await expect(page.locator('.chat-input-modes')).toBeHidden()
     await expect(tools).toHaveClass(/chat-tools-btn--active/)
@@ -299,13 +303,13 @@ test.describe('the empty conversation on a phone', () => {
       body: JSON.stringify({ data: [{ id: 'alpha-7b', capabilities: ['FLAG_CHAT'] }] }),
     }))
     await page.goto('/app/chat')
-    const items = page.locator('.chat-recent-strip-item')
+    const items = page.locator('.phone-chat-welcome').getByRole('button').filter({ hasText: /Earlier|Older/ })
     await expect(items).toHaveCount(2)
     // Rows touch, split by a hairline, instead of floating bordered cards.
     const [a, b] = await items.evaluateAll(els => els.map(el => el.getBoundingClientRect()))
     expect(Math.round(b.top)).toBe(Math.round(a.bottom))
     await expect(items.first()).toHaveCSS('border-top-width', '0px')
-    // The composer's paperclip already offers attachments.
+    // Attachments have one entry in the composer sheet.
     await expect(page.locator('.chat-empty-hints')).toBeHidden()
     // A focus ring on the title button rendered as a soft halo in Safari.
     const title = page.locator('.chat-header-model > button.input')
@@ -324,5 +328,28 @@ test.describe('desktop is unchanged', () => {
     await expect(page.locator('.mobile-tabbar')).toBeHidden()
     await expect(page.locator('.phone-home')).toHaveCount(0)
     await expect(page.locator('.home-greeting')).toBeVisible()
+  })
+})
+
+test.describe('chat keyboard viewport', () => {
+  test.use(phone)
+
+  test('the composer stays above a keyboard that only shrinks the visual viewport', async ({ page }) => {
+    await page.addInitScript(() => {
+      const viewport = new EventTarget()
+      Object.assign(viewport, { height: window.innerHeight, width: window.innerWidth, offsetTop: 0, scale: 1 })
+      Object.defineProperty(window, 'visualViewport', { value: viewport, configurable: true })
+      window.__chatKeyboard = height => {
+        viewport.height = window.innerHeight - height
+        viewport.dispatchEvent(new Event('resize'))
+      }
+    })
+    await page.goto('/app/chat')
+    await expect(page.locator('.chat-input')).toBeVisible()
+    await page.evaluate(() => window.__chatKeyboard(336))
+    await expect.poll(async () => Math.round((await page.locator('.chat-input-area').boundingBox()).y + (await page.locator('.chat-input-area').boundingBox()).height)).toBe(508)
+    await expect(page.locator('.chat-input')).toBeVisible()
+    await page.evaluate(() => window.__chatKeyboard(0))
+    await expect.poll(async () => Math.round((await page.locator('.chat-input-area').boundingBox()).y + (await page.locator('.chat-input-area').boundingBox()).height)).toBe(844)
   })
 })

@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "Ajukan pertanyaan, tulis sesuatu, atau jelajahi ide.",
+    "ideas": "Coba prompt",
+    "assistant": "Asisten",
+    "messageActions": "Tindakan pesan",
+    "conversationActions": "Tindakan percakapan",
+    "generationSettings": "Pengaturan generasi",
+    "toolsActive": "Alat diaktifkan",
+    "clearHistoryMessage": "Hapus semua pesan dalam percakapan ini? Tindakan ini tidak dapat dibatalkan.",
+    "contextUsage": "Konteks terpakai"
   }
 }

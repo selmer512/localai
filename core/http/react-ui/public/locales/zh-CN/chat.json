@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "提出问题、创作内容或探索一个想法。",
+    "ideas": "试试这些提示",
+    "assistant": "助手",
+    "messageActions": "消息操作",
+    "conversationActions": "对话操作",
+    "generationSettings": "生成设置",
+    "toolsActive": "工具已启用",
+    "clearHistoryMessage": "清除此对话中的所有消息？此操作无法撤销。",
+    "contextUsage": "已用上下文"
   }
 }

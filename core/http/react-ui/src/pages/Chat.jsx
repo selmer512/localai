@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
-import { ChevronLeft, Plus } from 'lucide-react'
+import { Plus, ArrowUp, Square, Paperclip } from 'lucide-react'
 import { useParams, useOutletContext, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fromState } from '../utils/editorNav'
@@ -23,6 +23,11 @@ import { useIsPhone } from '../hooks/useIsPhone'
 import { useOperations } from '../hooks/useOperations'
 import { relativeTime } from '../utils/format'
 import { copyToClipboard } from '../utils/clipboard'
+import PhoneChatHeader from '../components/mobile/PhoneChatHeader'
+import PhoneChatWelcome from '../components/mobile/PhoneChatWelcome'
+import PhoneChatSettings from '../components/mobile/PhoneChatSettings'
+import PhoneMessageActions from '../components/mobile/PhoneMessageActions'
+import { Sheet } from '../components/ui/sheet'
 
 const FOCUS_MODE_KEY = 'localai_chat_focus_mode'
 
@@ -192,7 +197,6 @@ function ActivityGroup({ items, updateChatSettings, activeChat, getClientForTool
 function StreamingActivity({ reasoning, toolCalls, hasResponse }) {
   const { t } = useTranslation('chat')
   const hasContent = reasoning || (toolCalls && toolCalls.length > 0)
-  if (!hasContent) return null
 
   const contentRef = useRef(null)
   const [manualCollapse, setManualCollapse] = useState(null)
@@ -212,6 +216,8 @@ function StreamingActivity({ reasoning, toolCalls, hasResponse }) {
   useEffect(() => {
     setManualCollapse(null)
   }, [hasResponse])
+
+  if (!hasContent) return null
 
   const lastTool = toolCalls && toolCalls.length > 0 ? toolCalls[toolCalls.length - 1] : null
   const label = reasoning
@@ -386,9 +392,22 @@ export default function Chat() {
   const [modelInfo, setModelInfo] = useState(null)
   const [showModelInfo, setShowModelInfo] = useState(false)
   const [canvasMode, setCanvasMode] = useState(false)
-  // Phones keep the composer to one row; attach, Canvas and MCP live in a
-  // tray behind "+", as the Messages app does with its app drawer.
+  // Phone tools and settings use the same modal sheets as the app shell.
   const isPhone = useIsPhone()
+  const [chatViewportHeight, setChatViewportHeight] = useState(null)
+  useEffect(() => {
+    if (!isPhone || !window.visualViewport) return
+    const viewport = window.visualViewport
+    // Safari keeps the layout viewport tall when its keyboard opens.
+    const sync = () => { if (viewport.scale === 1) setChatViewportHeight(viewport.height) }
+    sync()
+    viewport.addEventListener('resize', sync)
+    viewport.addEventListener('scroll', sync)
+    return () => {
+      viewport.removeEventListener('resize', sync)
+      viewport.removeEventListener('scroll', sync)
+    }
+  }, [isPhone])
   const [toolsOpen, setToolsOpen] = useState(false)
   const [canvasOpen, setCanvasOpen] = useState(false)
   const [selectedArtifactId, setSelectedArtifactId] = useState(null)
@@ -410,6 +429,8 @@ export default function Chat() {
   const stickToBottomRef = useRef(true)
   const [scrolledUp, setScrolledUp] = useState(false)
   const chatsMenuRef = useRef(null)
+  const toolsTriggerRef = useRef(null)
+  const settingsTriggerRef = useRef(null)
 
   // Focus mode: once a conversation has at least one message we slim the
   // surrounding chrome (collapse the global app rail, fade non-essential
@@ -1000,35 +1021,7 @@ export default function Chat() {
     || (activeChat.mcpServers || []).length > 0
     || (activeChat.clientMCPServers || []).length > 0
     || (activeChat.mcpResources || []).length > 0
-  const attachButton = (
-    <button
-      type="button"
-      className="btn btn-secondary btn-sm chat-attach-btn"
-      onClick={() => { setToolsOpen(false); fileInputRef.current?.click() }}
-      title={t('input.attachFile')}
-      aria-label={t('input.attachFile')}
-    >
-      <i className="fas fa-paperclip" />
-      {isPhone && <span className="chat-mode-chip-label">{t('input.attachFile')}</span>}
-    </button>
-  )
-
-  return (
-    <div className={layoutClasses}>
-      {/* Chat main area */}
-      <div className="chat-main">
-        {/* Header */}
-        <div className="chat-header">
-          {/* Phones only (hidden by CSS elsewhere): the conversation is a
-              pushed screen with the tab bar hidden, so it needs a way out. */}
-          <button
-            type="button"
-            className="chat-header-back"
-            onClick={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/app'))}
-            aria-label={t('header.back')}
-          >
-            <ChevronLeft aria-hidden="true" strokeWidth={2.4} />
-          </button>
+  const conversationsMenu = (
           <ChatsMenu
             ref={chatsMenuRef}
             chats={chats}
@@ -1043,6 +1036,114 @@ export default function Chat() {
             onCopyChat={(chat) => copyChatAsMarkdown(chat)}
             onDuplicate={(chat) => { if (forkChat(chat.id)) addToast(t('toasts.forked'), 'success', 2000) }}
           />
+  )
+  const attachButton = (
+    <button
+      type="button"
+      className="btn btn-secondary btn-sm chat-attach-btn"
+      onClick={() => { setToolsOpen(false); fileInputRef.current?.click() }}
+      title={t('input.attachFile')}
+      aria-label={t('input.attachFile')}
+    >
+      {isPhone ? <Paperclip size={20} aria-hidden="true" /> : <i className="fas fa-paperclip" />}
+      {isPhone && <span className="chat-mode-chip-label">{t('input.attachFile')}</span>}
+    </button>
+  )
+
+  const composerTools = (
+            <div id="chat-input-tools" className="chat-input-modes">
+              {isPhone && attachButton}
+              <button
+                type="button"
+                className={`chat-mode-chip${canvasMode ? ' chat-mode-chip-on' : ''}`}
+                onClick={() => {
+                  const next = !canvasMode
+                  setCanvasMode(next)
+                  if (isPhone) setToolsOpen(false)
+                  if (!next) setCanvasOpen(false)
+                }}
+                aria-pressed={canvasMode}
+                aria-label={t('input.canvasLabel')}
+                title={t('input.canvasTitle')}
+              >
+                <i className="fas fa-columns" />
+                <span className="chat-mode-chip-label">{t('input.canvasLabel')}</span>
+                {canvasMode && artifacts.length > 0 && !canvasOpen && (
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    className="chat-mode-chip-count"
+                    title={t('input.openCanvas')}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedArtifactId(artifacts[0]?.id)
+                      setCanvasOpen(true)
+                      if (isPhone) setToolsOpen(false)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        setSelectedArtifactId(artifacts[0]?.id)
+                        setCanvasOpen(true)
+                        if (isPhone) setToolsOpen(false)
+                      }
+                    }}
+                  >
+                    {artifacts.length}
+                  </span>
+                )}
+              </button>
+              <UnifiedMCPDropdown
+                serverMCPAvailable={mcpAvailable}
+                mcpServerList={mcpServerList}
+                mcpServersLoading={mcpServersLoading}
+                serverListError={mcpServerListError}
+                selectedServers={activeChat.mcpServers || []}
+                onToggleServer={toggleMcpServer}
+                onSelectAllServers={() => {
+                  const allNames = mcpServerList.filter(s => !s.error).map(s => s.name)
+                  const allSelected = allNames.every(n => (activeChat.mcpServers || []).includes(n))
+                  updateChatSettings(activeChat.id, { mcpServers: allSelected ? [] : allNames })
+                }}
+                onFetchServers={fetchMcpServers}
+                clientMCPActiveIds={activeChat.clientMCPServers || []}
+                onClientToggle={handleClientMCPToggle}
+                onClientAdded={handleClientMCPServerAdded}
+                onClientRemoved={handleClientMCPServerRemoved}
+                connectionStatuses={connectionStatuses}
+                getConnectedTools={getConnectedTools}
+                promptsAvailable={mcpAvailable}
+                mcpPromptList={mcpPromptList}
+                mcpPromptsLoading={mcpPromptsLoading}
+                onFetchPrompts={fetchMcpPrompts}
+                onSelectPrompt={handleSelectPrompt}
+                promptArgsDialog={mcpPromptArgsDialog}
+                promptArgsValues={mcpPromptArgsValues}
+                onPromptArgsChange={(name, value) => setMcpPromptArgsValues(prev => ({ ...prev, [name]: value }))}
+                onPromptArgsSubmit={handleExpandPromptWithArgs}
+                onPromptArgsCancel={() => setMcpPromptArgsDialog(null)}
+                resourcesAvailable={mcpAvailable}
+                mcpResourceList={mcpResourceList}
+                mcpResourcesLoading={mcpResourcesLoading}
+                onFetchResources={fetchMcpResources}
+                selectedResources={activeChat.mcpResources || []}
+                onToggleResource={toggleMcpResource}
+              />
+            </div>
+  )
+
+  return (
+    <div className={layoutClasses} style={isPhone && chatViewportHeight ? { '--chat-viewport-height': `${chatViewportHeight}px` } : undefined}>
+      {/* Chat main area */}
+      <div className="chat-main">
+        {/* Header */}
+        {isPhone ? (
+          <PhoneChatHeader chat={activeChat} onBack={() => ((window.history.state?.idx ?? 0) > 0 ? navigate(-1) : navigate('/app'))} onModelChange={model => updateChatSettings(activeChat.id, { model })} onSettings={() => setShowSettings(true)} settingsOpen={showSettings} settingsTriggerRef={settingsTriggerRef}>
+            {conversationsMenu}
+          </PhoneChatHeader>
+        ) : <div className="chat-header">
+          {conversationsMenu}
           {activeChat.localaiAssistant && (
             <span
               className="chat-header-shield"
@@ -1057,7 +1158,6 @@ export default function Chat() {
             onChange={(model) => updateChatSettings(activeChat.id, { model })}
             capability={CAP_CHAT}
             className="chat-header-model"
-            style={{ flex: '1 1 0', minWidth: 120 }}
           />
           <div className="chat-header-actions">
             {activeChat.model && isAdmin && (
@@ -1082,10 +1182,10 @@ export default function Chat() {
               <i className="fas fa-sliders-h" />
             </button>
           </div>
-        </div>
+        </div>}
 
         {/* Model info panel */}
-        {showModelInfo && modelInfo && (
+        {!isPhone && showModelInfo && modelInfo && (
           <div id="chat-model-info-panel" className="chat-model-info-panel">
             <div className="chat-model-info-header">
               <span>{t('header.modelInfoTitle', { model: activeChat.model })}</span>
@@ -1118,7 +1218,7 @@ export default function Chat() {
         )}
 
         {/* Context window progress bar */}
-        {contextPercent !== null && (
+        {!isPhone && contextPercent !== null && (
           <div className="chat-context-bar">
             <div className="chat-context-progress"
               style={{
@@ -1134,7 +1234,7 @@ export default function Chat() {
           </div>
         )}
 
-        {/* Settings slide-out panel */}
+        {!isPhone && <>
         <div className={`chat-settings-overlay${showSettings ? ' open' : ''}`} onClick={() => setShowSettings(false)} />
         <div className={`chat-settings-drawer${showSettings ? ' open' : ''}`}>
           <div className="chat-settings-drawer-header">
@@ -1242,11 +1342,17 @@ export default function Chat() {
             </div>
           </div>
         </div>
+        </>}
+        {isPhone && <PhoneChatSettings open={showSettings} onOpenChange={setShowSettings} onCloseAutoFocus={event => { event.preventDefault(); if (!confirmDialog) settingsTriggerRef.current?.focus() }} chat={activeChat} onUpdate={updateChatSettings} isAdmin={isAdmin} modelInfo={modelInfo} contextPercent={contextPercent} onEditConfig={() => navigate(`/app/model-editor/${encodeURIComponent(activeChat.model)}`, { state: fromState(location, 'Chat') })} onClear={() => {
+          setShowSettings(false)
+          setConfirmDialog({ title: t('settings.clearHistory'), message: t('phone.clearHistoryMessage'), confirmLabel: t('settings.clearHistory'), danger: true, onConfirm: () => { clearHistory(activeChat.id); setConfirmDialog(null) } })
+        }} />}
+
 
         {/* Messages */}
         <div className="chat-messages" ref={messagesRef}>
           {activeChat.history.length === 0 && !isStreaming && (
-            <div className="chat-empty-state">
+            isPhone ? <PhoneChatWelcome chat={activeChat} recentChats={recentChats} onPrompt={prompt => { setInput(prompt); textareaRef.current?.focus() }} onSelect={switchChat} /> : <div className="chat-empty-state">
               <h2 className="chat-empty-title">{activeChat.localaiAssistant ? t('empty.manageTitle') : t('empty.startTitle')}</h2>
               <p className="chat-empty-text">
                 {activeChat.localaiAssistant
@@ -1325,11 +1431,9 @@ export default function Chat() {
                     <i className={`fas ${msg.role === 'user' ? 'fa-user' : 'fa-robot'}`} />
                   </div>
                   <div className="chat-message-bubble">
-                    {/* Both roles are labelled now that neither is a bubble.
-                        A transcript needs to say who is speaking; a bubble said
-                        it by shape and side. */}
+                    {/* The header names the model; phone answers use a short speaker label. */}
                     {msg.role === 'assistant' && activeChat.model && (
-                      <span className="chat-message-model">{activeChat.model}</span>
+                      <span className="chat-message-model">{isPhone ? t('phone.assistant') : activeChat.model}</span>
                     )}
                     {msg.role === 'user' && (
                       <span className="chat-message-model">{t('message.you')}</span>
@@ -1383,7 +1487,7 @@ export default function Chat() {
                       </a>
                     )}
                     {editingMessageIndex !== i && (
-                      <div className="chat-message-actions">
+                      isPhone ? <PhoneMessageActions onCopy={() => copyMessage(msg.content)} onEdit={editableMessageText(msg) !== null && !isStreaming ? () => startMessageEdit(i, msg) : undefined} onRegenerate={msg.role === 'assistant' && !isStreaming ? () => handleRegenerate(i) : undefined} onBranch={msg.role === 'assistant' && !isStreaming ? () => { forkChat(activeChat.id, i + 1); addToast(t('toasts.forked'), 'success', 2000) } : undefined} /> : <div className="chat-message-actions">
                         <button onClick={() => copyMessage(msg.content)} title={t('actions.copy')}>
                           <i className="fas fa-copy" />
                         </button>
@@ -1429,7 +1533,7 @@ export default function Chat() {
               </div>
               <div className="chat-message-bubble">
                 {activeChat.model && (
-                  <span className="chat-message-model">{activeChat.model}</span>
+                  <span className="chat-message-model">{isPhone ? t('phone.assistant') : activeChat.model}</span>
                 )}
                 <div className="chat-message-content">
                   <span dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
@@ -1477,7 +1581,7 @@ export default function Chat() {
             </div>
           )}
           <div ref={messagesEndRef} />
-          {scrolledUp && (
+          {scrolledUp && (activeChat.history.length > 0 || isStreaming) && (
             <button
               type="button"
               className="chat-jump-latest"
@@ -1493,7 +1597,7 @@ export default function Chat() {
         </div>
 
         {/* Token info bar */}
-        {(tokensPerSecond || maxTokensPerSecond || activeChat.tokenUsage?.total > 0) && (
+        {!isPhone && (tokensPerSecond || maxTokensPerSecond || activeChat.tokenUsage?.total > 0) && (
           <div className="chat-token-info">
             {tokensPerSecond !== null && <span><i className="fas fa-tachometer-alt" /> {t('tokens.perSec', { count: tokensPerSecond })}</span>}
             {maxTokensPerSecond !== null && !isStreaming && (
@@ -1537,92 +1641,18 @@ export default function Chat() {
             {isPhone && (
               <button
                 type="button"
+                ref={toolsTriggerRef}
                 className={`chat-tools-btn${toolsActive ? ' chat-tools-btn--active' : ''}`}
                 aria-expanded={toolsOpen}
-                aria-controls="chat-input-tools"
+                aria-haspopup="dialog"
                 aria-label={t('input.tools')}
                 onClick={() => setToolsOpen(open => !open)}
               >
                 <Plus aria-hidden="true" strokeWidth={2.2} />
               </button>
             )}
-            <div id="chat-input-tools" className={`chat-input-modes${isPhone && !toolsOpen ? ' chat-input-modes--closed' : ''}`}>
-              {isPhone && attachButton}
-              <button
-                type="button"
-                className={`chat-mode-chip${canvasMode ? ' chat-mode-chip-on' : ''}`}
-                onClick={() => {
-                  const next = !canvasMode
-                  setCanvasMode(next)
-                  if (!next) setCanvasOpen(false)
-                }}
-                aria-pressed={canvasMode}
-                aria-label={t('input.canvasLabel')}
-                title={t('input.canvasTitle')}
-              >
-                <i className="fas fa-columns" />
-                <span className="chat-mode-chip-label">{t('input.canvasLabel')}</span>
-                {canvasMode && artifacts.length > 0 && !canvasOpen && (
-                  <span
-                    role="button"
-                    tabIndex={0}
-                    className="chat-mode-chip-count"
-                    title={t('input.openCanvas')}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedArtifactId(artifacts[0]?.id)
-                      setCanvasOpen(true)
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        setSelectedArtifactId(artifacts[0]?.id)
-                        setCanvasOpen(true)
-                      }
-                    }}
-                  >
-                    {artifacts.length}
-                  </span>
-                )}
-              </button>
-              <UnifiedMCPDropdown
-                serverMCPAvailable={mcpAvailable}
-                mcpServerList={mcpServerList}
-                mcpServersLoading={mcpServersLoading}
-                serverListError={mcpServerListError}
-                selectedServers={activeChat.mcpServers || []}
-                onToggleServer={toggleMcpServer}
-                onSelectAllServers={() => {
-                  const allNames = mcpServerList.filter(s => !s.error).map(s => s.name)
-                  const allSelected = allNames.every(n => (activeChat.mcpServers || []).includes(n))
-                  updateChatSettings(activeChat.id, { mcpServers: allSelected ? [] : allNames })
-                }}
-                onFetchServers={fetchMcpServers}
-                clientMCPActiveIds={activeChat.clientMCPServers || []}
-                onClientToggle={handleClientMCPToggle}
-                onClientAdded={handleClientMCPServerAdded}
-                onClientRemoved={handleClientMCPServerRemoved}
-                connectionStatuses={connectionStatuses}
-                getConnectedTools={getConnectedTools}
-                promptsAvailable={mcpAvailable}
-                mcpPromptList={mcpPromptList}
-                mcpPromptsLoading={mcpPromptsLoading}
-                onFetchPrompts={fetchMcpPrompts}
-                onSelectPrompt={handleSelectPrompt}
-                promptArgsDialog={mcpPromptArgsDialog}
-                promptArgsValues={mcpPromptArgsValues}
-                onPromptArgsChange={(name, value) => setMcpPromptArgsValues(prev => ({ ...prev, [name]: value }))}
-                onPromptArgsSubmit={handleExpandPromptWithArgs}
-                onPromptArgsCancel={() => setMcpPromptArgsDialog(null)}
-                resourcesAvailable={mcpAvailable}
-                mcpResourceList={mcpResourceList}
-                mcpResourcesLoading={mcpResourcesLoading}
-                onFetchResources={fetchMcpResources}
-                selectedResources={activeChat.mcpResources || []}
-                onToggleResource={toggleMcpResource}
-              />
-            </div>
+            {!isPhone && composerTools}
+            {isPhone && toolsActive && <span className="phone-chat-tools-status">{t('phone.toolsActive')}</span>}
             {!isPhone && attachButton}
             <input
               ref={fileInputRef}
@@ -1646,8 +1676,8 @@ export default function Chat() {
               disabled={isStreaming}
             />
             {isStreaming ? (
-              <button className="chat-stop-btn" onClick={stopGeneration} title={t('input.stopGenerating')}>
-                <i className="fas fa-stop" />
+              <button type="button" className="chat-stop-btn" onClick={stopGeneration} title={t('input.stopGenerating')} aria-label={t('input.stopGenerating')}>
+                {isPhone ? <Square size={17} fill="currentColor" aria-hidden="true" /> : <i className="fas fa-stop" />}
               </button>
             ) : (
               <button
@@ -1658,12 +1688,15 @@ export default function Chat() {
                 aria-label={t('input.send')}
                 title={t('input.send')}
               >
-                <i className="fas fa-paper-plane" aria-hidden="true" />
+                {isPhone ? <ArrowUp size={22} aria-hidden="true" /> : <i className="fas fa-paper-plane" aria-hidden="true" />}
               </button>
             )}
           </div>
         </div>
       </div>
+      {isPhone && <Sheet open={toolsOpen} onOpenChange={setToolsOpen} title={t('input.tools')} cancelLabel={t('actions.cancel')} className="phone-chat-tools" onCloseAutoFocus={event => { event.preventDefault(); toolsTriggerRef.current?.focus() }}>
+        {composerTools}
+      </Sheet>}
       {canvasOpen && artifacts.length > 0 && (
         <CanvasPanel
           artifacts={artifacts}

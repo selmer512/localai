@@ -123,5 +123,16 @@
   },
   "message": {
     "you": "You"
+  },
+  "phone": {
+    "welcomeHint": "Fai una domanda, scrivi qualcosa o esplora un’idea.",
+    "ideas": "Prova una richiesta",
+    "assistant": "Assistente",
+    "messageActions": "Azioni del messaggio",
+    "conversationActions": "Azioni della conversazione",
+    "generationSettings": "Impostazioni di generazione",
+    "toolsActive": "Strumenti attivi",
+    "clearHistoryMessage": "Cancellare tutti i messaggi di questa conversazione? Questa azione non può essere annullata.",
+    "contextUsage": "Contesto utilizzato"
   }
 }
